@@ -1,22 +1,36 @@
 #!/usr/bin/env python3
 """
-core/config.py - Константы и паттерны для v16.0
+core/config.py - Константы и паттерны для v16.7
 """
 
 import re
+import sys
+from pathlib import Path
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ВЕРСИЯ
 # ═══════════════════════════════════════════════════════════════════════════
 
-VERSION = "16.0"
-VERSION_NAME = "КРИТИЧЕСКИЕ ИСПРАВЛЕНИЯ + DEBUG"
+VERSION = "16.7"
+VERSION_NAME = "Auto Test-Results Copy"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # HUGGING FACE TOKEN
+# 🔒 v16.7.1: Токен перенесён в secrets.py (не в Git)
 # ═══════════════════════════════════════════════════════════════════════════
 
-HF_TOKEN = "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"
+try:
+    from .secrets import HF_TOKEN
+except ImportError:
+    print("=" * 70)
+    print("❌ ОШИБКА: Файл secrets.py не найден!")
+    print()
+    print("📋 Создай файл secrets.py из шаблона:")
+    print("   1. Скопируй: scripts/core/secrets.example.py → secrets.py")
+    print("   2. Получи токен: https://huggingface.co/settings/tokens")
+    print("   3. Вставь в secrets.py: HF_TOKEN = \"hf_твой_токен\"")
+    print("=" * 70)
+    sys.exit(1)
 
 # ═══════════════════════════════════════════════════════════════════════════
 # РЕЖИМЫ
