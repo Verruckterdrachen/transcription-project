@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """
-corrections/boundary_fixer.py - Boundary correction v16.11
+corrections/boundary_fixer.py - Boundary correction v16.12
+
+🆕 v16.12: КРИТИЧЕСКИЙ FIX RAW_SPEAKER_ID В SPLIT
+- При split обновляется не только speaker, но и raw_speaker_id
+- Создан обратный маппинг speaker_roles для конвертации
+- Исправлен баг: TXT выводил старый speaker вместо нового
+- Проверка что оба поля синхронизированы
 
 🆕 v16.11: ПРАВИЛЬНАЯ ЛОГИКА CONTINUATION PHRASE FIX
 - Проверка контекста ВНУТРИ текущего split (а не предыдущего сегмента)
 - Continuation phrase сохраняет спикера если накоплено >80 слов
 - Защита от смены спикера внутри длинного монолога
-
-🆕 v16.10: CONTINUATION PHRASE FIX В SPLIT (НЕ РАБОТАЛ)
-- Неправильная проверка предыдущего сегмента
-- Исправлено в v16.11
 
 🆕 v16.5: Удален дубликат seconds_to_hms(), добавлен импорт из utils
 🆕 v16.4: КРИТИЧЕСКИЕ ИСПРАВЛЕНИЯ split_mixed_speaker_segments
@@ -233,19 +235,21 @@ def boundary_correction_raw(segments_raw, speaker_surname, speaker_roles):
     return segments_raw
 
 
-def split_mixed_speaker_segments(segments_merged, speaker_surname):
+def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles):
     """
-    v16.11: ПРАВИЛЬНАЯ ЛОГИКА continuation phrase fix
+    v16.12: КРИТИЧЕСКИЙ FIX - обновление raw_speaker_id при split
+    
+    🆕 v16.12 ИЗМЕНЕНИЯ:
+    - При split обновляется НЕ ТОЛЬКО speaker, но и raw_speaker_id
+    - Создан обратный маппинг speaker_roles для конвертации (Исаев → SPEAKER_01)
+    - Исправлен баг: TXT выводил старый speaker из-за несинхронизации полей
+    - Проверка что оба поля speaker и raw_speaker_id синхронизированы
     
     🆕 v16.11 ИЗМЕНЕНИЯ:
     - Continuation phrase проверяется ВНУТРИ текущего split
     - Если накоплено >80 слов в current_group → continuation сохраняет текущего спикера
     - Защита от смены спикера внутри длинного монолога
     - Правильный контекст для продолжения мысли
-    
-    🆕 v16.10 ИЗМЕНЕНИЯ (НЕ РАБОТАЛИ):
-    - Проверка предыдущего merged сегмента (неправильно)
-    - Исправлено в v16.11
     
     🆕 v16.4 ИЗМЕНЕНИЯ:
     - Пересчет таймкодов после split (start/end/time)
@@ -259,11 +263,17 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname):
     Args:
         segments_merged: Список merged сегментов
         speaker_surname: Фамилия спикера
+        speaker_roles: Dict SPEAKER_XX → роль (для обратной конвертации)
     
     Returns:
         Список сегментов с разделенными mixed-speaker блоками
     """
     print("\n✂️ Разделение mixed-speaker сегментов...")
+    
+    # 🆕 v16.12: Создаём обратный маппинг speaker → raw_speaker_id
+    reverse_roles = {}
+    for raw_id, role in speaker_roles.items():
+        reverse_roles[role] = raw_id
     
     result = []
     splitcount = 0
@@ -342,6 +352,9 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname):
                 newseg['end'] = group_end
                 newseg['time'] = seconds_to_hms(current_time)
                 
+                # 🆕 v16.12: ОБНОВЛЯЕМ raw_speaker_id через обратный маппинг
+                newseg['raw_speaker_id'] = reverse_roles.get(current_speaker, seg.get('raw_speaker_id'))
+                
                 result.append(newseg)
                 splitcount += 1
                 
@@ -364,6 +377,9 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname):
             newseg['start'] = current_time
             newseg['end'] = end  # До конца оригинального сегмента
             newseg['time'] = seconds_to_hms(current_time)
+            
+            # 🆕 v16.12: ОБНОВЛЯЕМ raw_speaker_id через обратный маппинг
+            newseg['raw_speaker_id'] = reverse_roles.get(current_speaker, seg.get('raw_speaker_id'))
             
             result.append(newseg)
     
