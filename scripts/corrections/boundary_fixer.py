@@ -1,0 +1,299 @@
+#!/usr/bin/env python3
+"""
+corrections/boundary_fixer.py - Boundary correction v16.5
+
+🆕 v16.5: Удален дубликат seconds_to_hms(), добавлен импорт из utils
+🆕 v16.4: КРИТИЧЕСКИЕ ИСПРАВЛЕНИЯ split_mixed_speaker_segments
+- Пересчет таймкодов после split (start/end/time)
+- Защита от split анонсов вопросов
+- Пропорциональное распределение времени по словам
+"""
+
+import re
+from core.utils import seconds_to_hms
+
+
+def is_journalist_phrase(text):
+    """
+    v16.3.2: Проверяет, является ли фраза журналистской
+    """
+    text_lower = text.lower()
+    
+    journalist_markers = [
+        r'вы\s+(можете|могли|должны)?',
+        r'расскажите',
+        r'объясните',
+        r'как\s+вы',
+        r'почему\s+вы',
+        r'что\s+вы',
+        r'давайте',
+        r'смотрим',
+    ]
+    
+    for marker in journalist_markers:
+        if re.search(marker, text_lower):
+            return True
+    return False
+
+
+def is_expert_phrase(text, speaker_surname):
+    """
+    v16.3.2: Проверяет, является ли фраза экспертной
+    """
+    if not speaker_surname:
+        return False
+    
+    text_lower = text.lower()
+    surname_lower = speaker_surname.lower()
+    
+    expert_markers = [
+        surname_lower,
+        r'я\s+(считаю|думаю|полагаю)',
+        r'на\s+мой\s+взгляд',
+        r'по\s+моему\s+мнению',
+    ]
+    
+    for marker in expert_markers:
+        if re.search(marker, text_lower):
+            return True
+    return False
+
+
+def is_question_announcement(text):
+    """
+    🆕 v16.4: Определяет, является ли текст анонсом вопроса
+    
+    Защита: НЕ split анонсы вопросов
+    """
+    text_lower = text.lower()
+    
+    announcement_patterns = [
+        r'следующий вопрос\s+(про|о|об)',
+        r'еще вопрос\s+(про|о|об)',
+        r'другой вопрос\s+(про|о|об)',
+    ]
+    
+    for pattern in announcement_patterns:
+        if re.search(pattern, text_lower):
+            word_count = len(text.split())
+            if word_count < 20:
+                return True
+    return False
+
+
+def boundary_correction_raw(segments_raw, speaker_surname, speaker_roles):
+    """
+    v16.3.2: Boundary correction между спикерами
+    
+    Корректирует границы между сегментами разных спикеров:
+    1. Находит короткие последние предложения (≤10 слов)
+    2. Проверяет паузу < 0.5s до следующего спикера
+    3. Анализирует семантику (журналистская/экспертная фраза)
+    4. Переносит последнее предложение к следующему спикеру
+    
+    Args:
+        segments_raw: raw segments после alignment
+        speaker_surname: Фамилия спикера
+        speaker_roles: Dict SPEAKER_XX → роль
+    
+    Returns:
+        segments_raw с исправленными границами
+    """
+    if len(segments_raw) < 2:
+        return segments_raw
+    
+    corrections = 0
+    i = 0
+    
+    while i < len(segments_raw) - 1:
+        current = segments_raw[i]
+        next_seg = segments_raw[i + 1]
+        
+        current_speaker = current.get('speaker')
+        next_speaker = next_seg.get('speaker')
+        
+        # Пропускаем если тот же спикер
+        if current_speaker == next_speaker:
+            i += 1
+            continue
+        
+        # Разбиваем текст на предложения
+        current_text = current.get('text', '')
+        sentences = re.split(r'[.!?]+\s+', current_text)
+        
+        if len(sentences) < 2:
+            i += 1
+            continue
+        
+        # Берем последнее предложение
+        last_sentence = sentences[-1].strip()
+        word_count = len(last_sentence.split())
+        
+        # Пропускаем если последнее предложение длинное
+        if word_count > 10:
+            i += 1
+            continue
+        
+        # Проверяем паузу между сегментами
+        current_end = current.get('end', 0)
+        next_start = next_seg.get('start', 0)
+        pause = next_start - current_end
+        
+        if pause > 0.5:
+            i += 1
+            continue
+        
+        # Анализируем семантику
+        is_journalist_text = is_journalist_phrase(last_sentence)
+        is_expert_text = is_expert_phrase(last_sentence, speaker_surname)
+        
+        # Если журналистская фраза, а следующий спикер НЕ журналист
+        if is_journalist_text and next_speaker != "Журналист":
+            # Переносим фразу к следующему сегменту (исправление)
+            next_speaker = "Журналист"
+            i += 1
+            continue  # НЕ переносим, ошибка атрибуции
+        
+        # Если экспертная фраза, а следующий спикер журналист
+        if is_expert_text and next_speaker == "Журналист":
+            # Переносим фразу к следующему сегменту (исправление)
+            next_speaker = speaker_surname
+            i += 1
+            continue  # НЕ переносим, ошибка атрибуции
+        
+        # Переносим последнее предложение
+        remaining_text = '. '.join(sentences[:-1])
+        if remaining_text:
+            remaining_text = remaining_text.strip() + '.'
+            current['text'] = remaining_text
+        
+        # Добавляем к следующему сегменту
+        next_seg_text = f"{last_sentence} {next_seg.get('text', '')}"
+        next_seg['text'] = next_seg_text.strip()
+        
+        print(f"  ✂️ BOUNDARY FIX: {next_seg.get('start_hms', '???')} перенос → {next_speaker}")
+        print(f"     \"{last_sentence}\"")
+        
+        corrections += 1
+        i += 1
+    
+    if corrections > 0:
+        print(f"✅ Boundary correction: {corrections}")
+    
+    return segments_raw
+
+
+def split_mixed_speaker_segments(segments_merged, speaker_surname):
+    """
+    v16.4: КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ - Разделение mixed-speaker сегментов
+    
+    🆕 v16.4 ИЗМЕНЕНИЯ:
+    - Пересчет таймкодов после split (start/end/time)
+    - Пропорциональное распределение времени по словам
+    - Защита от split анонсов вопросов
+    
+    Разделяет merged сегменты, в которых смешались реплики разных спикеров:
+    - Журналист: "Расскажите..." + Эксперт: "Ответ..."
+    - Merge ошибочно склеил их в один блок
+    
+    Args:
+        segments_merged: Список merged сегментов
+        speaker_surname: Фамилия спикера
+    
+    Returns:
+        Список сегментов с разделенными mixed-speaker блоками
+    """
+    print("\n✂️ Разделение mixed-speaker сегментов...")
+    
+    result = []
+    splitcount = 0
+    
+    for seg in segments_merged:
+        speaker = seg.get('speaker')
+        text = seg.get('text', '')
+        start = seg.get('start', 0)
+        end = seg.get('end', 0)
+        duration = end - start
+        
+        # 🆕 ЗАЩИТА: НЕ разделять анонсы вопросов
+        if is_question_announcement(text):
+            result.append(seg)
+            continue
+        
+        # Разбиваем на предложения
+        sentences = re.split(r'[.!?]+\s+', text)
+        sentences = [s.strip() for s in sentences if s.strip()]
+        
+        if len(sentences) < 2:
+            result.append(seg)
+            continue
+        
+        # Анализируем каждое предложение на принадлежность спикеру
+        current_group = []
+        current_speaker = speaker
+        
+        total_words = sum(len(s.split()) for s in sentences)
+        current_time = start
+        
+        for sentence in sentences:
+            sentence = sentence.strip()
+            if not sentence:
+                continue
+            
+            is_journalist_sent = is_journalist_phrase(sentence)
+            is_expert_sent = is_expert_phrase(sentence, speaker_surname)
+            
+            # Определяем спикера предложения
+            if is_journalist_sent:
+                sentence_speaker = "Журналист"
+            elif is_expert_sent:
+                sentence_speaker = speaker_surname
+            else:
+                sentence_speaker = current_speaker
+            
+            # Если спикер изменился - создаем новый сегмент
+            if sentence_speaker != current_speaker and current_group:
+                # 🆕 Вычисляем пропорциональное время
+                group_text = '. '.join(current_group) + '.'
+                group_words = len(group_text.split())
+                group_duration = (group_words / total_words) * duration if total_words > 0 else 0
+                group_end = current_time + group_duration
+                
+                newseg = seg.copy()
+                newseg['text'] = group_text
+                newseg['speaker'] = current_speaker
+                newseg['start'] = current_time
+                newseg['end'] = group_end
+                newseg['time'] = seconds_to_hms(current_time)
+                
+                result.append(newseg)
+                splitcount += 1
+                
+                print(f"  ✂️ SPLIT: {newseg['time']} ({current_speaker}) \"{group_text[:50]}...\"")
+                
+                # Сбрасываем группу
+                current_group = []
+                current_time = group_end
+                current_speaker = sentence_speaker
+            
+            current_group.append(sentence)
+        
+        # Добавляем последнюю группу
+        if current_group:
+            group_text = '. '.join(current_group) + '.'
+            
+            newseg = seg.copy()
+            newseg['text'] = group_text
+            newseg['speaker'] = current_speaker
+            newseg['start'] = current_time
+            newseg['end'] = end  # До конца оригинального сегмента
+            newseg['time'] = seconds_to_hms(current_time)
+            
+            result.append(newseg)
+    
+    if splitcount > 0:
+        print(f"✅ Разделено: {splitcount} mixed сегментов")
+    else:
+        print(f"✅ Mixed сегментов не найдено")
+    
+    return result
