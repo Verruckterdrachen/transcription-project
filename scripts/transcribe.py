@@ -103,8 +103,9 @@ class TeeOutput:
 # ВЕРСИЯ
 # ═══════════════════════════════════════════════════════════════════════════
 
-VERSION = "16.8.1"
-VERSION_NAME = "Debug & Long Monologue Fix"
+# Строки 70-71
+VERSION = "16.9"  # Было: 16.8.1
+VERSION_NAME = "Continuation Phrase Fix"  # Было: Debug & Long Monologue Fix
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ PIPELINE
