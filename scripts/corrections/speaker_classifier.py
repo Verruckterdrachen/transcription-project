@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """
-corrections/speaker_classifier.py - Весовая классификация спикеров v15 для v16.8
+corrections/speaker_classifier.py - Весовая классификация спикеров v15 для v16.9
 
-🆕 v16.8: LONG MONOLOGUE PROTECTION
-- Защита от переатрибуции сегментов после длинных монологов (>60s)
-- Защита от "То есть", "В частности" как журналистских маркеров
-- Учёт контекста предыдущих сегментов
+🆕 v16.9: FIX CONTINUATION PHRASE ATTRIBUTION
+- Исправлена логика проверки continuation phrases после длинных монологов
+- Теперь проверяется монолог ПРЕДЫДУЩЕГО спикера, а не текущего
+- "В частности", "То есть" корректно атрибутируются предыдущему спикеру
 """
 
-# Version: v16.8
+# Version: v16.9
 # Last updated: 2026-02-11
-# 🆕 v16.8: Long monologue protection для точной атрибуции
+# 🔧 v16.9: Fix continuation phrase attribution logic
 
 import re
 from core.config import SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD, SPEAKER_CLASSIFICATION_MIN_WORDS
@@ -83,24 +83,27 @@ def has_speaker_monologue_markers(text):
 
     return any(re.search(p, text_lower) for p in speaker_monologue_patterns)
 
-def get_previous_monologue_duration(segments, index, speaker):
+def get_monologue_duration_at_index(segments, end_index, speaker):
     """
-    🆕 v16.8: Вычисляет длительность предыдущего непрерывного монолога спикера
+    🔧 v16.9: Вычисляет длительность монолога спикера, заканчивающегося на end_index
     
     Args:
         segments: Список всех сегментов
-        index: Индекс текущего сегмента
+        end_index: Индекс последнего сегмента монолога
         speaker: Спикер для проверки
     
     Returns:
-        Длительность предыдущего монолога в секундах (0 если нет монолога)
+        Длительность монолога в секундах (0 если нет монолога)
     """
-    if index == 0:
+    if end_index < 0 or end_index >= len(segments):
         return 0
     
-    # Находим начало предыдущего монолога
-    monologue_start_idx = index - 1
-    for i in range(index - 1, -1, -1):
+    if segments[end_index].get('speaker') != speaker:
+        return 0
+    
+    # Находим начало монолога
+    monologue_start_idx = end_index
+    for i in range(end_index, -1, -1):
         if segments[i].get('speaker') != speaker:
             monologue_start_idx = i + 1
             break
@@ -108,12 +111,9 @@ def get_previous_monologue_duration(segments, index, speaker):
             monologue_start_idx = 0
     
     # Вычисляем длительность
-    if monologue_start_idx < index:
-        duration = (segments[index - 1].get('end', 0) - 
-                   segments[monologue_start_idx].get('start', 0))
-        return duration
-    
-    return 0
+    duration = (segments[end_index].get('end', 0) - 
+               segments[monologue_start_idx].get('start', 0))
+    return duration
 
 def is_continuation_phrase(text):
     """
@@ -148,17 +148,17 @@ def is_continuation_phrase(text):
     return any(re.match(p, text_lower) for p in continuation_patterns)
 
 # ═══════════════════════════════════════════════════════════════════════════
-# ВЕСОВАЯ КЛАССИФИКАЦИЯ v15 + v16.8 PROTECTION
+# ВЕСОВАЯ КЛАССИФИКАЦИЯ v15 + v16.9 FIX
 # ═══════════════════════════════════════════════════════════════════════════
 
 def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
     """
-    v16.8: Весовая классификация спикеров с защитой длинных монологов
+    v16.9: Весовая классификация спикеров с ИСПРАВЛЕННОЙ защитой continuation phrases
 
-    🆕 v16.8 ИЗМЕНЕНИЯ:
-    - Long Monologue Protection: не переатрибутировать после монологов >60s
-    - Continuation Phrase Detection: "То есть", "В частности" как продолжение
-    - Context-aware classification: учёт контекста предыдущих сегментов
+    🔧 v16.9 ФИКС:
+    - Continuation phrases теперь проверяются относительно ПРЕДЫДУЩЕГО спикера
+    - "В частности" после длинного монолога Исаева → атрибутируется Исаеву
+    - Исправлена логика get_monologue_duration_at_index()
 
     Args:
         segments: Список сегментов после merge_replicas()
@@ -179,8 +179,8 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
             (r'\b(давайте|переходим|начнем|продолжим)\b', 2),
         ],
         'questions': [
-            (r'\?$', 1),  # Вопросительный знак в конце
-            (r'^(как|почему|зачем|когда|где|кто|что)\s', 2),  # Вопрос в начале
+            (r'\?$', 1),
+            (r'^(как|почему|зачем|когда|где|кто|что)\s', 2),
             (r'\b(не\s+так|верно|правильно)\s*\?', 2),
         ],
         'commands': [
@@ -197,7 +197,7 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
             (r'\b(моё|моя|мой|мои)\s+(?:мнение|опыт|исследование|работа)\b', 3),
         ],
         'facts': [
-            (r'\b\d{4}\s*год', 1),  # Даты
+            (r'\b\d{4}\s*год', 1),
             (r'\b(?:операция|сражение|битва|фронт|армия)\b', 1),
         ],
     }
@@ -205,9 +205,7 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
     # Защиты от ложных срабатываний
     PROTECTIONS = {
         'journalist_not_speaker': [
-            # "Мы" в контексте программы, не личного опыта
             (r'\bмы\s+(?:сейчас|теперь|тут|здесь)\s', -3),
-            # Обращение "вы" к Спикеру
             (r'\bвы\s+(?:представьтесь|расскажите|объясните)\b', -5),
         ],
     }
@@ -236,7 +234,7 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
         # Применяем защиты
         for pattern, weight in PROTECTIONS['journalist_not_speaker']:
             if re.search(pattern, text_lower, re.I):
-                speaker_score += weight  # Отрицательный вес уменьшает вес Спикера
+                speaker_score += weight
                 details.append(f"PROTECT:S:{weight}")
 
         return journalist_score, speaker_score, details
@@ -247,13 +245,14 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
         'changed_to_journalist': 0,
         'changed_to_speaker': 0,
         'skipped_protections': 0,
-        'skipped_monologue_context': 0,  # 🆕 v16.8
+        'skipped_monologue_context': 0,
+        'continuation_phrases_fixed': 0,  # 🆕 v16.9
         'details': []
     }
 
     if debug:
         print("\n" + "="*80)
-        print("🎯 v16.8: ВЕСОВАЯ КЛАССИФИКАЦИЯ + MONOLOGUE PROTECTION")
+        print("🎯 v16.9: ВЕСОВАЯ КЛАССИФИКАЦИЯ + CONTINUATION PHRASE FIX")
         print("="*80)
 
     for i, seg in enumerate(segments):
@@ -268,34 +267,40 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
 
         stats['total_checked'] += 1
 
-        # 🆕 v16.8: LONG MONOLOGUE PROTECTION
-        # Проверяем длительность предыдущего монолога
-        prev_monologue_duration = get_previous_monologue_duration(segments, i, current_speaker)
-        
-        if prev_monologue_duration > 60:
-            # Если предыдущий монолог >60s, не переатрибутировать следующие 3 сегмента
-            segments_to_protect = 3
-            monologue_end_idx = i - 1
+        # 🔧 v16.9: FIXED CONTINUATION PHRASE LOGIC
+        # Проверяем, начинается ли текущий сегмент с continuation phrase
+        if i > 0 and is_continuation_phrase(text):
+            prev_seg = segments[i - 1]
+            prev_speaker = prev_seg.get('speaker')
             
-            # Проверяем, находимся ли мы в защищённой зоне
-            protected = False
-            for j in range(max(0, monologue_end_idx - segments_to_protect + 1), monologue_end_idx + 1):
-                if j == i:
-                    protected = True
-                    break
+            # Проверяем длительность предыдущего монолога
+            prev_monologue_duration = get_monologue_duration_at_index(segments, i - 1, prev_speaker)
             
-            if protected or is_continuation_phrase(text):
-                if debug:
-                    protection_reason = "continuation phrase" if is_continuation_phrase(text) else f"after {prev_monologue_duration:.1f}s monologue"
-                    print(f"\n  🛡️ [{time}] MONOLOGUE PROTECTION ({protection_reason})")
-                    print(f"     Текст: {text[:80]}...")
-                
-                stats['skipped_monologue_context'] += 1
-                continue
+            # Если предыдущий монолог длинный (>30s) или очень длинный (>60s)
+            if prev_monologue_duration > 30:
+                # Это продолжение ПРЕДЫДУЩЕГО спикера!
+                if current_speaker != prev_speaker:
+                    if debug:
+                        print(f"\n  🔧 [{time}] CONTINUATION PHRASE FIX")
+                        print(f"     {current_speaker} → {prev_speaker} (после монолога {prev_monologue_duration:.1f}s)")
+                        print(f"     Текст: {text[:80]}...")
+                    
+                    seg['speaker'] = prev_speaker
+                    stats['continuation_phrases_fixed'] += 1
+                    stats['changed_to_speaker'] += 1 if prev_speaker != 'Журналист' else 0
+                    stats['changed_to_journalist'] += 1 if prev_speaker == 'Журналист' else 0
+                    continue
+                else:
+                    # Уже правильный спикер, просто защищаем
+                    if debug:
+                        print(f"\n  🛡️ [{time}] CONTINUATION PHRASE (уже верно)")
+                        print(f"     Спикер: {current_speaker} (после монолога {prev_monologue_duration:.1f}s)")
+                    stats['skipped_monologue_context'] += 1
+                    continue
 
         j_score, s_score, details = calculate_speaker_score(text, current_speaker)
 
-        # Определяем порог для изменения (минимальная разница весов)
+        # Определяем порог для изменения
         CONFIDENCE_THRESHOLD = SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD
 
         # Журналист → Спикер
@@ -338,13 +343,13 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
 
     if debug:
         print("="*80)
-        print(f"✅ v16.8: Классификация завершена")
+        print(f"✅ v16.9: Классификация завершена")
         print(f"   Всего проверено: {stats['total_checked']}")
         print(f"   Исправлено: {stats['changed_to_journalist'] + stats['changed_to_speaker']}")
         print(f"   • Журналист → Спикер: {stats['changed_to_speaker']}")
         print(f"   • Спикер → Журналист: {stats['changed_to_journalist']}")
-        print(f"   • 🆕 Пропущено (монолог >60s): {stats['skipped_monologue_context']}")
-        print(f"   • Пропущено (защиты): {stats['skipped_protections']}")
+        print(f"   • 🔧 Continuation phrases исправлено: {stats['continuation_phrases_fixed']}")
+        print(f"   • Пропущено (защиты): {stats['skipped_monologue_context'] + stats['skipped_protections']}")
         print("="*80)
         print()
 
