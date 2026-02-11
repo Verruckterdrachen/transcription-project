@@ -1,30 +1,21 @@
 #!/usr/bin/env python3
 """
-transcribe_v16.py - Главный файл пайплайна транскрибации v16.7
+transcribe_v16.py - Главный файл пайплайна транскрибации v16.8.1
+
+🔥 v16.8.1: FIX LOG COPY TIMING
+- Копирование лога ПОСЛЕ закрытия файла (было: во время записи)
+- Исправлен порядок операций в __main__
+
+🔥 v16.8: DEBUG LOG + LONG MONOLOGUE FIX
+- Автоматическое логирование всего pipeline в файл
+- Monologue context protection для длинных монологов >60s
+- Continuation phrase detection
+- GAP overlap protection
 
 🔥 v16.7: AUTO TEST-RESULTS COPY
 - Автоматическое копирование результатов в test-results/latest/
 - Очистка latest/ перед каждым запуском
 - Логирование копирования
-
-🔥 v16.5: SMART GAP ATTRIBUTION
-- FIX #1: GAP_FILLED умная атрибуция по семантическому сходству
-- FIX #2: Защита от атрибуции запинок/переформулировок предыдущему спикеру
-- FIX #3: text_similarity() используется из utils.py для анализа GAP
-
-🔥 v16.4: SPEAKER ATTRIBUTION PROTECTION
-- FIX #1: split_mixed_speaker_segments — пересчет таймкодов после разделения
-- FIX #2: text_based_correction — защита от переатрибуции анонсов вопросов
-- FIX #3: Context window protection — не трогать сегменты внутри монологов >60s
-- FIX #4: Confirmation pattern detection — детекция подтверждений ("Ну да", "Да-да")
-- FIX #5: Announcement vs Question — различение анонса и полного вопроса
-
-v16.0 (базовые исправления):
-- FIX #1: text_based_correction — защита от переатрибуции с маркерами Журналиста
-- FIX #2: "Давайте снять" НЕ удаляется (убран из patterns)
-- FIX #3: force_transcribe — no_speech_threshold 0.3→0.2 (меньше пропусков)
-- FIX #4: auto_merge — НЕ склеивает сегменты с разными raw_speaker_id
-- DEBUG: Сохранение промежуточных JSON на каждом этапе
 
 📁 СТРУКТУРА ПАПОК:
    Спикер (ДД.ММ)/
@@ -112,7 +103,7 @@ class TeeOutput:
 # ВЕРСИЯ
 # ═══════════════════════════════════════════════════════════════════════════
 
-VERSION = "16.8"
+VERSION = "16.8.1"
 VERSION_NAME = "Debug & Long Monologue Fix"
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -199,7 +190,7 @@ def copy_to_test_results(json_files, txt_path, speaker_surname, log_path=None):
         print(f"   ✅ JSON: {dest.name}")
     
     # Копируем TXT
-    if txt_path.exists():
+    if txt_path and txt_path.exists():
         dest = test_results_dir / "эксперт.txt"
         shutil.copy2(txt_path, dest)
         print(f"   ✅ TXT: {dest.name}")
@@ -427,7 +418,12 @@ def process_audio_file(
 # ═══════════════════════════════════════════════════════════════════════════
 
 def main():
-    """Главная функция - интерактивный режим"""
+    """
+    Главная функция - интерактивный режим
+    
+    Returns:
+        (json_files, txt_path, speaker_surname) для копирования в test-results
+    """
 
     # Инициализация
     login(token=HF_TOKEN)
@@ -436,29 +432,16 @@ def main():
     print(f"GPU: {'✅ CUDA' if torch.cuda.is_available() else '⚠️ CPU'}")
     print("=" * 70)
     print()
+    print("💡 v16.8 ИЗМЕНЕНИЯ:")
+    print("   ✅ Автоматическое логирование всего pipeline")
+    print("   ✅ Monologue context protection (>60s)")
+    print("   ✅ Continuation phrase detection")
+    print("   ✅ GAP overlap protection")
+    print()
     print("💡 v16.7 ИЗМЕНЕНИЯ:")
     print("   ✅ Автоматическое копирование в test-results/latest/")
     print("   ✅ Очистка latest/ перед новым запуском")
     print("   ✅ Готово для анализа AI")
-    print()
-    print("💡 v16.5 ИЗМЕНЕНИЯ:")
-    print("   ✅ FIX: GAP_FILLED — умная атрибуция по семантическому сходству")
-    print("   ✅ FIX: Защита от атрибуции запинок предыдущему спикеру")
-    print("   ✅ FIX: text_similarity() используется для анализа GAP")
-    print()
-    print("💡 v16.4 ИЗМЕНЕНИЯ:")
-    print("   ✅ FIX: split_mixed_speaker_segments — пересчет таймкодов")
-    print("   ✅ FIX: text_based_correction — защита от анонсов вопросов")
-    print("   ✅ FIX: Context window protection (монологи >60s)")
-    print("   ✅ FIX: Confirmation pattern detection (\"Ну да\", \"Да-да\")")
-    print("   ✅ FIX: Announcement vs Question distinction")
-    print()
-    print("💡 v16.0 БАЗОВЫЕ ИЗМЕНЕНИЯ:")
-    print("   ✅ FIX: text_based_correction — защита от неверной атрибуции")
-    print("   ✅ FIX: \"Давайте снять\" НЕ удаляется")
-    print("   ✅ FIX: force_transcribe — no_speech 0.2 (было 0.3)")
-    print("   ✅ FIX: auto_merge — проверка raw_speaker_id")
-    print("   ✅ Структура папок: audio/ → json/ + txt/")
     print()
 
     # Запрос пути к папке
@@ -467,7 +450,7 @@ def main():
 
     if not folder.exists():
         print("❌ Папка не найдена!")
-        return
+        return None, None, None
 
     print(f"✅ Папка: {folder}")
 
@@ -476,7 +459,7 @@ def main():
 
     if not audio_dir.exists():
         print(f"❌ Папка audio/ не найдена! Создай: {audio_dir}")
-        return
+        return None, None, None
 
     print(f"📁 audio/: {audio_dir}")
     print(f"📁 json/:  {json_dir}")
@@ -501,7 +484,7 @@ def main():
 
     if not wav_files:
         print(f"❌ WAV файлы не найдены в {audio_dir}!")
-        return
+        return None, None, None
 
     print(f"\n✅ Найдено WAV: {len(wav_files)}")
 
@@ -532,17 +515,13 @@ def main():
         jsons_to_txt(json_files, txt_path, speaker_surname)
         print(f"✅ TXT: {txt_path} (v{VERSION})")
 
-    # 🆕 v16.8: Копирование в test-results/latest/ с LOG
-    if json_files and txt_path:
-        # Путь к LOG файлу в текущей директории
-        log_path = Path.cwd() / "transcription_debug.log"
-        copy_to_test_results(json_files, txt_path, speaker_surname, log_path)
-
     print(f"\n✅ Готово! 🚀 (v{VERSION})")
     print(f"\n📂 Результаты:")
     print(f"   JSON: {json_dir}")
     print(f"   TXT:  {txt_dir}")
-    print(f"   TEST: test-results/latest/ (для AI анализа)")
+    
+    # Возвращаем данные для копирования в test-results
+    return json_files, txt_path, speaker_surname
 
 if __name__ == "__main__":
     # 🆕 v16.8: Захват console output в файл
@@ -553,12 +532,22 @@ if __name__ == "__main__":
     original_stdout = sys.stdout
     sys.stdout = tee
     
+    json_files = None
+    txt_path = None
+    speaker_surname = None
+    
     try:
-        main()
+        # Запускаем main и получаем результаты
+        json_files, txt_path, speaker_surname = main()
     finally:
-        # Восстанавливаем stdout
+        # Восстанавливаем stdout и закрываем файл
         sys.stdout = original_stdout
         tee.close()
         
-        print(f"\n💾 DEBUG log сохранён: {log_file}")
-
+        # ✅ v16.8.1: Копирование ПОСЛЕ закрытия файла
+        if json_files and txt_path and log_file.exists():
+            print(f"\n💾 DEBUG log сохранён: {log_file}")
+            copy_to_test_results(json_files, txt_path, speaker_surname, log_file)
+        else:
+            print(f"\n💾 DEBUG log сохранён: {log_file}")
+            print("   TEST: Копирование в test-results пропущено")
