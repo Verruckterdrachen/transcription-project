@@ -84,11 +84,36 @@ from huggingface_hub import login
 warnings.filterwarnings("ignore")
 
 # ═══════════════════════════════════════════════════════════════════════════
+# 🆕 v16.8: CONSOLE OUTPUT CAPTURE
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TeeOutput:
+    """
+    Класс для дублирования stdout в файл и консоль одновременно
+    (аналог Unix команды 'tee')
+    """
+    def __init__(self, filename):
+        self.terminal = sys.stdout
+        self.log = open(filename, 'w', encoding='utf-8')
+    
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+    
+    def flush(self):
+        self.terminal.flush()
+        self.log.flush()
+    
+    def close(self):
+        if self.log:
+            self.log.close()
+
+# ═══════════════════════════════════════════════════════════════════════════
 # ВЕРСИЯ
 # ═══════════════════════════════════════════════════════════════════════════
 
-VERSION = "16.7"
-VERSION_NAME = "Auto Test-Results Copy"
+VERSION = "16.8"
+VERSION_NAME = "Debug & Long Monologue Fix"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ PIPELINE
@@ -137,14 +162,15 @@ def ensure_folder_structure(base_folder):
 # 🆕 v16.7: Автоматическое копирование результатов для анализа AI
 # ═══════════════════════════════════════════════════════════════════════════
 
-def copy_to_test_results(json_files, txt_path, speaker_surname):
+def copy_to_test_results(json_files, txt_path, speaker_surname, log_path=None):
     """
-    Копирует результаты в test-results/latest/ для анализа AI
+    🆕 v16.8: Копирует результаты + LOG в test-results/latest/
     
     Args:
         json_files: Список путей к JSON файлам
         txt_path: Путь к TXT файлу
         speaker_surname: Фамилия спикера
+        log_path: Путь к LOG файлу (опционально)
     """
     # Путь к test-results/latest/ относительно scripts/
     script_dir = Path(__file__).parent
@@ -178,9 +204,17 @@ def copy_to_test_results(json_files, txt_path, speaker_surname):
         shutil.copy2(txt_path, dest)
         print(f"   ✅ TXT: {dest.name}")
     
-    print(f"\n✅ Скопировано в test-results/latest/:")
+    # 🆕 v16.8: Копируем LOG
+    if log_path and log_path.exists():
+        dest = test_results_dir / "эксперт_debug.log"
+        shutil.copy2(log_path, dest)
+        print(f"   ✅ LOG: {dest.name}")
+    
+    print(f"\n✅ Скопировано в test-results/latest/:") 
     print(f"   - JSON: {len(copied_json)} файлов")
     print(f"   - TXT: 1 файл")
+    if log_path and log_path.exists():
+        print(f"   - LOG: 1 файл (debug)")
     print(f"\n💡 Теперь можно попросить AI проанализировать результаты:")
     print(f"   'Проанализируй test-results/latest/'")
 
@@ -498,9 +532,11 @@ def main():
         jsons_to_txt(json_files, txt_path, speaker_surname)
         print(f"✅ TXT: {txt_path} (v{VERSION})")
 
-    # 🆕 v16.7: Копирование в test-results/latest/
+    # 🆕 v16.8: Копирование в test-results/latest/ с LOG
     if json_files and txt_path:
-        copy_to_test_results(json_files, txt_path, speaker_surname)
+        # Путь к LOG файлу в текущей директории
+        log_path = Path.cwd() / "transcription_debug.log"
+        copy_to_test_results(json_files, txt_path, speaker_surname, log_path)
 
     print(f"\n✅ Готово! 🚀 (v{VERSION})")
     print(f"\n📂 Результаты:")
@@ -509,4 +545,20 @@ def main():
     print(f"   TEST: test-results/latest/ (для AI анализа)")
 
 if __name__ == "__main__":
-    main()
+    # 🆕 v16.8: Захват console output в файл
+    log_file = Path.cwd() / "transcription_debug.log"
+    
+    # Создаём tee для stdout
+    tee = TeeOutput(log_file)
+    original_stdout = sys.stdout
+    sys.stdout = tee
+    
+    try:
+        main()
+    finally:
+        # Восстанавливаем stdout
+        sys.stdout = original_stdout
+        tee.close()
+        
+        print(f"\n💾 DEBUG log сохранён: {log_file}")
+

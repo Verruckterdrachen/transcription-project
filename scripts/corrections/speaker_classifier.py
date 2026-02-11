@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
 """
-corrections/speaker_classifier.py - Весовая классификация спикеров v15 для v16.0
+corrections/speaker_classifier.py - Весовая классификация спикеров v15 для v16.8
+
+🆕 v16.8: LONG MONOLOGUE PROTECTION
+- Защита от переатрибуции сегментов после длинных монологов (>60s)
+- Защита от "То есть", "В частности" как журналистских маркеров
+- Учёт контекста предыдущих сегментов
 """
+
+# Version: v16.8
+# Last updated: 2026-02-11
+# 🆕 v16.8: Long monologue protection для точной атрибуции
 
 import re
 from core.config import SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD, SPEAKER_CLASSIFICATION_MIN_WORDS
@@ -74,17 +83,82 @@ def has_speaker_monologue_markers(text):
 
     return any(re.search(p, text_lower) for p in speaker_monologue_patterns)
 
+def get_previous_monologue_duration(segments, index, speaker):
+    """
+    🆕 v16.8: Вычисляет длительность предыдущего непрерывного монолога спикера
+    
+    Args:
+        segments: Список всех сегментов
+        index: Индекс текущего сегмента
+        speaker: Спикер для проверки
+    
+    Returns:
+        Длительность предыдущего монолога в секундах (0 если нет монолога)
+    """
+    if index == 0:
+        return 0
+    
+    # Находим начало предыдущего монолога
+    monologue_start_idx = index - 1
+    for i in range(index - 1, -1, -1):
+        if segments[i].get('speaker') != speaker:
+            monologue_start_idx = i + 1
+            break
+        if i == 0:
+            monologue_start_idx = 0
+    
+    # Вычисляем длительность
+    if monologue_start_idx < index:
+        duration = (segments[index - 1].get('end', 0) - 
+                   segments[monologue_start_idx].get('start', 0))
+        return duration
+    
+    return 0
+
+def is_continuation_phrase(text):
+    """
+    🆕 v16.8: Проверяет, является ли фраза продолжением монолога
+    
+    Фразы типа "То есть", "В частности", "Кроме того" обычно продолжают
+    предыдущую мысль, а не начинают новую тему журналиста.
+    
+    Args:
+        text: Текст для проверки
+    
+    Returns:
+        True если это фраза-продолжение
+    """
+    text_lower = text.lower().strip()
+    
+    continuation_patterns = [
+        r'^то\s+есть\b',
+        r'^в\s+частности\b',
+        r'^кроме\s+того\b',
+        r'^помимо\s+этого\b',
+        r'^также\b',
+        r'^более\s+того\b',
+        r'^к\s+тому\s+же\b',
+        r'^вдобавок\b',
+        r'^при\s+этом\b',
+        r'^однако\b',
+        r'^но\b',
+        r'^а\s+(?:также|еще|ещё)\b',
+    ]
+    
+    return any(re.match(p, text_lower) for p in continuation_patterns)
+
 # ═══════════════════════════════════════════════════════════════════════════
-# ВЕСОВАЯ КЛАССИФИКАЦИЯ v15
+# ВЕСОВАЯ КЛАССИФИКАЦИЯ v15 + v16.8 PROTECTION
 # ═══════════════════════════════════════════════════════════════════════════
 
 def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
     """
-    v15.0: Весовая классификация спикеров на основе текстовых паттернов
+    v16.8: Весовая классификация спикеров с защитой длинных монологов
 
-    Анализирует каждый сегмент и переклассифицирует спикера при наличии
-    убедительных доказательств. Использует систему весов для минимизации
-    ложных срабатываний.
+    🆕 v16.8 ИЗМЕНЕНИЯ:
+    - Long Monologue Protection: не переатрибутировать после монологов >60s
+    - Continuation Phrase Detection: "То есть", "В частности" как продолжение
+    - Context-aware classification: учёт контекста предыдущих сегментов
 
     Args:
         segments: Список сегментов после merge_replicas()
@@ -173,15 +247,16 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
         'changed_to_journalist': 0,
         'changed_to_speaker': 0,
         'skipped_protections': 0,
+        'skipped_monologue_context': 0,  # 🆕 v16.8
         'details': []
     }
 
     if debug:
         print("\n" + "="*80)
-        print("🎯 v15: ВЕСОВАЯ КЛАССИФИКАЦИЯ СПИКЕРОВ")
+        print("🎯 v16.8: ВЕСОВАЯ КЛАССИФИКАЦИЯ + MONOLOGUE PROTECTION")
         print("="*80)
 
-    for seg in segments:
+    for i, seg in enumerate(segments):
         text = seg.get('text', '').strip()
         current_speaker = seg.get('speaker', '')
         time = seg.get('time', '00:00:00')
@@ -192,6 +267,31 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
             continue
 
         stats['total_checked'] += 1
+
+        # 🆕 v16.8: LONG MONOLOGUE PROTECTION
+        # Проверяем длительность предыдущего монолога
+        prev_monologue_duration = get_previous_monologue_duration(segments, i, current_speaker)
+        
+        if prev_monologue_duration > 60:
+            # Если предыдущий монолог >60s, не переатрибутировать следующие 3 сегмента
+            segments_to_protect = 3
+            monologue_end_idx = i - 1
+            
+            # Проверяем, находимся ли мы в защищённой зоне
+            protected = False
+            for j in range(max(0, monologue_end_idx - segments_to_protect + 1), monologue_end_idx + 1):
+                if j == i:
+                    protected = True
+                    break
+            
+            if protected or is_continuation_phrase(text):
+                if debug:
+                    protection_reason = "continuation phrase" if is_continuation_phrase(text) else f"after {prev_monologue_duration:.1f}s monologue"
+                    print(f"\n  🛡️ [{time}] MONOLOGUE PROTECTION ({protection_reason})")
+                    print(f"     Текст: {text[:80]}...")
+                
+                stats['skipped_monologue_context'] += 1
+                continue
 
         j_score, s_score, details = calculate_speaker_score(text, current_speaker)
 
@@ -238,11 +338,12 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
 
     if debug:
         print("="*80)
-        print(f"✅ v15: Классификация завершена")
+        print(f"✅ v16.8: Классификация завершена")
         print(f"   Всего проверено: {stats['total_checked']}")
         print(f"   Исправлено: {stats['changed_to_journalist'] + stats['changed_to_speaker']}")
         print(f"   • Журналист → Спикер: {stats['changed_to_speaker']}")
         print(f"   • Спикер → Журналист: {stats['changed_to_journalist']}")
+        print(f"   • 🆕 Пропущено (монолог >60s): {stats['skipped_monologue_context']}")
         print(f"   • Пропущено (защиты): {stats['skipped_protections']}")
         print("="*80)
         print()

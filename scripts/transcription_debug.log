@@ -1,0 +1,8 @@
+2026-02-11 13:58:30,604 - Registered checkpoint save hook for _speechbrain_save
+2026-02-11 13:58:30,604 - Registered checkpoint load hook for _speechbrain_load
+2026-02-11 13:58:30,604 - Registered checkpoint save hook for save
+2026-02-11 13:58:30,604 - Registered checkpoint load hook for load
+2026-02-11 13:58:30,811 - Applied quirks (see `speechbrain.utils.quirks`): [allow_tf32, disable_jit_profiling]
+2026-02-11 13:58:30,811 - Excluded quirks specified by the `SB_DISABLE_QUIRKS` environment (comma-separated list): []
+2026-02-11 13:58:30,811 - Registered checkpoint save hook for _save
+2026-02-11 13:58:30,811 - Registered checkpoint load hook for _recover

@@ -104,12 +104,18 @@ def detect_speaker_for_gap(existing_segments, gap_start, gap_end, speaker_surnam
 
 def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker_surname=None):
     """
+    🆕 v16.8: GAP Overlap Protection - обрезка при пересечении с соседними
     🆕 v16.5: Smart GAP Attribution - умная атрибуция по семантическому сходству
     🆕 v16.3.2: Gap speaker detection добавлен
     🔧 v16.2: Force-transcribe gaps с исправленным itertracks
 
     Повторно транскрибирует пропущенные участки (gaps) используя
     данные диаризации. Использует более мягкие параметры Whisper.
+    
+    🆕 v16.8 ИЗМЕНЕНИЯ:
+    - GAP overlap detection с предыдущими GAP и существующими сегментами
+    - Автоматическая обрезка границ при overlap
+    - Пропуск слишком коротких GAP после обрезки (<1s)
     
     🆕 v16.5 ИЗМЕНЕНИЯ:
     - После транскрибации проверяется семантическое сходство с next_segment
@@ -172,6 +178,40 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
                     # Adjust timing
                     seg_start = gap_start + float(seg['start'])
                     seg_end = gap_start + float(seg['end'])
+
+                    # ═══════════════════════════════════════════════════════
+                    # 🆕 v16.8: GAP OVERLAP PROTECTION
+                    # ═══════════════════════════════════════════════════════
+                    
+                    original_start = seg_start
+                    original_end = seg_end
+                    
+                    # 1. Проверяем overlap с предыдущим GAP сегментом
+                    if added_segments:
+                        last_gap = added_segments[-1]
+                        if seg_start < last_gap["end"] + 0.5:
+                            seg_start = last_gap["end"]
+                            print(f"     ⚠️ GAP overlap с предыдущим GAP, adjusted start: {seg_start:.2f}s")
+                    
+                    # 2. Проверяем overlap со следующим существующим сегментом
+                    next_existing = None
+                    for existing_seg in sorted(existing_segments, key=lambda x: x['start']):
+                        if existing_seg['start'] >= gap_end:
+                            next_existing = existing_seg
+                            break
+                    
+                    if next_existing and seg_end > next_existing["start"] - 0.5:
+                        seg_end = next_existing["start"]
+                        print(f"     ⚠️ GAP overlap с next existing, adjusted end: {seg_end:.2f}s")
+                    
+                    # 3. Пропускаем слишком короткие GAP после обрезки
+                    if seg_end - seg_start < 1.0:
+                        print(f"     ⚠️ GAP too short after adjustment ({seg_end - seg_start:.2f}s), skipping")
+                        continue
+                    
+                    # 4. Показываем adjustment если был
+                    if seg_start != original_start or seg_end != original_end:
+                        print(f"     🔧 Adjusted: {original_start:.2f}-{original_end:.2f} → {seg_start:.2f}-{seg_end:.2f}")
 
                     # ═══════════════════════════════════════════════════════
                     # 🆕 v16.5: УМНАЯ АТРИБУЦИЯ GAP_FILLED
