@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """
-corrections/speaker_classifier.py - Весовая классификация спикеров v15 для v16.9
+corrections/speaker_classifier.py - Весовая классификация спикеров v15 для v16.13
+
+🔥 v16.13: КРИТИЧЕСКИЙ FIX RAW_SPEAKER_ID SYNC В CLASSIFICATION
+- При изменении speaker ТАКЖЕ обновляется raw_speaker_id
+- Создан обратный маппинг speaker_roles для синхронизации
+- Исправлен баг: TXT выводил старый speaker из-за несинхронизации
+- Аналогичный фикс v16.12, но для этапа классификации
 
 🆕 v16.9: FIX CONTINUATION PHRASE ATTRIBUTION
 - Исправлена логика проверки continuation phrases после длинных монологов
@@ -8,9 +14,9 @@ corrections/speaker_classifier.py - Весовая классификация с
 - "В частности", "То есть" корректно атрибутируются предыдущему спикеру
 """
 
-# Version: v16.9
+# Version: v16.13
 # Last updated: 2026-02-11
-# 🔧 v16.9: Fix continuation phrase attribution logic
+# 🔥 v16.13: КРИТИЧЕСКИЙ FIX - синхронизация raw_speaker_id при classification
 
 import re
 from core.config import SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD, SPEAKER_CLASSIFICATION_MIN_WORDS
@@ -148,13 +154,19 @@ def is_continuation_phrase(text):
     return any(re.match(p, text_lower) for p in continuation_patterns)
 
 # ═══════════════════════════════════════════════════════════════════════════
-# ВЕСОВАЯ КЛАССИФИКАЦИЯ v15 + v16.9 FIX
+# ВЕСОВАЯ КЛАССИФИКАЦИЯ v15 + v16.13 FIX
 # ═══════════════════════════════════════════════════════════════════════════
 
-def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
+def apply_speaker_classification_v15(segments, speaker_surname, speaker_roles, debug=False):
     """
-    v16.9: Весовая классификация спикеров с ИСПРАВЛЕННОЙ защитой continuation phrases
-
+    v16.13: Весовая классификация спикеров с СИНХРОНИЗАЦИЕЙ raw_speaker_id
+    
+    🔥 v16.13 КРИТИЧЕСКИЙ FIX:
+    - При изменении speaker ТАКЖЕ обновляется raw_speaker_id
+    - Создан обратный маппинг speaker_roles (Исаев → SPEAKER_01)
+    - Исправлен баг: TXT выводил старый speaker из-за несинхронизации
+    - Синхронизация во всех 3 местах изменения speaker
+    
     🔧 v16.9 ФИКС:
     - Continuation phrases теперь проверяются относительно ПРЕДЫДУЩЕГО спикера
     - "В частности" после длинного монолога Исаева → атрибутируется Исаеву
@@ -163,11 +175,22 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
     Args:
         segments: Список сегментов после merge_replicas()
         speaker_surname: Фамилия основного спикера
+        speaker_roles: Dict SPEAKER_XX → роль (для обратной конвертации)
         debug: Если True, выводит детальную информацию
 
     Returns:
         (segments, stats) - модифицированные сегменты и статистика
     """
+    
+    # 🆕 v16.13: Создаём обратный маппинг speaker → raw_speaker_id
+    reverse_roles = {}
+    for raw_id, role in speaker_roles.items():
+        reverse_roles[role] = raw_id
+    
+    if debug:
+        print(f"\n🔄 v16.13: Обратный маппинг создан:")
+        for role, raw_id in reverse_roles.items():
+            print(f"   {role} → {raw_id}")
 
     # Паттерны для определения Журналиста
     JOURNALIST_PATTERNS = {
@@ -246,13 +269,14 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
         'changed_to_speaker': 0,
         'skipped_protections': 0,
         'skipped_monologue_context': 0,
-        'continuation_phrases_fixed': 0,  # 🆕 v16.9
+        'continuation_phrases_fixed': 0,
+        'raw_speaker_id_synced': 0,  # 🆕 v16.13
         'details': []
     }
 
     if debug:
         print("\n" + "="*80)
-        print("🎯 v16.9: ВЕСОВАЯ КЛАССИФИКАЦИЯ + CONTINUATION PHRASE FIX")
+        print("🎯 v16.13: ВЕСОВАЯ КЛАССИФИКАЦИЯ + RAW_SPEAKER_ID SYNC")
         print("="*80)
 
     for i, seg in enumerate(segments):
@@ -286,7 +310,11 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
                         print(f"     Текст: {text[:80]}...")
                     
                     seg['speaker'] = prev_speaker
+                    # 🆕 v16.13: ОБНОВЛЯЕМ raw_speaker_id через обратный маппинг
+                    seg['raw_speaker_id'] = reverse_roles.get(prev_speaker, seg.get('raw_speaker_id'))
+                    
                     stats['continuation_phrases_fixed'] += 1
+                    stats['raw_speaker_id_synced'] += 1  # 🆕 v16.13
                     stats['changed_to_speaker'] += 1 if prev_speaker != 'Журналист' else 0
                     stats['changed_to_journalist'] += 1 if prev_speaker == 'Журналист' else 0
                     continue
@@ -312,7 +340,11 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
                 print(f"     Текст: {text[:80]}...")
 
             seg['speaker'] = speaker_surname
+            # 🆕 v16.13: ОБНОВЛЯЕМ raw_speaker_id через обратный маппинг
+            seg['raw_speaker_id'] = reverse_roles.get(speaker_surname, seg.get('raw_speaker_id'))
+            
             stats['changed_to_speaker'] += 1
+            stats['raw_speaker_id_synced'] += 1  # 🆕 v16.13
             stats['details'].append({
                 'time': time,
                 'from': 'Журналист',
@@ -331,7 +363,11 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
                 print(f"     Текст: {text[:80]}...")
 
             seg['speaker'] = 'Журналист'
+            # 🆕 v16.13: ОБНОВЛЯЕМ raw_speaker_id через обратный маппинг
+            seg['raw_speaker_id'] = reverse_roles.get('Журналист', seg.get('raw_speaker_id'))
+            
             stats['changed_to_journalist'] += 1
+            stats['raw_speaker_id_synced'] += 1  # 🆕 v16.13
             stats['details'].append({
                 'time': time,
                 'from': speaker_surname,
@@ -343,12 +379,13 @@ def apply_speaker_classification_v15(segments, speaker_surname, debug=False):
 
     if debug:
         print("="*80)
-        print(f"✅ v16.9: Классификация завершена")
+        print(f"✅ v16.13: Классификация завершена")
         print(f"   Всего проверено: {stats['total_checked']}")
         print(f"   Исправлено: {stats['changed_to_journalist'] + stats['changed_to_speaker']}")
         print(f"   • Журналист → Спикер: {stats['changed_to_speaker']}")
         print(f"   • Спикер → Журналист: {stats['changed_to_journalist']}")
         print(f"   • 🔧 Continuation phrases исправлено: {stats['continuation_phrases_fixed']}")
+        print(f"   • 🆕 raw_speaker_id синхронизировано: {stats['raw_speaker_id_synced']}")
         print(f"   • Пропущено (защиты): {stats['skipped_monologue_context'] + stats['skipped_protections']}")
         print("="*80)
         print()
