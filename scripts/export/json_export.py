@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
-export/json_export.py - Экспорт результатов в JSON для v16.0
+export/json_export.py - Экспорт результатов в JSON для v16.12
+
+🆕 v16.12: Добавлено поле pipeline_version в JSON metadata
 """
 
 import json
@@ -45,6 +47,7 @@ def export_to_json(
         "gaps_final": file_info.get("gaps_final", 0),
         "retry_added": file_info.get("retry_added", 0),
         "speaker_identification": "v16.0-modular",
+        "pipeline_version": file_info.get("pipeline_version", "unknown"),  # 🆕 v16.12
         "params": file_info.get("params", {}),
         "segments_count": len(segments_raw),
         "merged_count": len(segments_merged),
