@@ -2,8 +2,15 @@
 """
 transcribe_v16.py - Главный файл пайплайна транскрибации v16.12
 
+🔥 v16.15: DEBUG OUTPUT ДЛЯ SPLIT - находим виновника!
+- Детальный debug output для каждого предложения в split
+- Показ результатов is_journalist_phrase, is_expert_phrase, is_continuation
+- Логирование смены current_speaker с причиной
+- Поможет найти КАКОЕ предложение ошибочно меняет спикера
+
 🔥 v16.14: КРИТИЧЕСКИЙ FIX REPLICA MERGER - SPEAKER ОТ САМОГО ДЛИННОГО
 - replica_merger теперь берёт speaker/raw_speaker_id от САМОГО ДЛИННОГО сегмента
+
 - Исправлен баг: первый короткий сегмент "заражал" всю склейку
 - Добавлен debug output с выбором доминирующего сегмента
 
@@ -123,8 +130,8 @@ class TeeOutput:
 # ВЕРСИЯ
 # ═══════════════════════════════════════════════════════════════════════════
 
-VERSION = "16.14"
-VERSION_NAME = "Critical Fix: Speaker from LONGEST segment in replica_merger"
+VERSION = "16.15"
+VERSION_NAME = "Debug Output для Split - находим виновника ошибки"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ PIPELINE

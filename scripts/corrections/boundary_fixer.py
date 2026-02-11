@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """
-corrections/boundary_fixer.py - Boundary correction v16.12
+corrections/boundary_fixer.py - Boundary correction v16.15
+
+🆕 v16.15: DEBUG OUTPUT ДЛЯ SPLIT - находим виновника!
+- Детальный debug output для каждого предложения
+- Показ результатов проверок (is_journalist/expert/continuation)
+- Логирование смены current_speaker с причиной
+- Поможет найти КАКОЕ предложение ошибочно определяется
 
 🆕 v16.12: КРИТИЧЕСКИЙ FIX RAW_SPEAKER_ID В SPLIT
 - При split обновляется не только speaker, но и raw_speaker_id
@@ -12,12 +18,6 @@ corrections/boundary_fixer.py - Boundary correction v16.12
 - Проверка контекста ВНУТРИ текущего split (а не предыдущего сегмента)
 - Continuation phrase сохраняет спикера если накоплено >80 слов
 - Защита от смены спикера внутри длинного монолога
-
-🆕 v16.5: Удален дубликат seconds_to_hms(), добавлен импорт из utils
-🆕 v16.4: КРИТИЧЕСКИЕ ИСПРАВЛЕНИЯ split_mixed_speaker_segments
-- Пересчет таймкодов после split (start/end/time)
-- Защита от split анонсов вопросов
-- Пропорциональное распределение времени по словам
 """
 
 import re
@@ -235,9 +235,15 @@ def boundary_correction_raw(segments_raw, speaker_surname, speaker_roles):
     return segments_raw
 
 
-def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles):
+def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles, debug=True):
     """
-    v16.12: КРИТИЧЕСКИЙ FIX - обновление raw_speaker_id при split
+    v16.15: DEBUG OUTPUT - находим виновника ошибки атрибуции!
+    
+    🆕 v16.15 ИЗМЕНЕНИЯ:
+    - Детальный debug output для каждого предложения в split
+    - Показ результатов is_journalist_phrase, is_expert_phrase, is_continuation
+    - Логирование смены current_speaker с указанием причины
+    - Параметр debug=True для включения детального вывода
     
     🆕 v16.12 ИЗМЕНЕНИЯ:
     - При split обновляется НЕ ТОЛЬКО speaker, но и raw_speaker_id
@@ -251,19 +257,11 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
     - Защита от смены спикера внутри длинного монолога
     - Правильный контекст для продолжения мысли
     
-    🆕 v16.4 ИЗМЕНЕНИЯ:
-    - Пересчет таймкодов после split (start/end/time)
-    - Пропорциональное распределение времени по словам
-    - Защита от split анонсов вопросов
-    
-    Разделяет merged сегменты, в которых смешались реплики разных спикеров:
-    - Журналист: "Расскажите..." + Эксперт: "Ответ..."
-    - Merge ошибочно склеил их в один блок
-    
     Args:
         segments_merged: Список merged сегментов
         speaker_surname: Фамилия спикера
         speaker_roles: Dict SPEAKER_XX → роль (для обратной конвертации)
+        debug: Включить детальный debug output
     
     Returns:
         Список сегментов с разделенными mixed-speaker блоками
@@ -299,6 +297,10 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
             result.append(seg)
             continue
         
+        # 🆕 v16.15: DEBUG HEADER
+        if debug and len(sentences) >= 2:
+            print(f"\n  🔍 АНАЛИЗ СЕГМЕНТА: {seconds_to_hms(start)} ({speaker}) — {len(sentences)} предложений")
+        
         # Анализируем каждое предложение на принадлежность спикеру
         current_group = []
         current_speaker = speaker
@@ -315,11 +317,21 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
             is_expert_sent = is_expert_phrase(sentence, speaker_surname)
             is_continuation = is_continuation_phrase(sentence)
             
+            # 🆕 v16.15: DEBUG OUTPUT для каждого предложения
+            if debug:
+                print(f"    [{sent_idx+1}] \"{sentence[:60]}...\"")
+                print(f"        Journalist={is_journalist_sent} | Expert={is_expert_sent} | Continuation={is_continuation}")
+            
             # 🆕 v16.11: ПРАВИЛЬНАЯ ЛОГИКА ОПРЕДЕЛЕНИЯ СПИКЕРА
+            sentence_speaker = None
+            reason = ""
+            
             if is_journalist_sent:
                 sentence_speaker = "Журналист"
+                reason = "is_journalist_phrase=True"
             elif is_expert_sent:
                 sentence_speaker = speaker_surname
+                reason = "is_expert_phrase=True"
             elif is_continuation:
                 # 🔧 v16.11: CONTINUATION PHRASE LOGIC
                 # Проверяем контекст ВНУТРИ текущего split
@@ -328,17 +340,29 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
                 # Если УЖЕ накоплено много слов (>80) → продолжение текущего монолога
                 if current_group_words > 80:
                     sentence_speaker = current_speaker
-                    print(f"  🔧 CONTINUATION FIX: \"{sentence[:40]}...\" → {current_speaker} (внутри монолога {current_group_words} слов)")
+                    reason = f"continuation + context (>{current_group_words} слов)"
+                    if debug:
+                        print(f"        → {sentence_speaker} ({reason})")
                     continuation_fixed += 1
                 else:
                     # Если мало накоплено, используем контекст сегмента
                     sentence_speaker = current_speaker
+                    reason = f"continuation + inherit ({current_group_words} слов)"
             else:
                 # Нейтральная фраза - используем контекст
                 sentence_speaker = current_speaker
+                reason = "neutral (inherit)"
+            
+            # 🆕 v16.15: DEBUG - показываем определённого спикера
+            if debug:
+                print(f"        → SPEAKER: {sentence_speaker} ({reason})")
             
             # Если спикер изменился - создаем новый сегмент
             if sentence_speaker != current_speaker and current_group:
+                # 🆕 v16.15: DEBUG - логируем смену спикера
+                if debug:
+                    print(f"        ⚠️ СМЕНА СПИКЕРА: {current_speaker} → {sentence_speaker}")
+                
                 # 🆕 Вычисляем пропорциональное время
                 group_text = '. '.join(current_group) + '.'
                 group_words = len(group_text.split())

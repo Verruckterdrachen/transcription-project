@@ -2,7 +2,7 @@ Token will not been saved to git credential helper. Pass `add_to_git_credential=
 Token is valid (permission: fineGrained).
 Your token has been saved to C:\Users\wings\.cache\huggingface\token
 Login successful
-🔥 ПАЙПЛАЙН v16.14: Critical Fix: Speaker from LONGEST segment in replica_merger
+🔥 ПАЙПЛАЙН v16.15: Debug Output для Split - находим виновника ошибки
 GPU: ✅ CUDA
 ======================================================================
 
@@ -22,13 +22,13 @@ GPU: ✅ CUDA
 📁 txt/:   ..\interview\2026\Неизвестные сражения\2 серия\Исаев (02.02)\txt
 
 ⚙️ Режим [точный]: 
-🚀 Режим: точный (v16.14)
+🚀 Режим: точный (v16.15)
 
 🤖 Загрузка Whisper large-v3-turbo...
 ✅ Whisper готов
 
 👤 'Исаев (02.02)' → Исаев (02.02).txt
-🤖 large-v3-turbo + pyannote v16.14...
+🤖 large-v3-turbo + pyannote v16.15...
 
 ✅ Найдено WAV: 1
 
@@ -71,7 +71,7 @@ GPU: ✅ CUDA
   🔍 SPEAKER_00 [00:09:43-00:09:43] 0.5s
   🔍 SPEAKER_01 [00:09:52-00:09:59] 6.7s
   🔍 SPEAKER_00 [00:09:59-00:09:59] 0.2s
-  👥 Спикеров: 2, ['SPEAKER_01', 'SPEAKER_00']
+  👥 Спикеров: 2, ['SPEAKER_00', 'SPEAKER_01']
   📊 Stats: {'SPEAKER_01': 555.3820033955856, 'SPEAKER_00': 36.723259762309105}
 📏 Адаптивный VAD: 0.7
   🎙️ Whisper транскрибация NW Uckpa0001_01.wav...
@@ -370,12 +370,275 @@ GPU: ✅ CUDA
 ✂️ Разделение mixed-speaker сегментов (v16.12)...
 
 ✂️ Разделение mixed-speaker сегментов...
-  🔧 CONTINUATION FIX: "То есть масштабы Невского пятачка как пл..." → Исаев (внутри монолога 136 слов)
+
+  🔍 АНАЛИЗ СЕГМЕНТА: 00:00:00 (Журналист) — 2 предложений
+    [1] "Мы сейчас отвечаем на вопрос..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+    [2] "У нас сериал «Неизвестные сражения и Великой Отечественной в..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+
+  🔍 АНАЛИЗ СЕГМЕНТА: 00:00:12 (Журналист) — 2 предложений
+    [1] "Первый вопрос..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+    [2] "С какой целью был занят плацдарм «Невский пятачок» под Ленин..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+
+  🔍 АНАЛИЗ СЕГМЕНТА: 00:00:21 (Исаев) — 15 предложений
+    [1] "Первоначально, когда в сентябре 1941 года был занят плацдарм..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [2] "Поскольку при прорыве блокады те, кто наступает с внешнего к..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [3] "Они бы соединились с войсками на плацдарме на Невском пятачк..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [4] "То есть это было сделано для того, чтобы облегчить тем, кто ..."
+        Journalist=False | Expert=False | Continuation=True
+        → SPEAKER: Исаев (continuation + inherit (61 слов))
+    [5] "Начиная с сентября, это уже были войска под командованием Ку..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [6] "Но в связи с тем, что началась битва за Москву, немцы начали..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [7] "Он стал точкой прорыва блокада изнутри..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [8] "И соответственно количество войск, которые сосредотачивались..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [9] "Туда даже перебросили управление 8-й армии..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [10] "То есть масштабы Невского пятачка как плацдарма выросли, выр..."
+        Journalist=False | Expert=False | Continuation=True
+        → Исаев (continuation + context (>136 слов))
+        → SPEAKER: Исаев (continuation + context (>136 слов))
+    [11] "То есть с небольшого пространства земли на восточном берегу ..."
+        Journalist=True | Expert=False | Continuation=True
+        → SPEAKER: Журналист (is_journalist_phrase=True)
+        ⚠️ СМЕНА СПИКЕРА: Исаев → Журналист
   ✂️ SPLIT: 00:00:21 (Исаев) "Первоначально, когда в сентябре 1941 года был заня..."
+    [12] "Для этого предпринимались большие усилия..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+    [13] "Несколько дивизий сосредоточили на плацдарме, перебрасывали ..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+    [14] "Но, к сожалению, успехом все эти действия не увенчались..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+    [15] "Тем не менее, в ноябре-декабре Невский пятачок был такой над..."
+        Journalist=False | Expert=False | Continuation=True
+        → SPEAKER: Журналист (continuation + inherit (55 слов))
+
+  🔍 АНАЛИЗ СЕГМЕНТА: 00:02:27 (Журналист) — 2 предложений
+    [1] "Второй вопрос..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+    [2] "Что было основным препятствием для прорыва с Невского пятачк..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+
+  🔍 АНАЛИЗ СЕГМЕНТА: 00:02:32 (Исаев) — 16 предложений
+    [1] "Невский пятачок, хотя он располагался в достаточно удобном м..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [2] "Это новейшая по тем временам электростанция, построенная по ..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [3] "И с электростанции пятачок просматривался практически на всю..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [4] "И самое главное, это позволяло немцам корректировать артилле..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [5] "Поэтому наличие 8-й ГРЭС существенно затрудняло любые наступ..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [6] "С нее били пулеметы, с нее работали наводчики, как артиллери..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [7] "И все это, конечно, неблагоприятствовало тому, чтобы вырвать..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [8] "А также не совсем благоприятны были условия местности, хотя ..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [9] "И, конечно, возможность прорыва была довольно узкой..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [10] "При том, что в целом Невский пятачок был достаточно удобным ..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [11] "В частности, на другом берегу Невы были достаточные простран..."
+        Journalist=True | Expert=False | Continuation=True
+        → SPEAKER: Журналист (is_journalist_phrase=True)
+        ⚠️ СМЕНА СПИКЕРА: Исаев → Журналист
   ✂️ SPLIT: 00:02:32 (Исаев) "Невский пятачок, хотя он располагался в достаточно..."
-  🔧 CONTINUATION FIX: "Кроме того, советские войска в тот перио..." → Исаев (внутри монолога 149 слов)
-  🔧 CONTINUATION FIX: "Кроме того, основным фактором, который о..." → Исаев (внутри монолога 199 слов)
-  🔧 CONTINUATION FIX: "То есть после того, как в Крыму высвобод..." → Исаев (внутри монолога 291 слов)
+    [12] "В Неве была небольшая гавань, в которой можно было грузить н..."
+        Journalist=True | Expert=False | Continuation=False
+        → SPEAKER: Журналист (is_journalist_phrase=True)
+    [13] "Но само наличие 8-й ГРЭС сводило все эти преимущества практи..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+    [14] "И ничего с ней сделать не могли осенью и в начале зимы 1941 ..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+    [15] "То есть это был такой пункт, который делал для немцев оборон..."
+        Journalist=False | Expert=False | Continuation=True
+        → SPEAKER: Журналист (continuation + inherit (55 слов))
+    [16] "Достаточно простым точки зрения техники и тактики...."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+
+  🔍 АНАЛИЗ СЕГМЕНТА: 00:04:39 (Журналист) — 3 предложений
+    [1] "Третий вопрос..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+    [2] "Почему потерпели неудачь, предпринимавшись в 1942 году попыт..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+    [3] "Есть что-то общее?..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+
+  🔍 АНАЛИЗ СЕГМЕНТА: 00:04:48 (Исаев) — 14 предложений
+    [1] "Да, давайте я еще про пятачок скажу..."
+        Journalist=True | Expert=False | Continuation=False
+        → SPEAKER: Журналист (is_journalist_phrase=True)
+    [2] "Также имели место ошибки в проведении..."
+        Journalist=False | Expert=False | Continuation=True
+        → SPEAKER: Исаев (continuation + inherit (7 слов))
+    [3] "Да, это Имели ошибки в проведении наступательных операций с ..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [4] "В частности, сначала бросают в бой добровольческие полки без..."
+        Journalist=False | Expert=False | Continuation=True
+        → SPEAKER: Исаев (continuation + inherit (24 слов))
+    [5] "Они несут большие потери..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [6] "Затем на Невский пятачок переправляют танки, которые идут уж..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [7] "И в итоге вся операция, все наступление с Невского пятачка т..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [8] "То есть имели место серьезные помарки в ведении операции, сп..."
+        Journalist=False | Expert=False | Continuation=True
+        → SPEAKER: Исаев (continuation + inherit (71 слов))
+    [9] "Вместо того, чтобы потратить время, например, на их сколачив..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [10] "При таком подходе, конечно, добиться позитивного результата ..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [11] "И все это привело к общей неудаче наступлений с Невского пят..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [12] "Следующий вопрос про наступление..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [13] "Было ли что-то общее..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [14] "Почему?..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+
+  🔍 АНАЛИЗ СЕГМЕНТА: 00:06:10 (Журналист) — 2 предложений
+    [1] "Ну да, и почему потерпели неудачу..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+    [2] "Да...."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Журналист (neutral (inherit))
+
+  🔍 АНАЛИЗ СЕГМЕНТА: 00:06:12 (Исаев) — 25 предложений
+    [1] "Это неудача первых попыток прорыва блокады..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [2] "То есть прорыв блокады через самое узкое ее место, то, что н..."
+        Journalist=False | Expert=False | Continuation=True
+        → SPEAKER: Исаев (continuation + inherit (6 слов))
+    [3] "Действительно, небольшое расстояние разделяло внешнее и внут..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [4] "Можно было его пройти, казалось бы, за дни, если даже не за ..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [5] "Но, тем не менее, там была прочная оборона немцев, с которой..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [6] "И предпринимается масштабное наступление с обходом бутылочно..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [7] "Предполагалось нанести удар на большую глубину, но по, казал..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [8] "Это было наступление, получившее наименование Любаньской опе..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [9] "Реку форсировала по льду вторая ударная армия..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [10] "Это был такой глубокий обход самой прочной немецкой обороны..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [11] "Но, тем не менее, прежде всего из-за недооценки сил противни..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [12] "Противника недооценили именно численно..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [13] "Кроме того, советские войска в тот период сидели на голодном..."
+        Journalist=False | Expert=False | Continuation=True
+        → Исаев (continuation + context (>149 слов))
+        → SPEAKER: Исаев (continuation + context (>149 слов))
+    [14] "Еще один фактор – это, опять же, подготовка войск, которые в..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [15] "При недостаточной подготовке, неготовности к штурмовым дейст..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [16] "Все это привело к неудаче..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [17] "Кроме того, основным фактором, который объединял все операци..."
+        Journalist=False | Expert=False | Continuation=True
+        → Исаев (continuation + context (>199 слов))
+        → SPEAKER: Исаев (continuation + context (>199 слов))
+    [18] "И немцы старались удержать основные дорожные направления и м..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [19] "Это приводило не просто к плохому снабжению боеприпасами, но..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [20] "Из-за этого все те наступления, которые были предприняты в п..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [21] "И общим в этих всех наступлениях было, во-первых, недостаток..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [22] "Несколько другая картина наблюдалась осенью, когда немецкое ..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [23] "То есть после того, как в Крыму высвободилась 11-я армия Эри..."
+        Journalist=False | Expert=False | Continuation=True
+        → Исаев (continuation + context (>291 слов))
+        → SPEAKER: Исаев (continuation + context (>291 слов))
+    [24] "И здесь, в Приладожье, состоялось столкновение между свежепр..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
+    [25] "И несмотря на то, что Ленинград избежал смертельной угрозы, ..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
 ✅ Разделено: 2 mixed сегментов
 ✅ Continuation phrases исправлено: 4
 
@@ -387,7 +650,7 @@ GPU: ✅ CUDA
 
 🔍 Validation: Adjacent same speaker...
   ✅ Соседних реплик не найдено
- ✅ NW Uckpa0001_01.json (v16.14, roles={'SPEAKER_01': 'Спикер', 'SPEAKER_00': 'Журналист'})
+ ✅ NW Uckpa0001_01.json (v16.15, roles={'SPEAKER_01': 'Спикер', 'SPEAKER_00': 'Журналист'})
 
 ✅ JSON: 1/1
 
@@ -395,9 +658,9 @@ GPU: ✅ CUDA
 
 📄 1 JSON → Исаев (02.02).txt
  ✅ TXT: Исаев (02.02).txt (v16.3 + исправления)
-✅ TXT: ..\interview\2026\Неизвестные сражения\2 серия\Исаев (02.02)\txt\Исаев (02.02).txt (v16.14)
+✅ TXT: ..\interview\2026\Неизвестные сражения\2 серия\Исаев (02.02)\txt\Исаев (02.02).txt (v16.15)
 
-✅ Готово! 🚀 (v16.14)
+✅ Готово! 🚀 (v16.15)
 
 📂 Результаты:
    JSON: ..\interview\2026\Неизвестные сражения\2 серия\Исаев (02.02)\json
