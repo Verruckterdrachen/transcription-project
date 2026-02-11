@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """
-transcribe_v16.py - Главный файл пайплайна транскрибации v16.5
+transcribe_v16.py - Главный файл пайплайна транскрибации v16.7
+
+🔥 v16.7: AUTO TEST-RESULTS COPY
+- Автоматическое копирование результатов в test-results/latest/
+- Очистка latest/ перед каждым запуском
+- Логирование копирования
 
 🔥 v16.5: SMART GAP ATTRIBUTION
 - FIX #1: GAP_FILLED умная атрибуция по семантическому сходству
@@ -32,6 +37,7 @@ import os
 import sys
 import whisper
 import torch
+import shutil
 from pathlib import Path
 from tqdm import tqdm
 import warnings
@@ -81,8 +87,8 @@ warnings.filterwarnings("ignore")
 # ВЕРСИЯ
 # ═══════════════════════════════════════════════════════════════════════════
 
-VERSION = "16.5"
-VERSION_NAME = "Smart GAP Attribution"
+VERSION = "16.7"
+VERSION_NAME = "Auto Test-Results Copy"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ PIPELINE
@@ -125,6 +131,58 @@ def ensure_folder_structure(base_folder):
     txt_dir.mkdir(exist_ok=True)
 
     return audio_dir, json_dir, txt_dir
+
+# ═══════════════════════════════════════════════════════════════════════════
+# КОПИРОВАНИЕ В TEST-RESULTS
+# 🆕 v16.7: Автоматическое копирование результатов для анализа AI
+# ═══════════════════════════════════════════════════════════════════════════
+
+def copy_to_test_results(json_files, txt_path, speaker_surname):
+    """
+    Копирует результаты в test-results/latest/ для анализа AI
+    
+    Args:
+        json_files: Список путей к JSON файлам
+        txt_path: Путь к TXT файлу
+        speaker_surname: Фамилия спикера
+    """
+    # Путь к test-results/latest/ относительно scripts/
+    script_dir = Path(__file__).parent
+    project_root = script_dir.parent
+    test_results_dir = project_root / "test-results" / "latest"
+    
+    # Проверяем существование папки
+    if not test_results_dir.exists():
+        print(f"\n⚠️ Папка test-results/latest/ не найдена, пропускаю копирование")
+        return
+    
+    print(f"\n📊 Копирование в test-results/latest/...")
+    
+    # Очищаем latest/ (удаляем старые результаты)
+    for old_file in test_results_dir.glob("*"):
+        if old_file.is_file() and old_file.name != ".gitkeep":
+            old_file.unlink()
+            print(f"   🗑️ Удалён: {old_file.name}")
+    
+    # Копируем JSON файлы
+    copied_json = []
+    for json_path in json_files:
+        dest = test_results_dir / f"эксперт_{json_path.name}"
+        shutil.copy2(json_path, dest)
+        copied_json.append(dest.name)
+        print(f"   ✅ JSON: {dest.name}")
+    
+    # Копируем TXT
+    if txt_path.exists():
+        dest = test_results_dir / "эксперт.txt"
+        shutil.copy2(txt_path, dest)
+        print(f"   ✅ TXT: {dest.name}")
+    
+    print(f"\n✅ Скопировано в test-results/latest/:")
+    print(f"   - JSON: {len(copied_json)} файлов")
+    print(f"   - TXT: 1 файл")
+    print(f"\n💡 Теперь можно попросить AI проанализировать результаты:")
+    print(f"   'Проанализируй test-results/latest/'")
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ОСНОВНАЯ ФУНКЦИЯ ОБРАБОТКИ ОДНОГО ФАЙЛА
@@ -344,6 +402,11 @@ def main():
     print(f"GPU: {'✅ CUDA' if torch.cuda.is_available() else '⚠️ CPU'}")
     print("=" * 70)
     print()
+    print("💡 v16.7 ИЗМЕНЕНИЯ:")
+    print("   ✅ Автоматическое копирование в test-results/latest/")
+    print("   ✅ Очистка latest/ перед новым запуском")
+    print("   ✅ Готово для анализа AI")
+    print()
     print("💡 v16.5 ИЗМЕНЕНИЯ:")
     print("   ✅ FIX: GAP_FILLED — умная атрибуция по семантическому сходству")
     print("   ✅ FIX: Защита от атрибуции запинок предыдущему спикеру")
@@ -428,16 +491,22 @@ def main():
     print(f"\n✅ JSON: {len(json_files)}/{len(wav_files)}")
 
     # Создание TXT
+    txt_path = None
     if json_files:
         txt_path = txt_dir / f"{full_name}.txt"
         print(f"\n📄 {len(json_files)} JSON → {txt_path.name}")
         jsons_to_txt(json_files, txt_path, speaker_surname)
         print(f"✅ TXT: {txt_path} (v{VERSION})")
 
+    # 🆕 v16.7: Копирование в test-results/latest/
+    if json_files and txt_path:
+        copy_to_test_results(json_files, txt_path, speaker_surname)
+
     print(f"\n✅ Готово! 🚀 (v{VERSION})")
     print(f"\n📂 Результаты:")
     print(f"   JSON: {json_dir}")
     print(f"   TXT:  {txt_dir}")
+    print(f"   TEST: test-results/latest/ (для AI анализа)")
 
 if __name__ == "__main__":
     main()
