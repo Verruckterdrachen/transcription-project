@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """
-corrections/boundary_fixer.py - Boundary correction v16.10
+corrections/boundary_fixer.py - Boundary correction v16.11
 
-🆕 v16.10: CONTINUATION PHRASE FIX В SPLIT
-- Детекция continuation phrases при split
-- Использование контекста предыдущего монолога
-- Проверка raw_speaker_id из оригинальных segments_raw
-- Защита от переатрибуции при переговоре фраз
+🆕 v16.11: ПРАВИЛЬНАЯ ЛОГИКА CONTINUATION PHRASE FIX
+- Проверка контекста ВНУТРИ текущего split (а не предыдущего сегмента)
+- Continuation phrase сохраняет спикера если накоплено >80 слов
+- Защита от смены спикера внутри длинного монолога
+
+🆕 v16.10: CONTINUATION PHRASE FIX В SPLIT (НЕ РАБОТАЛ)
+- Неправильная проверка предыдущего сегмента
+- Исправлено в v16.11
 
 🆕 v16.5: Удален дубликат seconds_to_hms(), добавлен импорт из utils
 🆕 v16.4: КРИТИЧЕСКИЕ ИСПРАВЛЕНИЯ split_mixed_speaker_segments
@@ -232,13 +235,17 @@ def boundary_correction_raw(segments_raw, speaker_surname, speaker_roles):
 
 def split_mixed_speaker_segments(segments_merged, speaker_surname):
     """
-    v16.10: КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ - Continuation phrase fix в split
+    v16.11: ПРАВИЛЬНАЯ ЛОГИКА continuation phrase fix
     
-    🆕 v16.10 ИЗМЕНЕНИЯ:
-    - Детекция continuation phrases ("То есть", "В частности" и т.д.)
-    - Использование контекста предыдущего монолога (>60s)
-    - Проверка raw_speaker_id из оригинальных segments
-    - Защита от переатрибуции при переговоре фраз
+    🆕 v16.11 ИЗМЕНЕНИЯ:
+    - Continuation phrase проверяется ВНУТРИ текущего split
+    - Если накоплено >80 слов в current_group → continuation сохраняет текущего спикера
+    - Защита от смены спикера внутри длинного монолога
+    - Правильный контекст для продолжения мысли
+    
+    🆕 v16.10 ИЗМЕНЕНИЯ (НЕ РАБОТАЛИ):
+    - Проверка предыдущего merged сегмента (неправильно)
+    - Исправлено в v16.11
     
     🆕 v16.4 ИЗМЕНЕНИЯ:
     - Пересчет таймкодов после split (start/end/time)
@@ -282,15 +289,6 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname):
             result.append(seg)
             continue
         
-        # 🆕 v16.10: Определяем контекст предыдущего монолога
-        previous_speaker = None
-        previous_monologue_duration = 0
-        
-        if seg_idx > 0:
-            prev_seg = segments_merged[seg_idx - 1]
-            previous_speaker = prev_seg.get('speaker')
-            previous_monologue_duration = prev_seg.get('end', 0) - prev_seg.get('start', 0)
-        
         # Анализируем каждое предложение на принадлежность спикеру
         current_group = []
         current_speaker = speaker
@@ -307,20 +305,23 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname):
             is_expert_sent = is_expert_phrase(sentence, speaker_surname)
             is_continuation = is_continuation_phrase(sentence)
             
-            # 🆕 v16.10: УМНОЕ ОПРЕДЕЛЕНИЕ СПИКЕРА
+            # 🆕 v16.11: ПРАВИЛЬНАЯ ЛОГИКА ОПРЕДЕЛЕНИЯ СПИКЕРА
             if is_journalist_sent:
                 sentence_speaker = "Журналист"
             elif is_expert_sent:
                 sentence_speaker = speaker_surname
             elif is_continuation:
-                # 🔧 CONTINUATION PHRASE LOGIC
-                # Если это continuation phrase после длинного монолога (>60s)
-                if previous_monologue_duration > 60 and previous_speaker:
-                    sentence_speaker = previous_speaker
-                    print(f"  🔧 CONTINUATION FIX: \"{sentence[:40]}...\" → {previous_speaker} (после монолога {previous_monologue_duration:.1f}s)")
+                # 🔧 v16.11: CONTINUATION PHRASE LOGIC
+                # Проверяем контекст ВНУТРИ текущего split
+                current_group_words = sum(len(s.split()) for s in current_group)
+                
+                # Если УЖЕ накоплено много слов (>80) → продолжение текущего монолога
+                if current_group_words > 80:
+                    sentence_speaker = current_speaker
+                    print(f"  🔧 CONTINUATION FIX: \"{sentence[:40]}...\" → {current_speaker} (внутри монолога {current_group_words} слов)")
                     continuation_fixed += 1
                 else:
-                    # Если нет длинного монолога, используем текущего спикера
+                    # Если мало накоплено, используем контекст сегмента
                     sentence_speaker = current_speaker
             else:
                 # Нейтральная фраза - используем контекст
