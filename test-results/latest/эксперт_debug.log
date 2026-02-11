@@ -2,7 +2,7 @@ Token will not been saved to git credential helper. Pass `add_to_git_credential=
 Token is valid (permission: fineGrained).
 Your token has been saved to C:\Users\wings\.cache\huggingface\token
 Login successful
-🔥 ПАЙПЛАЙН v16.15: Debug Output для Split - находим виновника ошибки
+🔥 ПАЙПЛАЙН v16.16: Critical Fix: Word Boundary в regex - false positive 'Невы'
 GPU: ✅ CUDA
 ======================================================================
 
@@ -22,13 +22,13 @@ GPU: ✅ CUDA
 📁 txt/:   ..\interview\2026\Неизвестные сражения\2 серия\Исаев (02.02)\txt
 
 ⚙️ Режим [точный]: 
-🚀 Режим: точный (v16.15)
+🚀 Режим: точный (v16.16)
 
 🤖 Загрузка Whisper large-v3-turbo...
 ✅ Whisper готов
 
 👤 'Исаев (02.02)' → Исаев (02.02).txt
-🤖 large-v3-turbo + pyannote v16.15...
+🤖 large-v3-turbo + pyannote v16.16...
 
 ✅ Найдено WAV: 1
 
@@ -420,22 +420,22 @@ GPU: ✅ CUDA
         → Исаев (continuation + context (>136 слов))
         → SPEAKER: Исаев (continuation + context (>136 слов))
     [11] "То есть с небольшого пространства земли на восточном берегу ..."
-        Journalist=True | Expert=False | Continuation=True
-        → SPEAKER: Журналист (is_journalist_phrase=True)
-        ⚠️ СМЕНА СПИКЕРА: Исаев → Журналист
-  ✂️ SPLIT: 00:00:21 (Исаев) "Первоначально, когда в сентябре 1941 года был заня..."
+        Journalist=False | Expert=False | Continuation=True
+        → Исаев (continuation + context (>157 слов))
+        → SPEAKER: Исаев (continuation + context (>157 слов))
     [12] "Для этого предпринимались большие усилия..."
         Journalist=False | Expert=False | Continuation=False
-        → SPEAKER: Журналист (neutral (inherit))
+        → SPEAKER: Исаев (neutral (inherit))
     [13] "Несколько дивизий сосредоточили на плацдарме, перебрасывали ..."
         Journalist=False | Expert=False | Continuation=False
-        → SPEAKER: Журналист (neutral (inherit))
+        → SPEAKER: Исаев (neutral (inherit))
     [14] "Но, к сожалению, успехом все эти действия не увенчались..."
         Journalist=False | Expert=False | Continuation=False
-        → SPEAKER: Журналист (neutral (inherit))
+        → SPEAKER: Исаев (neutral (inherit))
     [15] "Тем не менее, в ноябре-декабре Невский пятачок был такой над..."
         Journalist=False | Expert=False | Continuation=True
-        → SPEAKER: Журналист (continuation + inherit (55 слов))
+        → Исаев (continuation + context (>212 слов))
+        → SPEAKER: Исаев (continuation + context (>212 слов))
 
   🔍 АНАЛИЗ СЕГМЕНТА: 00:02:27 (Журналист) — 2 предложений
     [1] "Второй вопрос..."
@@ -477,25 +477,25 @@ GPU: ✅ CUDA
         Journalist=False | Expert=False | Continuation=False
         → SPEAKER: Исаев (neutral (inherit))
     [11] "В частности, на другом берегу Невы были достаточные простран..."
-        Journalist=True | Expert=False | Continuation=True
-        → SPEAKER: Журналист (is_journalist_phrase=True)
-        ⚠️ СМЕНА СПИКЕРА: Исаев → Журналист
-  ✂️ SPLIT: 00:02:32 (Исаев) "Невский пятачок, хотя он располагался в достаточно..."
+        Journalist=False | Expert=False | Continuation=True
+        → Исаев (continuation + context (>154 слов))
+        → SPEAKER: Исаев (continuation + context (>154 слов))
     [12] "В Неве была небольшая гавань, в которой можно было грузить н..."
-        Journalist=True | Expert=False | Continuation=False
-        → SPEAKER: Журналист (is_journalist_phrase=True)
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Исаев (neutral (inherit))
     [13] "Но само наличие 8-й ГРЭС сводило все эти преимущества практи..."
         Journalist=False | Expert=False | Continuation=False
-        → SPEAKER: Журналист (neutral (inherit))
+        → SPEAKER: Исаев (neutral (inherit))
     [14] "И ничего с ней сделать не могли осенью и в начале зимы 1941 ..."
         Journalist=False | Expert=False | Continuation=False
-        → SPEAKER: Журналист (neutral (inherit))
+        → SPEAKER: Исаев (neutral (inherit))
     [15] "То есть это был такой пункт, который делал для немцев оборон..."
         Journalist=False | Expert=False | Continuation=True
-        → SPEAKER: Журналист (continuation + inherit (55 слов))
+        → Исаев (continuation + context (>209 слов))
+        → SPEAKER: Исаев (continuation + context (>209 слов))
     [16] "Достаточно простым точки зрения техники и тактики...."
         Journalist=False | Expert=False | Continuation=False
-        → SPEAKER: Журналист (neutral (inherit))
+        → SPEAKER: Исаев (neutral (inherit))
 
   🔍 АНАЛИЗ СЕГМЕНТА: 00:04:39 (Журналист) — 3 предложений
     [1] "Третий вопрос..."
@@ -639,18 +639,18 @@ GPU: ✅ CUDA
     [25] "И несмотря на то, что Ленинград избежал смертельной угрозы, ..."
         Journalist=False | Expert=False | Continuation=False
         → SPEAKER: Исаев (neutral (inherit))
-✅ Разделено: 2 mixed сегментов
-✅ Continuation phrases исправлено: 4
+✅ Mixed сегментов не найдено
+✅ Continuation phrases исправлено: 8
 
 🔍 Text-based correction (v16.4)...
-  🛡️ ЗАЩИТА: 00:00:21 внутри монолога 85.6s
-  🛡️ ЗАЩИТА: 00:02:32 внутри монолога 84.6s
+  🛡️ ЗАЩИТА: 00:00:21 внутри монолога 124.8s
+  🛡️ ЗАЩИТА: 00:02:32 внутри монолога 126.3s
   🛡️ ЗАЩИТА: 00:06:12 внутри монолога 226.7s
 ✅ Text-based corrections: 0 (все верно)
 
 🔍 Validation: Adjacent same speaker...
   ✅ Соседних реплик не найдено
- ✅ NW Uckpa0001_01.json (v16.15, roles={'SPEAKER_01': 'Спикер', 'SPEAKER_00': 'Журналист'})
+ ✅ NW Uckpa0001_01.json (v16.16, roles={'SPEAKER_01': 'Спикер', 'SPEAKER_00': 'Журналист'})
 
 ✅ JSON: 1/1
 
@@ -658,9 +658,9 @@ GPU: ✅ CUDA
 
 📄 1 JSON → Исаев (02.02).txt
  ✅ TXT: Исаев (02.02).txt (v16.3 + исправления)
-✅ TXT: ..\interview\2026\Неизвестные сражения\2 серия\Исаев (02.02)\txt\Исаев (02.02).txt (v16.15)
+✅ TXT: ..\interview\2026\Неизвестные сражения\2 серия\Исаев (02.02)\txt\Исаев (02.02).txt (v16.16)
 
-✅ Готово! 🚀 (v16.15)
+✅ Готово! 🚀 (v16.16)
 
 📂 Результаты:
    JSON: ..\interview\2026\Неизвестные сражения\2 серия\Исаев (02.02)\json

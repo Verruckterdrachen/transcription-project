@@ -2,6 +2,13 @@
 """
 transcribe_v16.py - Главный файл пайплайна транскрибации v16.12
 
+🔥 v16.16: КРИТИЧЕСКИЙ FIX - Word Boundary в regex паттернах!
+- Добавлен \\b (word boundary) в начале всех regex паттернов
+- Исправлен баг: 'вы\\s+' ловил "вы " внутри слов (Невы, совы, кровы)
+- Теперь поиск только целых слов: '\\bвы\\s+', '\\bрасскажите\\b' и т.д.
+- Предотвращение FALSE POSITIVE в is_journalist_phrase() и is_expert_phrase()
+- Исправлена ошибка: "То есть с небольшого пространства земли на восточном берегу Невы..." → Journalist=False ✅
+
 🔥 v16.15: DEBUG OUTPUT ДЛЯ SPLIT - находим виновника!
 - Детальный debug output для каждого предложения в split
 - Показ результатов is_journalist_phrase, is_expert_phrase, is_continuation
@@ -130,8 +137,8 @@ class TeeOutput:
 # ВЕРСИЯ
 # ═══════════════════════════════════════════════════════════════════════════
 
-VERSION = "16.15"
-VERSION_NAME = "Debug Output для Split - находим виновника ошибки"
+VERSION = "16.16"
+VERSION_NAME = "Critical Fix: Word Boundary в regex - false positive 'Невы'"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ PIPELINE
