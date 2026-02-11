@@ -1,7 +1,7 @@
 """
 merge/replica_merger.py - Склейка реплик одного спикера
 
-🆕 v16.3.1: ПРАВИЛЬНОЕ ИСПРАВЛЕНИЕ - НЕ пропускаем сегменты других спикеров
+🆕 v16.14: КРИТИЧЕСКИЙ FIX - speaker от САМОГО ДЛИННОГО сегмента
 """
 
 from difflib import SequenceMatcher
@@ -36,10 +36,13 @@ def clean_loops(text):
 
 def merge_replicas(segments):
     """
-    🔧 v16.3.1: ПРАВИЛЬНО - НЕ увеличиваем j при смене спикера
+    🔧 v16.14: КРИТИЧЕСКИЙ FIX - speaker от САМОГО ДЛИННОГО сегмента!
 
-    Критическое исправление: когда встречается другой спикер, НЕ делаем j += 1,
-    чтобы следующая итерация начиналась именно с этого сегмента.
+    **Проблема v16.13:** При merge брался speaker от ПЕРВОГО сегмента в группе.
+    Если первый сегмент короткий/неуверенный, вся склейка получала неправильный speaker.
+
+    **Решение v16.14:** Берём speaker и raw_speaker_id от САМОГО ДЛИННОГО сегмента по тексту
+    (длинный = более надёжный = правильный speaker).
 
     Args:
         segments: Список сегментов после alignment
@@ -64,6 +67,9 @@ def merge_replicas(segments):
         current_end = current['end']
         start_time = current['start']
 
+        # 🆕 v16.14: Собираем ВСЕ сегменты группы для выбора доминирующего
+        all_segments_in_group = [current]
+
         print(f"  🔀 {current.get('start_hms', seconds_to_hms(start_time))} {current_speaker} — начало merge")
 
         # Ищем соседние сегменты того же спикера
@@ -74,9 +80,7 @@ def merge_replicas(segments):
             next_seg = segments[j]
             pause = next_seg['start'] - current_end
 
-            # 🔧 v16.3.1: ИСПРАВЛЕНО - НЕ увеличиваем j при смене спикера!
             if next_seg['speaker'] != current_speaker:
-                # НЕ делаем j += 1!
                 merge_continue = False
                 break
 
@@ -92,6 +96,8 @@ def merge_replicas(segments):
                     # Дубликат - берём более длинный
                     if len(next_seg['text']) > len(texts[-1]):
                         texts[-1] = next_seg['text']
+                        # 🆕 v16.14: Заменяем и в группе
+                        all_segments_in_group[-1] = next_seg
                     current_end = next_seg['end']
                     j += 1
                     continue
@@ -99,6 +105,7 @@ def merge_replicas(segments):
                 if sim > 0.60:
                     # Похожие - добавляем
                     texts.append(next_seg['text'])
+                    all_segments_in_group.append(next_seg)  # 🆕 v16.14
                     current_end = next_seg['end']
                     j += 1
                     continue
@@ -106,6 +113,7 @@ def merge_replicas(segments):
                 # Малая overlap - склеиваем
                 if abs(pause) <= 2.0:
                     texts.append(next_seg['text'])
+                    all_segments_in_group.append(next_seg)  # 🆕 v16.14
                     current_end = next_seg['end']
                     j += 1
                     continue
@@ -120,6 +128,7 @@ def merge_replicas(segments):
                 if current_speaker != "Журналист":
                     if pause <= 2.0:
                         texts.append(next_seg['text'])
+                        all_segments_in_group.append(next_seg)  # 🆕 v16.14
                         print(f"    ↳ {next_seg.get('start_hms', '')} ⏸️ {pause:.1f}s → ✅ merge")
                         current_end = next_seg['end']
                         j += 1
@@ -127,6 +136,7 @@ def merge_replicas(segments):
                     elif pause <= 5.0 and any(similarity(next_seg['text'], t) for t in texts[-2:]):
                         # Пауза 2-5s, но есть similarity с предыдущими
                         texts.append(next_seg['text'])
+                        all_segments_in_group.append(next_seg)  # 🆕 v16.14
                         print(f"    ↳ {next_seg.get('start_hms', '')} ⏸️ {pause:.1f}s → ✅ merge (similarity)")
                         current_end = next_seg['end']
                         j += 1
@@ -140,6 +150,7 @@ def merge_replicas(segments):
                 if current_speaker == "Журналист":
                     if pause <= 3.0 and pause >= -12.0:
                         texts.append(next_seg['text'])
+                        all_segments_in_group.append(next_seg)  # 🆕 v16.14
                         print(f"    ↳ {next_seg.get('start_hms', '')} ⏸️ {pause:.1f}s → ✅ merge")
                         current_end = next_seg['end']
                         j += 1
@@ -149,28 +160,32 @@ def merge_replicas(segments):
                         merge_continue = False
                         break
 
+        # 🆕 v16.14: ВЫБИРАЕМ ДОМИНИРУЮЩИЙ СЕГМЕНТ (самый длинный по тексту)
+        dominant_segment = max(all_segments_in_group, key=lambda s: len(s.get('text', '')))
+        
+        if len(all_segments_in_group) > 1:
+            print(f"    🎯 Доминирующий: {dominant_segment.get('speaker')} / {dominant_segment.get('raw_speaker_id')} (длина: {len(dominant_segment.get('text', ''))} символов)")
+
         # Склеиваем тексты
         final_text = ' '.join(texts)
         final_text = clean_loops(final_text)
         final_text = clean_hallucinations_from_text(final_text, current_speaker)
 
         if final_text:
+            # 🆕 v16.14: Берём speaker и raw_speaker_id от ДОМИНИРУЮЩЕГО сегмента!
             merged.append({
-                "speaker": current_speaker,
+                "speaker": dominant_segment.get('speaker', current_speaker),  # 🆕 v16.14
                 "time": current.get('start_hms', seconds_to_hms(start_time)),
                 "start": start_time,
                 "end": current_end,
                 "text": final_text,
                 "confidence": current.get('confidence', ''),
-                "raw_speaker_id": current.get('raw_speaker_id', '')
+                "raw_speaker_id": dominant_segment.get('raw_speaker_id', '')  # 🆕 v16.14
             })
 
             if len(texts) > 1:
                 print(f"  ✅ Склеено {len(texts)} сегментов → {len(final_text.split())} слов")
 
-        # 🔧 v16.3.1: ПРАВИЛЬНОЕ ПРОДВИЖЕНИЕ
-        # Если j не изменилось (только i+1), значит одиночный сегмент
-        # Если j изменилось, значит был merge
         i = j
 
     return merged

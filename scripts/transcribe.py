@@ -2,7 +2,13 @@
 """
 transcribe_v16.py - Главный файл пайплайна транскрибации v16.12
 
+🔥 v16.14: КРИТИЧЕСКИЙ FIX REPLICA MERGER - SPEAKER ОТ САМОГО ДЛИННОГО
+- replica_merger теперь берёт speaker/raw_speaker_id от САМОГО ДЛИННОГО сегмента
+- Исправлен баг: первый короткий сегмент "заражал" всю склейку
+- Добавлен debug output с выбором доминирующего сегмента
+
 🔥 v16.13: КРИТИЧЕСКИЙ FIX RAW_SPEAKER_ID SYNC В CLASSIFICATION
+
 - speaker_classifier теперь синхронизирует raw_speaker_id при изменении speaker
 - Передача speaker_roles в apply_speaker_classification_v15
 - Исправлен баг: TXT выводил старый speaker после классификации
@@ -117,8 +123,8 @@ class TeeOutput:
 # ВЕРСИЯ
 # ═══════════════════════════════════════════════════════════════════════════
 
-VERSION = "16.13"
-VERSION_NAME = "Critical Fix: raw_speaker_id sync in speaker_classifier + version in JSON"
+VERSION = "16.14"
+VERSION_NAME = "Critical Fix: Speaker from LONGEST segment in replica_merger"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ PIPELINE
