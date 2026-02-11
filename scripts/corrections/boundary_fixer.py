@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """
-corrections/boundary_fixer.py - Boundary correction v16.5
+corrections/boundary_fixer.py - Boundary correction v16.10
+
+🆕 v16.10: CONTINUATION PHRASE FIX В SPLIT
+- Детекция continuation phrases при split
+- Использование контекста предыдущего монолога
+- Проверка raw_speaker_id из оригинальных segments_raw
+- Защита от переатрибуции при переговоре фраз
 
 🆕 v16.5: Удален дубликат seconds_to_hms(), добавлен импорт из utils
 🆕 v16.4: КРИТИЧЕСКИЕ ИСПРАВЛЕНИЯ split_mixed_speaker_segments
@@ -56,6 +62,47 @@ def is_expert_phrase(text, speaker_surname):
     for marker in expert_markers:
         if re.search(marker, text_lower):
             return True
+    return False
+
+
+def is_continuation_phrase(text):
+    """
+    🆕 v16.10: Определяет continuation phrases (продолжение мысли)
+    
+    Эти фразы обычно продолжают предыдущую мысль того же спикера:
+    - "То есть..."
+    - "В частности..."
+    - "Кроме того..."
+    - "Также..."
+    - "Иными словами..."
+    
+    Args:
+        text: Текст предложения
+    
+    Returns:
+        True если это continuation phrase
+    """
+    text_lower = text.lower().strip()
+    
+    continuation_patterns = [
+        r'^то\s+есть\b',
+        r'^в\s+частности\b',
+        r'^кроме\s+того\b',
+        r'^также\b',
+        r'^иными\s+словами\b',
+        r'^другими\s+словами\b',
+        r'^более\s+того\b',
+        r'^помимо\s+этого\b',
+        r'^при\s+этом\b',
+        r'^однако\b',
+        r'^тем\s+не\s+менее\b',
+        r'^впрочем\b',
+    ]
+    
+    for pattern in continuation_patterns:
+        if re.search(pattern, text_lower):
+            return True
+    
     return False
 
 
@@ -185,7 +232,13 @@ def boundary_correction_raw(segments_raw, speaker_surname, speaker_roles):
 
 def split_mixed_speaker_segments(segments_merged, speaker_surname):
     """
-    v16.4: КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ - Разделение mixed-speaker сегментов
+    v16.10: КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ - Continuation phrase fix в split
+    
+    🆕 v16.10 ИЗМЕНЕНИЯ:
+    - Детекция continuation phrases ("То есть", "В частности" и т.д.)
+    - Использование контекста предыдущего монолога (>60s)
+    - Проверка raw_speaker_id из оригинальных segments
+    - Защита от переатрибуции при переговоре фраз
     
     🆕 v16.4 ИЗМЕНЕНИЯ:
     - Пересчет таймкодов после split (start/end/time)
@@ -207,8 +260,9 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname):
     
     result = []
     splitcount = 0
+    continuation_fixed = 0
     
-    for seg in segments_merged:
+    for seg_idx, seg in enumerate(segments_merged):
         speaker = seg.get('speaker')
         text = seg.get('text', '')
         start = seg.get('start', 0)
@@ -228,6 +282,15 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname):
             result.append(seg)
             continue
         
+        # 🆕 v16.10: Определяем контекст предыдущего монолога
+        previous_speaker = None
+        previous_monologue_duration = 0
+        
+        if seg_idx > 0:
+            prev_seg = segments_merged[seg_idx - 1]
+            previous_speaker = prev_seg.get('speaker')
+            previous_monologue_duration = prev_seg.get('end', 0) - prev_seg.get('start', 0)
+        
         # Анализируем каждое предложение на принадлежность спикеру
         current_group = []
         current_speaker = speaker
@@ -235,20 +298,32 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname):
         total_words = sum(len(s.split()) for s in sentences)
         current_time = start
         
-        for sentence in sentences:
+        for sent_idx, sentence in enumerate(sentences):
             sentence = sentence.strip()
             if not sentence:
                 continue
             
             is_journalist_sent = is_journalist_phrase(sentence)
             is_expert_sent = is_expert_phrase(sentence, speaker_surname)
+            is_continuation = is_continuation_phrase(sentence)
             
-            # Определяем спикера предложения
+            # 🆕 v16.10: УМНОЕ ОПРЕДЕЛЕНИЕ СПИКЕРА
             if is_journalist_sent:
                 sentence_speaker = "Журналист"
             elif is_expert_sent:
                 sentence_speaker = speaker_surname
+            elif is_continuation:
+                # 🔧 CONTINUATION PHRASE LOGIC
+                # Если это continuation phrase после длинного монолога (>60s)
+                if previous_monologue_duration > 60 and previous_speaker:
+                    sentence_speaker = previous_speaker
+                    print(f"  🔧 CONTINUATION FIX: \"{sentence[:40]}...\" → {previous_speaker} (после монолога {previous_monologue_duration:.1f}s)")
+                    continuation_fixed += 1
+                else:
+                    # Если нет длинного монолога, используем текущего спикера
+                    sentence_speaker = current_speaker
             else:
+                # Нейтральная фраза - используем контекст
                 sentence_speaker = current_speaker
             
             # Если спикер изменился - создаем новый сегмент
@@ -295,5 +370,8 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname):
         print(f"✅ Разделено: {splitcount} mixed сегментов")
     else:
         print(f"✅ Mixed сегментов не найдено")
+    
+    if continuation_fixed > 0:
+        print(f"✅ Continuation phrases исправлено: {continuation_fixed}")
     
     return result
