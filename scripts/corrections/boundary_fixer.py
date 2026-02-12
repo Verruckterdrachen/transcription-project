@@ -74,6 +74,46 @@ def is_expert_phrase(text, speaker_surname):
     return False
 
 
+def detect_continuation_phrase(current_text, previous_texts, threshold=0.90):  # 🆕 v16.19: 80% → 90%
+    """
+    🔧 v16.19: КРИТИЧЕСКИЙ FIX - Повышен порог similarity с 80% до 90%
+    
+    **ПРОБЛЕМА v16.16:**
+    Порог 80% слишком низкий для детекции заикания.
+    Заикание обычно имеет similarity 85-95% (почти идентичный текст).
+    
+    Примеры НЕ детектировались:
+    - "...точки зрения коммуникации, «Невский пятачок», несмотря..." (similarity ~92%)
+    - "...был прежде всего Леонид Говоров, была основа плана..." (similarity ~88%)
+    
+    **РЕШЕНИЕ v16.19:**
+    Повысить порог до 90% для точной детекции заикания.
+    
+    Args:
+        current_text: Текущий текст для проверки
+        previous_texts: Список предыдущих текстов (для контекста)
+        threshold: Порог similarity (теперь 0.90)
+    
+    Returns:
+        (is_repetition, similarity, matched_text)
+    """
+    if not previous_texts:
+        return False, 0.0, None
+    
+    current_lower = current_text.lower().strip()
+    
+    # Проверяем последние 2-3 предложения
+    for prev_text in previous_texts[-3:]:
+        prev_lower = prev_text.lower().strip()
+        
+        similarity = SequenceMatcher(None, current_lower, prev_lower).ratio()
+        
+        if similarity >= threshold:  # 🆕 v16.19: теперь 0.90
+            return True, similarity, prev_text
+    
+    return False, 0.0, None
+
+
 def is_continuation_phrase(text):
     """
     🆕 v16.10: Определяет continuation phrases (продолжение мысли)
