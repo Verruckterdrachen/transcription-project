@@ -1,6 +1,7 @@
 """
 merge/replica_merger.py - Склейка реплик одного спикера
 
+🆕 v16.22: FIX БАГ #3 - Loop artifacts с вариациями слов
 🆕 v16.21: CRITICAL FIX - Infinite Loop в overlap handling
 🆕 v16.20: DEBUG OUTPUT для диагностики зависания
 🆕 v16.14: КРИТИЧЕСКИЙ FIX - speaker от САМОГО ДЛИННОГО сегмента
@@ -13,34 +14,79 @@ from corrections.hallucinations import clean_hallucinations_from_text
 
 def clean_loops(text, debug=False):
     """
+    🆕 v16.22: FIX БАГ #3 - Детекция вариаций с fuzzy matching
     🔧 v16.1: Удаляет зацикленные фразы (loop artifacts)
     🆕 v16.20: Добавлен debug параметр
+    
+    **ПРОБЛЕМА (БАГ #3):**
+    Функция детектировала только ТОЧНЫЕ повторы:
+    - "учитывать была немецкая" ← phrase1
+    - "учитывать это было" ← phrase2 (РАЗНЫЕ слова!)
+    - phrase1 ≠ phrase2 → НЕ детектируется!
+    
+    **FIX v16.22:**
+    Используем fuzzy matching (SequenceMatcher) для детекции вариаций:
+    - Если фразы похожи ≥75% → считаем повтором
+    - Удаляем ВСЕ вариации, оставляем только первую
+    
+    Args:
+        text: Текст для очистки
+        debug: Показывать debug output
+    
+    Returns:
+        Очищенный текст без loop artifacts
     """
     if debug:
         print(f"    🧹 clean_loops: обработка текста ({len(text)} символов, {len(text.split())} слов)")
     
     words = text.split()
-    seen = set()
+    seen = []  # Список увиденных фраз для fuzzy matching
     cleaned = []
-
+    
+    removed_count = 0
     i = 0
+    
     while i < len(words):
-        phrase = ' '.join(words[i:i+3])
-
-        if phrase.lower() in seen:
-            i += 1
+        phrase = ' '.join(words[i:i+3])  # 3 слова
+        phrase_lower = phrase.lower()
+        
+        # 🆕 v16.22: Fuzzy matching с предыдущими фразами
+        is_loop = False
+        
+        for prev_phrase in seen:
+            similarity = SequenceMatcher(None, phrase_lower, prev_phrase).ratio()
+            
+            if similarity >= 0.75:  # Похожесть ≥75%
+                is_loop = True
+                removed_count += 1
+                
+                if debug:
+                    print(f"      🔁 LOOP (similarity={similarity:.2f}): '{phrase}' ≈ '{prev_phrase}'")
+                
+                break
+        
+        if is_loop:
+            i += 1  # Пропускаем повтор
             continue
-
-        seen.add(phrase.lower())
+        
+        # Добавляем фразу в seen
+        seen.append(phrase_lower)
+        
+        # Добавляем слова в результат
         cleaned.extend(words[i:i+3])
         i += 3
-
+    
     final = ' '.join(cleaned)
+    
+    # Удаляем повторяющуюся пунктуацию
     final = re.sub(r'([.,!?])\1{2,}', r'\1', final)
-
+    
     if debug:
-        print(f"    ✅ clean_loops: готово ({len(final)} символов)")
-
+        if removed_count > 0:
+            print(f"    ✅ clean_loops: готово ({len(final)} символов, удалено {removed_count} loop artifacts)")
+        else:
+            print(f"    ✅ clean_loops: готово ({len(final)} символов, loops не найдены)")
+    
     return final.strip()
 
 def merge_replicas(segments, debug=False):
