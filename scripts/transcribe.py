@@ -189,12 +189,14 @@ def ensure_folder_structure(base_folder):
 
 def copy_to_test_results(json_files, txt_path, speaker_surname, log_path=None):
     """
-    🆕 v16.8: Копирует результаты + LOG в test-results/latest/
+    🆕 v16.18.1: Копирует результаты в test-results/latest/ БЕЗ переименования
+    
+    Сохраняет оригинальные имена файлов для удобства миграции в golden-dataset
     
     Args:
         json_files: Список путей к JSON файлам
         txt_path: Путь к TXT файлу
-        speaker_surname: Фамилия спикера
+        speaker_surname: Фамилия спикера (не используется в v16.18.1+)
         log_path: Путь к LOG файлу (опционально)
     """
     # Путь к test-results/latest/ относительно scripts/
@@ -215,33 +217,42 @@ def copy_to_test_results(json_files, txt_path, speaker_surname, log_path=None):
             old_file.unlink()
             print(f"   🗑️ Удалён: {old_file.name}")
     
-    # Копируем JSON файлы
+    # 🆕 v16.18.1: Копируем JSON файлы БЕЗ переименования
     copied_json = []
     for json_path in json_files:
-        dest = test_results_dir / f"эксперт_{json_path.name}"
+        # Сохраняем оригинальное имя (например: NW_Uckpa0001_01.json)
+        dest = test_results_dir / json_path.name
         shutil.copy2(json_path, dest)
         copied_json.append(dest.name)
         print(f"   ✅ JSON: {dest.name}")
     
-    # Копируем TXT
+    # 🆕 v16.18.1: Копируем TXT БЕЗ переименования
     if txt_path and txt_path.exists():
-        dest = test_results_dir / "эксперт.txt"
+        # Сохраняем оригинальное имя (например: Исаев (02.02).txt)
+        dest = test_results_dir / txt_path.name
         shutil.copy2(txt_path, dest)
         print(f"   ✅ TXT: {dest.name}")
     
-    # 🆕 v16.8: Копируем LOG
+    # Копируем LOG
     if log_path and log_path.exists():
-        dest = test_results_dir / "эксперт_debug.log"
+        # LOG можно назвать по базовому имени TXT + "_debug.log"
+        if txt_path:
+            log_dest_name = txt_path.stem + "_debug.log"
+        else:
+            log_dest_name = "transcription_debug.log"
+        
+        dest = test_results_dir / log_dest_name
         shutil.copy2(log_path, dest)
         print(f"   ✅ LOG: {dest.name}")
     
-    print(f"\n✅ Скопировано в test-results/latest/:") 
+    print(f"\n✅ Скопировано в test-results/latest/:")
     print(f"   - JSON: {len(copied_json)} файлов")
     print(f"   - TXT: 1 файл")
     if log_path and log_path.exists():
         print(f"   - LOG: 1 файл (debug)")
-    print(f"\n💡 Теперь можно попросить AI проанализировать результаты:")
-    print(f"   'Проанализируй test-results/latest/'")
+    
+    print(f"\n💡 Файлы сохранены с оригинальными именами")
+    print(f"   Готовы к копированию в golden-dataset (когда понадобится)")
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ОСНОВНАЯ ФУНКЦИЯ ОБРАБОТКИ ОДНОГО ФАЙЛА

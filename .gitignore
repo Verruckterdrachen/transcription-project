@@ -36,10 +36,17 @@ interview/
 *.json
 *.txt
 
-# 🆕 ИСКЛЮЧЕНИЯ: test-results/latest/ - коммитить для AI анализа
+# 🆕 v16.18.1: ИСКЛЮЧЕНИЯ - что коммитить в Git
 !test-results/latest/*.json
 !test-results/latest/*.txt
+!test-results/latest/*.log
 !tests/*.txt
+
+# 🆕 v16.18.1: Golden Dataset - коммитить всё
+!golden-dataset/**/*.json
+!golden-dataset/**/*.txt
+!golden-dataset/**/*.md
+!golden-dataset/**/metadata.json
 
 # ═══════════════════════════════════════════════════════════════
 # Doc
@@ -57,7 +64,6 @@ temp_*.wav
 # 🆕 v16.8: Исключения для debug логов (ПОСЛЕ общего *.log!)
 !transcription_debug.log
 !scripts/transcription_debug.log
-!test-results/latest/*.log
 
 # ═══════════════════════════════════════════════════════════════
 # IDE

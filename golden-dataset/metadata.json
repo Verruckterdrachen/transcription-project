@@ -1,0 +1,56 @@
+{
+	"dataset_version": "1.0",
+	"created": "2026-02-12",
+	"updated": "2026-02-12",
+	"status": "active",
+	"purpose": "End-to-End testing, benchmarking, edge cases collection",
+	"statistics": {
+		"total_interviews": 1,
+		"total_duration_seconds": 599,
+		"total_duration_minutes": 10,
+		"unique_speakers": 1,
+		"unique_topics": 1,
+		"pipeline_versions": [
+			"v16.17"
+		],
+		"documented_edge_cases": 2
+	},
+	"interviews": [
+		{
+			"id": "001",
+			"folder": "interview-001-isaev",
+			"speaker": "Исаев",
+			"full_name": "Алексей Исаев",
+			"role": "Военный историк",
+			"topic": "Операция Искра, Невский пятачок",
+			"duration_seconds": 599,
+			"duration_minutes": 10,
+			"quality": "excellent",
+			"proofread": false,
+			"pipeline_version": "v16.17",
+			"date_transcribed": "2026-02-11",
+			"edge_cases_count": 2,
+			"characteristics": {
+				"journalist_style": "formal_questions",
+				"expert_style": "long_detailed_answers",
+				"interruptions": "none",
+				"overlapping_speech": "minimal",
+				"background_noise": "clean"
+			}
+		}
+	],
+	"quality_standards": {
+		"min_duration_seconds": 600,
+		"max_duration_seconds": 5400,
+		"manual_review_required": true,
+		"proofread_required": true,
+		"metadata_completeness": "100%"
+	},
+	"goals": {
+		"target_interviews": 20,
+		"target_duration_minutes": 800,
+		"target_speakers": 5,
+		"target_edge_cases": 50,
+		"target_date": "2026-06-30"
+	}
+}
