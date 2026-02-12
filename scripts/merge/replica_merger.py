@@ -1,6 +1,7 @@
 """
 merge/replica_merger.py - Склейка реплик одного спикера
 
+🆕 v16.20: DEBUG OUTPUT для диагностики зависания
 🆕 v16.14: КРИТИЧЕСКИЙ FIX - speaker от САМОГО ДЛИННОГО сегмента
 """
 
@@ -9,10 +10,14 @@ import re
 from core.utils import seconds_to_hms
 from corrections.hallucinations import clean_hallucinations_from_text
 
-def clean_loops(text):
+def clean_loops(text, debug=False):
     """
     🔧 v16.1: Удаляет зацикленные фразы (loop artifacts)
+    🆕 v16.20: Добавлен debug параметр
     """
+    if debug:
+        print(f"    🧹 clean_loops: обработка текста ({len(text)} символов, {len(text.split())} слов)")
+    
     words = text.split()
     seen = set()
     cleaned = []
@@ -32,11 +37,15 @@ def clean_loops(text):
     final = ' '.join(cleaned)
     final = re.sub(r'([.,!?])\1{2,}', r'\1', final)
 
+    if debug:
+        print(f"    ✅ clean_loops: готово ({len(final)} символов)")
+
     return final.strip()
 
-def merge_replicas(segments):
+def merge_replicas(segments, debug=False):
     """
     🔧 v16.14: КРИТИЧЕСКИЙ FIX - speaker от САМОГО ДЛИННОГО сегмента!
+    🆕 v16.20: Добавлен debug параметр для диагностики зависания
 
     **Проблема v16.13:** При merge брался speaker от ПЕРВОГО сегмента в группе.
     Если первый сегмент короткий/неуверенный, вся склейка получала неправильный speaker.
@@ -46,6 +55,7 @@ def merge_replicas(segments):
 
     Args:
         segments: Список сегментов после alignment
+        debug: Показывать debug output (default: False)
 
     Returns:
         Список merged сегментов (ВСЕ сегменты включены)
@@ -59,8 +69,10 @@ def merge_replicas(segments):
 
     merged = []
     i = 0
+    merge_count = 0
 
     while i < len(segments):
+        merge_count += 1
         current = segments[i]
         current_speaker = current['speaker']
         texts = [current['text']]
@@ -70,7 +82,10 @@ def merge_replicas(segments):
         # 🆕 v16.14: Собираем ВСЕ сегменты группы для выбора доминирующего
         all_segments_in_group = [current]
 
-        print(f"  🔀 {current.get('start_hms', seconds_to_hms(start_time))} {current_speaker} — начало merge")
+        if debug:
+            print(f"  🔀 MERGE #{merge_count}: {current.get('start_hms', seconds_to_hms(start_time))} {current_speaker} — начало")
+        else:
+            print(f"  🔀 {current.get('start_hms', seconds_to_hms(start_time))} {current_speaker} — начало merge")
 
         # Ищем соседние сегменты того же спикера
         j = i + 1
@@ -160,16 +175,39 @@ def merge_replicas(segments):
                         merge_continue = False
                         break
 
+        # 🆕 v16.20: DEBUG - показываем количество собранных сегментов
+        if debug:
+            total_words = sum(len(t.split()) for t in texts)
+            print(f"    📊 Собрано: {len(texts)} сегментов, {total_words} слов")
+
         # 🆕 v16.14: ВЫБИРАЕМ ДОМИНИРУЮЩИЙ СЕГМЕНТ (самый длинный по тексту)
         dominant_segment = max(all_segments_in_group, key=lambda s: len(s.get('text', '')))
         
         if len(all_segments_in_group) > 1:
             print(f"    🎯 Доминирующий: {dominant_segment.get('speaker')} / {dominant_segment.get('raw_speaker_id')} (длина: {len(dominant_segment.get('text', ''))} символов)")
 
+        # 🆕 v16.20: DEBUG перед склейкой
+        if debug:
+            print(f"    🔗 Склейка текстов...")
+
         # Склеиваем тексты
         final_text = ' '.join(texts)
-        final_text = clean_loops(final_text)
-        final_text = clean_hallucinations_from_text(final_text, current_speaker)
+        
+        # 🆕 v16.20: DEBUG перед clean_loops
+        if debug:
+            print(f"    🧹 Вызов clean_loops ({len(final_text)} символов)...")
+        
+        final_text = clean_loops(final_text, debug=debug)
+        
+        # 🆕 v16.20: DEBUG перед clean_hallucinations
+        if debug:
+            print(f"    🧹 Вызов clean_hallucinations_from_text...")
+        
+        final_text = clean_hallucinations_from_text(final_text, current_speaker, debug=debug)
+        
+        # 🆕 v16.20: DEBUG после очистки
+        if debug:
+            print(f"    ✅ Очистка завершена, финальный текст: {len(final_text)} символов")
 
         if final_text:
             # 🆕 v16.14: Берём speaker и raw_speaker_id от ДОМИНИРУЮЩЕГО сегмента!
@@ -187,5 +225,8 @@ def merge_replicas(segments):
                 print(f"  ✅ Склеено {len(texts)} сегментов → {len(final_text.split())} слов")
 
         i = j
+
+    if debug:
+        print(f"\n✅ merge_replicas завершён: {len(merged)} merged сегментов из {len(segments)} исходных")
 
     return merged
