@@ -6,6 +6,10 @@ corrections/timestamp_fixer.py - Исправление timestamp v16.22
 - Проверка: timestamp НЕ вставляется, если предложение уже начинается с HH:MM:SS
 - Regex check: r'^\d{2}:\d{2}:\d{2}'
 
+🆕 v16.22: FIX БАГ #2 - Timestamp назад
+- Проверка монотонности: new_start >= old_start (никогда не двигаем назад!)
+- Защита от gap filling artifacts
+
 🆕 v16.19: КРИТИЧЕСКИЙ FIX - Timestamp injection в блоки >30 сек
 - Детекция блоков без промежуточных timestamp (длительность >30s)
 - Вставка промежуточных меток каждые ~30 сек
@@ -133,9 +137,21 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
 
 def correct_timestamp_drift(segments, debug=True):
     """
+    🆕 v16.22: FIX БАГ #2 - Timestamp назад
     🆕 v16.19: Исправляет сдвиг timestamp после gap filling
     
-    **ПРОБЛЕМА:**
+    **ПРОБЛЕМА (БАГ #2):**
+    Функция сдвигала timestamp НАЗАД:
+    - prev_seg.end = 183.5 (00:03:03)
+    - current_seg.start = 186.2 (00:03:06)
+    - new_start = prev_end = 183.5  ← МЕНЬШЕ чем 186.2!
+    - Результат: 00:03:06 → 00:03:03 (НАЗАД!)
+    
+    **FIX v16.22:**
+    Проверяем монотонность: new_start ДОЛЖЕН быть >= old_start
+    Если new_start < old_start → НЕ корректируем (оставляем как есть)
+    
+    **ПРОБЛЕМА (v16.19):**
     После gap filling + overlap adjustment меняется segment.end,
     но segment.start остаётся старым → timestamp в TXT не совпадает с аудио.
     
@@ -148,6 +164,7 @@ def correct_timestamp_drift(segments, debug=True):
     После gap filling пересчитываем start по реальным границам:
     - Для первого сегмента после gap: start = конец предыдущего
     - Обновляем segment['time'] по новому start
+    - 🆕 Проверяем монотонность (НЕ двигаем назад!)
     
     Args:
         segments: Список сегментов после gap filling
@@ -160,6 +177,7 @@ def correct_timestamp_drift(segments, debug=True):
         print(f"\n🔧 Исправление сдвига timestamp после gap filling...")
     
     corrections = 0
+    skipped_backward = 0
     
     for i in range(1, len(segments)):
         prev_seg = segments[i - 1]
@@ -176,18 +194,28 @@ def correct_timestamp_drift(segments, debug=True):
             old_start = current_start
             new_start = prev_end
             
-            current_seg['start'] = new_start
-            current_seg['time'] = seconds_to_hms(new_start)
-            
-            if debug and abs(old_start - new_start) > 1.0:
-                print(f"  ⏱️ {seconds_to_hms(old_start)} → {seconds_to_hms(new_start)} (сдвиг {new_start - old_start:+.1f}s)")
-            
-            corrections += 1
+            # 🆕 v16.22: FIX БАГ #2 - Проверяем монотонность
+            if new_start >= old_start:
+                # Сдвиг ВПЕРЁД или не изменился → OK
+                current_seg['start'] = new_start
+                current_seg['time'] = seconds_to_hms(new_start)
+                
+                if debug and abs(old_start - new_start) > 1.0:
+                    print(f"  ⏱️ {seconds_to_hms(old_start)} → {seconds_to_hms(new_start)} (сдвиг {new_start - old_start:+.1f}s)")
+                
+                corrections += 1
+            else:
+                # Сдвиг НАЗАД → НЕ корректируем!
+                if debug:
+                    print(f"  ⏭️ ПРОПУСКАЕМ: {seconds_to_hms(old_start)} → {seconds_to_hms(new_start)} (сдвиг назад {new_start - old_start:.1f}s)")
+                skipped_backward += 1
     
     if debug:
         if corrections > 0:
             print(f"✅ Исправлено timestamp: {corrections}")
-        else:
+        if skipped_backward > 0:
+            print(f"⏭️ Пропущено (сдвиг назад): {skipped_backward}")
+        if corrections == 0 and skipped_backward == 0:
             print(f"✅ Сдвигов timestamp не найдено")
     
     return segments
