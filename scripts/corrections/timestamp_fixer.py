@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
-corrections/timestamp_fixer.py - Исправление timestamp v16.19
+corrections/timestamp_fixer.py - Исправление timestamp v16.22
+
+🆕 v16.22: FIX БАГ #1 - Дублирующиеся timestamp
+- Проверка: timestamp НЕ вставляется, если предложение уже начинается с HH:MM:SS
+- Regex check: r'^\d{2}:\d{2}:\d{2}'
 
 🆕 v16.19: КРИТИЧЕСКИЙ FIX - Timestamp injection в блоки >30 сек
 - Детекция блоков без промежуточных timestamp (длительность >30s)
@@ -14,9 +18,17 @@ from core.utils import seconds_to_hms
 
 def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
     """
+    🆕 v16.22: FIX - Защита от дублей timestamp
     🆕 v16.19: Вставляет промежуточные timestamp в блоки >30 сек
     
-    **ПРОБЛЕМА:**
+    **ПРОБЛЕМА (БАГ #1):**
+    Функция вставляла timestamp БЕЗ проверки, что предложение
+    УЖЕ начинается с timestamp → дубль: "00:00:55 00:00:55 Текст"
+    
+    **FIX v16.22:**
+    Перед вставкой проверяем, что предложение НЕ начинается с HH:MM:SS
+    
+    **ПРОБЛЕМА (v16.19):**
     После merge_replicas() блоки могут быть >60 сек без меток.
     Пример: 00:06:12 → 00:10:03 (~231 сек, 500 слов) — нет промежуточных меток!
     
@@ -44,6 +56,7 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
         print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s)...")
     
     injection_count = 0
+    skipped_duplicates = 0
     
     for seg_idx, seg in enumerate(segments):
         start = seg.get('start', 0)
@@ -82,13 +95,22 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
         for sent_idx, (sent, sent_dur) in enumerate(zip(sentences, sentence_durations)):
             # Проверяем, нужна ли вставка timestamp
             if elapsed >= interval and sent_idx < len(sentences) - 1:  # НЕ перед последним
-                timestamp_str = f" {seconds_to_hms(current_time)} "
-                new_text_parts.append(timestamp_str)
                 
-                if debug:
-                    print(f"  📌 {seg.get('time', '???')} ({seg.get('speaker')}) → inject {timestamp_str.strip()} после {elapsed:.1f}s")
+                # 🆕 v16.22: FIX БАГ #1 - Проверяем, что предложение НЕ начинается с timestamp
+                if not re.match(r'^\d{2}:\d{2}:\d{2}', sent.strip()):
+                    timestamp_str = f" {seconds_to_hms(current_time)} "
+                    new_text_parts.append(timestamp_str)
+                    
+                    if debug:
+                        print(f"  📌 {seg.get('time', '???')} ({seg.get('speaker')}) → inject {timestamp_str.strip()} после {elapsed:.1f}s")
+                    
+                    injection_count += 1
+                else:
+                    # Предложение УЖЕ начинается с timestamp → пропускаем
+                    if debug:
+                        print(f"  ⏭️ Пропускаем дубль: предложение начинается с {sent[:10]}...")
+                    skipped_duplicates += 1
                 
-                injection_count += 1
                 elapsed = 0.0  # Сбрасываем счётчик
             
             new_text_parts.append(sent)
@@ -101,7 +123,9 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
     if debug:
         if injection_count > 0:
             print(f"✅ Вставлено промежуточных timestamp: {injection_count}")
-        else:
+        if skipped_duplicates > 0:
+            print(f"⏭️ Пропущено дублей: {skipped_duplicates}")
+        if injection_count == 0 and skipped_duplicates == 0:
             print(f"✅ Блоков >30s не найдено")
     
     return segments

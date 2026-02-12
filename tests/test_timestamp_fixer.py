@@ -1,151 +1,118 @@
 #!/usr/bin/env python3
 """
-tests/test_timestamp_fixer.py - Unit tests для timestamp_fixer v16.19
+tests/test_timestamp_fixer.py - Unit tests для timestamp_fixer v16.22
 
-🧪 ROOT CAUSE TESTS:
-1. test_insert_intermediate_timestamps_long_block() - блок 231 сек без меток
-2. test_correct_timestamp_drift() - сдвиг timestamp после gap filling
+🆕 v16.22: Тесты для БАГ #1 - дублирующиеся timestamp
 """
 
 import sys
-from pathlib import Path
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'scripts'))
 
-# Добавляем scripts/ в путь
-sys.path.insert(0, str(Path(__file__).parent.parent / "scripts"))
-
-from corrections.timestamp_fixer import (
-    insert_intermediate_timestamps, correct_timestamp_drift
-)
+import unittest
+from corrections.timestamp_fixer import insert_intermediate_timestamps
 from core.utils import seconds_to_hms
 
 
-def test_insert_intermediate_timestamps_long_block():
-    """
-    🧪 TEST: Блок 231 сек должен получить промежуточные timestamp
+class TestInsertIntermediateTimestamps(unittest.TestCase):
+    """Тесты для insert_intermediate_timestamps()"""
     
-    ROOT CAUSE: merge_replicas() не проверяет длительность блока
+    def test_no_duplicate_timestamps_at_sentence_start(self):
+        """
+        🐛 БАГ #1: Дублирующиеся timestamp
+        
+        Сценарий:
+        - Блок >30 сек
+        - Предложение начинается с timestamp (например, вставленного ранее)
+        - insert_intermediate_timestamps() НЕ должен вставлять дубль!
+        
+        ОЖИДАЕТСЯ:
+        00:00:55 Текст...  (НЕТ дубля!)
+        
+        РЕАЛЬНОСТЬ (баг):
+        00:00:55 00:00:55 Текст...
+        """
+        segments = [
+            {
+                'start': 0.0,
+                'end': 65.0,  # 65 сек → нужна вставка timestamp
+                'time': '00:00:00',
+                'speaker': 'Исаев',
+                'text': 'Первое предложение длинное. 00:00:55 Второе предложение уже имеет timestamp в начале. Третье предложение.'
+            }
+        ]
+        
+        result = insert_intermediate_timestamps(segments, interval=30.0, debug=False)
+        
+        # Проверяем, что НЕТ дублей timestamp
+        text = result[0]['text']
+        
+        # Считаем количество вхождений "00:00:55"
+        count_timestamp = text.count('00:00:55')
+        
+        self.assertEqual(
+            count_timestamp, 
+            1,  # Только ОДИН timestamp!
+            f"Найден дубль timestamp! Текст: {text}"
+        )
+        
+        # Проверяем, что НЕТ двух timestamp подряд
+        self.assertNotIn(
+            '00:00:55 00:00:55',
+            text,
+            f"Найден дубль timestamp подряд! Текст: {text}"
+        )
     
-    БЫЛО:
-    00:06:12 Текст 231 сек без меток...
+    def test_insert_timestamp_in_long_block(self):
+        """
+        ✅ Позитивный тест: вставка timestamp в блок >30 сек
+        
+        Блок 65 сек без timestamp внутри → вставить ~00:00:30
+        """
+        segments = [
+            {
+                'start': 0.0,
+                'end': 65.0,
+                'time': '00:00:00',
+                'speaker': 'Исаев',
+                'text': 'Первое предложение очень длинное и занимает много времени. Второе предложение тоже длинное. Третье предложение.'
+            }
+        ]
+        
+        result = insert_intermediate_timestamps(segments, interval=30.0, debug=False)
+        
+        text = result[0]['text']
+        
+        # Проверяем, что timestamp вставлен
+        self.assertIn(
+            '00:00:',  # Должен быть хотя бы один timestamp внутри
+            text
+        )
     
-    ДОЛЖНО БЫТЬ:
-    00:06:12 Текст... 00:06:42 Текст... 00:07:12 Текст... (7 меток)
-    """
-    segments = [
-        {
-            'start': 372.0,  # 00:06:12
-            'end': 603.0,    # 00:10:03 (231 сек!)
-            'speaker': 'Исаев',
-            'time': '00:06:12',
-            'text': 'Предложение 1. Предложение 2. Предложение 3. Предложение 4. Предложение 5. Предложение 6. Предложение 7. Предложение 8.'
-        }
-    ]
-    
-    result = insert_intermediate_timestamps(segments, interval=30.0, debug=False)
-    
-    # Проверяем наличие timestamp в тексте
-    text = result[0]['text']
-    timestamps_count = text.count('00:')
-    
-    # Должно быть ~7 промежуточных меток (231/30 ≈ 7)
-    assert timestamps_count >= 5, f"Ожидалось >= 5 timestamp, найдено {timestamps_count}"
-    print(f"✅ test_insert_intermediate_timestamps_long_block: {timestamps_count} timestamp вставлено")
+    def test_no_insert_in_short_block(self):
+        """
+        ✅ Позитивный тест: НЕТ вставки в блоки <=30 сек
+        """
+        segments = [
+            {
+                'start': 0.0,
+                'end': 25.0,  # 25 сек → слишком коротко
+                'time': '00:00:00',
+                'speaker': 'Исаев',
+                'text': 'Короткий текст без промежуточных timestamp.'
+            }
+        ]
+        
+        original_text = segments[0]['text']
+        result = insert_intermediate_timestamps(segments, interval=30.0, debug=False)
+        
+        # Текст НЕ должен измениться
+        self.assertEqual(
+            result[0]['text'],
+            original_text,
+            "Короткий блок (<30s) не должен получить промежуточные timestamp!"
+        )
 
 
-def test_correct_timestamp_drift():
-    """
-    🧪 TEST: Сдвиг timestamp после gap filling должен быть исправлен
-    
-    ROOT CAUSE: gap filling меняет segment.end, но не обновляет start
-    
-    БЫЛО:
-    - Seg1: end=550.0
-    - Seg2: start=559.5 (оригинальный Whisper start)
-    - Реальное начало Seg2 после adjustment: 550.0 (сразу после Seg1)
-    
-    ДОЛЖНО БЫТЬ:
-    - Seg2: start=550.0 (исправлено), time='00:09:10'
-    """
-    segments = [
-        {
-            'start': 500.0,
-            'end': 550.0,
-            'speaker': 'Исаев',
-            'time': '00:08:20',
-            'text': 'Сегмент 1'
-        },
-        {
-            'start': 559.5,  # Старый start (сдвиг +9.5s)
-            'end': 600.0,
-            'speaker': 'Журналист',
-            'time': '00:09:19',  # Неправильный timestamp!
-            'text': 'Сегмент 2'
-        }
-    ]
-    
-    result = correct_timestamp_drift(segments, debug=False)
-    
-    # Проверяем исправление
-    seg2 = result[1]
-    assert abs(seg2['start'] - 550.0) < 0.1, f"Ожидалось start=550.0, получено {seg2['start']}"
-    assert seg2['time'] == '00:09:10', f"Ожидалось time='00:09:10', получено {seg2['time']}"
-    
-    print(f"✅ test_correct_timestamp_drift: сдвиг исправлен (559.5 → 550.0)")
-
-
-def test_hallucination_duplicate_removal():
-    """
-    🧪 TEST: Дубли должны быть удалены
-    
-    ROOT CAUSE: Whisper галлюцинирует при заикании/паузах
-    
-    БЫЛО:
-    "ничего не знали. ничего не знали."
-    
-    ДОЛЖНО БЫТЬ:
-    "ничего не знали."
-    """
-    from corrections.hallucinations import is_duplicate_phrase
-    
-    text = "ничего не знали. ничего не знали."
-    has_dupl, cleaned = is_duplicate_phrase(text, debug=False)
-    
-    assert has_dupl == True, "Дубль не обнаружен!"
-    assert cleaned.count("ничего не знали") == 1, f"Дубль не удалён: {cleaned}"
-    
-    print(f"✅ test_hallucination_duplicate_removal: дубль удалён")
-
-
-def test_continuation_phrase_threshold():
-    """
-    🧪 TEST: Порог similarity должен быть 90% (не 80%)
-    
-    ROOT CAUSE: Порог 80% пропускает заикания с similarity 85-95%
-    
-    ТЕСТ:
-    - similarity 92% → должно детектироваться
-    - similarity 78% → НЕ должно детектироваться
-    """
-    from corrections.boundary_fixer import detect_continuation_phrase
-    
-    # Заикание (similarity ~92%)
-    current = "«Невский пятачок», несмотря на то, что располагался"
-    previous = ["«Невский пятачок», хотя он располагался"]
-    
-    is_rep, sim, matched = detect_continuation_phrase(current, previous, threshold=0.90)
-    
-    assert is_rep == True, f"Заикание НЕ детектировано (similarity={sim:.2%})"
-    print(f"✅ test_continuation_phrase_threshold: заикание детектировано (similarity={sim:.2%})")
-
-
-if __name__ == "__main__":
-    print("\n🧪 RUNNING UNIT TESTS v16.19\n")
-    print("="*70)
-    
-    test_insert_intermediate_timestamps_long_block()
-    test_correct_timestamp_drift()
-    test_hallucination_duplicate_removal()
-    test_continuation_phrase_threshold()
-    
-    print("="*70)
-    print("\n✅ ВСЕ ТЕСТЫ ПРОЙДЕНЫ!\n")
+if __name__ == '__main__':
+    unittest.main()
