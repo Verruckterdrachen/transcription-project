@@ -1,6 +1,7 @@
 """
 merge/replica_merger.py - Склейка реплик одного спикера
 
+🆕 v16.21: CRITICAL FIX - Infinite Loop в overlap handling
 🆕 v16.20: DEBUG OUTPUT для диагностики зависания
 🆕 v16.14: КРИТИЧЕСКИЙ FIX - speaker от САМОГО ДЛИННОГО сегмента
 """
@@ -44,8 +45,16 @@ def clean_loops(text, debug=False):
 
 def merge_replicas(segments, debug=False):
     """
+    🆕 v16.21: CRITICAL FIX - Infinite Loop в overlap handling
     🔧 v16.14: КРИТИЧЕСКИЙ FIX - speaker от САМОГО ДЛИННОГО сегмента!
     🆕 v16.20: Добавлен debug параметр для диагностики зависания
+
+    **Проблема v16.20:** При большой overlap (>2s) без similarity цикл зависал,
+    потому что `j` инкрементировался, но `current_end` не обновлялся, и следующие
+    сегменты тоже попадали в overlap → infinite loop.
+
+    **Решение v16.21:** Добавлена защита - если overlap слишком большой и нет similarity,
+    останавливаем merge (это уже другая реплика).
 
     **Проблема v16.13:** При merge брался speaker от ПЕРВОГО сегмента в группе.
     Если первый сегмент короткий/неуверенный, вся склейка получала неправильный speaker.
@@ -87,11 +96,21 @@ def merge_replicas(segments, debug=False):
         else:
             print(f"  🔀 {current.get('start_hms', seconds_to_hms(start_time))} {current_speaker} — начало merge")
 
+        # 🆕 v16.21: Защита от infinite loop
+        max_iterations = len(segments) * 2
+        iteration_count = 0
+
         # Ищем соседние сегменты того же спикера
         j = i + 1
         merge_continue = True
 
         while j < len(segments) and merge_continue:
+            # 🆕 v16.21: Проверка защиты от infinite loop
+            iteration_count += 1
+            if iteration_count > max_iterations:
+                print(f"    ⚠️ ЗАЩИТА: превышено {max_iterations} итераций на merge #{merge_count}")
+                break
+
             next_seg = segments[j]
             pause = next_seg['start'] - current_end
 
@@ -133,9 +152,12 @@ def merge_replicas(segments, debug=False):
                     j += 1
                     continue
                 else:
-                    # Слишком большая overlap
-                    j += 1
-                    continue
+                    # 🆕 v16.21: FIX - Слишком большая overlap без similarity → STOP
+                    # Было: j += 1; continue → infinite loop!
+                    # Стало: break → завершаем merge
+                    print(f"    ↳ Overlap {abs(pause):.1f}s без similarity → ❌ STOP")
+                    merge_continue = False
+                    break
 
             # Обработка обычной паузы
             else:
