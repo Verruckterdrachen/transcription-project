@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 """
-transcribe_v16.py - Главный файл пайплайна транскрибации v16.27
+transcribe_v16.py - Главный файл пайплайна транскрибации v16.28
+
+🔥 v16.28: FIX clean_loops() - замена на "..." вместо удаления
+- v16.27 удалял loops → потеря смысла текста
+- v16.28 заменяет loops на "..." → контекст сохранён
+- Threshold: 95% (очень строго, не 75%!)
+- Min n-gram: 4 слова (не 2!)
+- Gap-filled: threshold 97%
 
 🔥 v16.27: FIX hallucination loops - clean_loops() реализация
 - Создана функция clean_loops() для удаления repeating n-grams
@@ -171,8 +178,8 @@ class TeeOutput:
 # ВЕРСИЯ
 # ═══════════════════════════════════════════════════════════════════════════
 
-VERSION = "16.27"
-VERSION_NAME = "FIX hallucination loops - clean_loops() реализация"
+VERSION = "16.28"
+VERSION_NAME = "FIX clean_loops() - замена на '...' вместо удаления"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ PIPELINE
@@ -531,6 +538,12 @@ def main():
 	print(f"🔥 ПАЙПЛАЙН v{VERSION}: {VERSION_NAME}")
 	print(f"GPU: {'✅ CUDA' if torch.cuda.is_available() else '⚠️ CPU'}")
 	print("=" * 70)
+	print(f"💡 v16.28 ИЗМЕНЕНИЯ:")
+	print("   ✅ clean_loops() теперь ЗАМЕНЯЕТ на '...' (НЕ удаляет!)")
+	print("   ✅ Threshold: 95% (очень строго)")
+	print("   ✅ Min n-gram: 4 слова (не 2!)")
+	print("   ✅ Gap-filled: threshold 97%")
+	print("   ✅ Сохраняем контекст, НЕ теряем смысл!")
 	print()
 	print(f"💡 v16.27 ИЗМЕНЕНИЯ:")
 	print("   ✅ clean_loops() создана - удаление hallucination loops")
