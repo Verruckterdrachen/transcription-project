@@ -91,29 +91,9 @@ def clean_loops(text, debug=False):
 
 def merge_replicas(segments, debug=False):
     """
+    🆕 v16.23: ОСЛАБЛЕНИЕ ЗАЩИТЫ v16.0 для БАГ #4
     🆕 v16.21: CRITICAL FIX - Infinite Loop в overlap handling
-    🔧 v16.14: КРИТИЧЕСКИЙ FIX - speaker от САМОГО ДЛИННОГО сегмента!
-    🆕 v16.20: Добавлен debug параметр для диагностики зависания
-
-    **Проблема v16.20:** При большой overlap (>2s) без similarity цикл зависал,
-    потому что `j` инкрементировался, но `current_end` не обновлялся, и следующие
-    сегменты тоже попадали в overlap → infinite loop.
-
-    **Решение v16.21:** Добавлена защита - если overlap слишком большой и нет similarity,
-    останавливаем merge (это уже другая реплика).
-
-    **Проблема v16.13:** При merge брался speaker от ПЕРВОГО сегмента в группе.
-    Если первый сегмент короткий/неуверенный, вся склейка получала неправильный speaker.
-
-    **Решение v16.14:** Берём speaker и raw_speaker_id от САМОГО ДЛИННОГО сегмента по тексту
-    (длинный = более надёжный = правильный speaker).
-
-    Args:
-        segments: Список сегментов после alignment
-        debug: Показывать debug output (default: False)
-
-    Returns:
-        Список merged сегментов (ВСЕ сегменты включены)
+    ...
     """
     if not segments:
         return []
@@ -130,11 +110,15 @@ def merge_replicas(segments, debug=False):
         merge_count += 1
         current = segments[i]
         current_speaker = current['speaker']
+        
+        # 🆕 v16.23: БАГ #4 FIX - берём raw_speaker_id для защиты
+        current_raw_id = current.get('raw_speaker_id', '')
+        
         texts = [current['text']]
         current_end = current['end']
         start_time = current['start']
 
-        # 🆕 v16.14: Собираем ВСЕ сегменты группы для выбора доминирующего
+        # Собираем ВСЕ сегменты группы
         all_segments_in_group = [current]
 
         if debug:
@@ -142,7 +126,7 @@ def merge_replicas(segments, debug=False):
         else:
             print(f"  🔀 {current.get('start_hms', seconds_to_hms(start_time))} {current_speaker} — начало merge")
 
-        # 🆕 v16.21: Защита от infinite loop
+        # Защита от infinite loop
         max_iterations = len(segments) * 2
         iteration_count = 0
 
@@ -151,18 +135,42 @@ def merge_replicas(segments, debug=False):
         merge_continue = True
 
         while j < len(segments) and merge_continue:
-            # 🆕 v16.21: Проверка защиты от infinite loop
             iteration_count += 1
             if iteration_count > max_iterations:
                 print(f"    ⚠️ ЗАЩИТА: превышено {max_iterations} итераций на merge #{merge_count}")
                 break
 
             next_seg = segments[j]
+            next_raw_id = next_seg.get('raw_speaker_id', '')
             pause = next_seg['start'] - current_end
 
+            # 🆕 v16.23: ОСЛАБЛЕННАЯ ПРОВЕРКА СПИКЕРА для БАГ #4
+            # СТАРАЯ логика v16.0:
+            #   if next_seg['speaker'] != current_speaker:
+            #       break
+            #
+            # НОВАЯ логика v16.23:
+            #   Проверяем speaker, НО игнорируем различия raw_speaker_id
+            #   если speaker одинаковый и это НЕ "Журналист"/"Оператор"
+            
             if next_seg['speaker'] != current_speaker:
                 merge_continue = False
                 break
+            
+            # 🆕 v16.23: Если speaker одинаковый, но raw_speaker_id разные
+            # → Это БАГ split, НО мы всё равно СЛИВАЕМ (для основного спикера)
+            if current_raw_id != next_raw_id and current_raw_id and next_raw_id:
+                if current_speaker not in ("Журналист", "Оператор"):
+                    # Для основного спикера игнорируем различия raw_speaker_id
+                    print(f"    ↳ ⚠️ raw_speaker_id разные ({current_raw_id} vs {next_raw_id}), но speaker={current_speaker} → ✅ merge anyway")
+                else:
+                    # Для Журналиста/Оператора НЕ игнорируем (защита v16.0)
+                    print(f"    ↳ ❌ raw_speaker_id разные ({current_raw_id} vs {next_raw_id}) для {current_speaker} → STOP")
+                    merge_continue = False
+                    break
+
+            # Далее идёт обычная логика overlap/pause...
+            # (копируем всё остальное из текущей версии)
 
             # Обработка overlap (отрицательная пауза)
             if pause < 0:

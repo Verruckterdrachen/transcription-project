@@ -1,26 +1,14 @@
 #!/usr/bin/env python3
 """
-corrections/boundary_fixer.py - Boundary correction v16.16
+corrections/boundary_fixer.py - Boundary correction v16.23
 
+🆕 v16.23: КРИТИЧЕСКИЙ FIX БАГ #4 - Raw speaker ID маппинг в split
+🆕 v16.19: КРИТИЧЕСКИЙ FIX БАГ #3 - Повышен порог similarity с 80% до 90%
 🔥 v16.16: КРИТИЧЕСКИЙ FIX - Word Boundary в regex паттернах!
-- Добавлен \\b (word boundary) в начале всех regex паттернов
-- Исправлен баг: 'вы\\s+' ловил "вы " внутри слов (Невы, совы, кровы)
-- Теперь поиск только целых слов: '\\bвы\\s+', '\\bрасскажите\\b' и т.д.
-- Предотвращение FALSE POSITIVE в is_journalist_phrase() и is_expert_phrase()
-
-🆕 v16.15: DEBUG OUTPUT ДЛЯ SPLIT - находим виновника!
-- Детальный debug output для каждого предложения
-- Показ результатов проверок (is_journalist/expert/continuation)
-- Логирование смены current_speaker с причиной
-- Поможет найти КАКОЕ предложение ошибочно определяется
-
-🆕 v16.12: КРИТИЧЕСКИЙ FIX RAW_SPEAKER_ID В SPLIT
-- При split обновляется не только speaker, но и raw_speaker_id
-- Создан обратный маппинг speaker_roles для конвертации
-- Исправлен баг: TXT выводил старый speaker вместо нового
 """
 
 import re
+from difflib import SequenceMatcher
 from core.utils import seconds_to_hms
 
 
@@ -33,14 +21,14 @@ def is_journalist_phrase(text):
     text_lower = text.lower()
     
     journalist_markers = [
-        r'\bвы\s+(можете|могли|должны)?',  # 🔥 v16.16: добавлен \b
-        r'\bрасскажите\b',                  # 🔥 v16.16: добавлен \b
-        r'\bобъясните\b',                   # 🔥 v16.16: добавлен \b
-        r'\bкак\s+вы\b',                    # 🔥 v16.16: добавлен \b
-        r'\bпочему\s+вы\b',                 # 🔥 v16.16: добавлен \b
-        r'\bчто\s+вы\b',                    # 🔥 v16.16: добавлен \b
-        r'\bдавайте\b',                     # 🔥 v16.16: добавлен \b
-        r'\bсмотрим\b',                     # 🔥 v16.16: добавлен \b
+        r'\bвы\s+(можете|могли|должны)?',
+        r'\bрасскажите\b',
+        r'\bобъясните\b',
+        r'\bкак\s+вы\b',
+        r'\bпочему\s+вы\b',
+        r'\bчто\s+вы\b',
+        r'\bдавайте\b',
+        r'\bсмотрим\b',
     ]
     
     for marker in journalist_markers:
@@ -63,9 +51,9 @@ def is_expert_phrase(text, speaker_surname):
     
     expert_markers = [
         surname_lower,
-        r'\bя\s+(считаю|думаю|полагаю)\b',  # 🔥 v16.16: добавлен \b
-        r'\bна\s+мой\s+взгляд\b',            # 🔥 v16.16: добавлен \b
-        r'\bпо\s+моему\s+мнению\b',          # 🔥 v16.16: добавлен \b
+        r'\bя\s+(считаю|думаю|полагаю)\b',
+        r'\bна\s+мой\s+взгляд\b',
+        r'\bпо\s+моему\s+мнению\b',
     ]
     
     for marker in expert_markers:
@@ -74,9 +62,9 @@ def is_expert_phrase(text, speaker_surname):
     return False
 
 
-def detect_continuation_phrase(current_text, previous_texts, threshold=0.90):  # 🆕 v16.19: 80% → 90%
+def detect_continuation_phrase(current_text, previous_texts, threshold=0.90):
     """
-    🔧 v16.19: КРИТИЧЕСКИЙ FIX - Повышен порог similarity с 80% до 90%
+    🔧 v16.19: КРИТИЧЕСКИЙ FIX БАГ #3 - Повышен порог similarity с 80% до 90%
     
     **ПРОБЛЕМА v16.16:**
     Порог 80% слишком низкий для детекции заикания.
@@ -117,19 +105,6 @@ def detect_continuation_phrase(current_text, previous_texts, threshold=0.90):  #
 def is_continuation_phrase(text):
     """
     🆕 v16.10: Определяет continuation phrases (продолжение мысли)
-    
-    Эти фразы обычно продолжают предыдущую мысль того же спикера:
-    - "То есть..."
-    - "В частности..."
-    - "Кроме того..."
-    - "Также..."
-    - "Иными словами..."
-    
-    Args:
-        text: Текст предложения
-    
-    Returns:
-        True если это continuation phrase
     """
     text_lower = text.lower().strip()
     
@@ -180,20 +155,6 @@ def is_question_announcement(text):
 def boundary_correction_raw(segments_raw, speaker_surname, speaker_roles):
     """
     v16.3.2: Boundary correction между спикерами
-    
-    Корректирует границы между сегментами разных спикеров:
-    1. Находит короткие последние предложения (≤10 слов)
-    2. Проверяет паузу < 0.5s до следующего спикера
-    3. Анализирует семантику (журналистская/экспертная фраза)
-    4. Переносит последнее предложение к следующему спикеру
-    
-    Args:
-        segments_raw: raw segments после alignment
-        speaker_surname: Фамилия спикера
-        speaker_roles: Dict SPEAKER_XX → роль
-    
-    Returns:
-        segments_raw с исправленными границами
     """
     if len(segments_raw) < 2:
         return segments_raw
@@ -245,17 +206,13 @@ def boundary_correction_raw(segments_raw, speaker_surname, speaker_roles):
         
         # Если журналистская фраза, а следующий спикер НЕ журналист
         if is_journalist_text and next_speaker != "Журналист":
-            # Переносим фразу к следующему сегменту (исправление)
-            next_speaker = "Журналист"
             i += 1
-            continue  # НЕ переносим, ошибка атрибуции
+            continue
         
         # Если экспертная фраза, а следующий спикер журналист
         if is_expert_text and next_speaker == "Журналист":
-            # Переносим фразу к следующему сегменту (исправление)
-            next_speaker = speaker_surname
             i += 1
-            continue  # НЕ переносим, ошибка атрибуции
+            continue
         
         # Переносим последнее предложение
         remaining_text = '. '.join(sentences[:-1])
@@ -281,23 +238,24 @@ def boundary_correction_raw(segments_raw, speaker_surname, speaker_roles):
 
 def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles, debug=True):
     """
-    v16.16: КРИТИЧЕСКИЙ FIX - Word Boundary в regex паттернах!
+    🆕 v16.23: КРИТИЧЕСКИЙ FIX БАГ #4 - Правильный raw_speaker_id маппинг!
     
-    🔥 v16.16 ИЗМЕНЕНИЯ:
-    - Использует обновлённые is_journalist_phrase() и is_expert_phrase()
-    - Исправлен баг FALSE POSITIVE: "Невы" больше не считается "вы"
-    - Точное определение журналистских/экспертных фраз
+    **ПРОБЛЕМА v16.12:**
+    При split обновлялся speaker, но raw_speaker_id маппился неправильно:
+    - reverse_roles создавался из speaker_roles: {"SPEAKER_00": "Спикер", ...}
+    - Обратный маппинг: {"Спикер": "SPEAKER_00", "Журналист": "SPEAKER_01"}
+    - НО! В split мы работаем с ИМЕНАМИ ("Исаев"), а не ролями ("Спикер")!
+    - Результат: reverse_roles.get("Исаев") → None → берётся fallback (старый raw_speaker_id)
+    - Следствие: два соседних сегмента "Исаев" имеют РАЗНЫЕ raw_speaker_id
+    - Auto_merge их НЕ сливает → БАГ #4 (adjacent same speaker)!
     
-    🆕 v16.15 ИЗМЕНЕНИЯ:
-    - Детальный debug output для каждого предложения в split
-    - Показ результатов is_journalist_phrase, is_expert_phrase, is_continuation
-    - Логирование смены current_speaker с указанием причины
-    - Параметр debug=True для включения детального вывода
-    
-    🆕 v16.12 ИЗМЕНЕНИЯ:
-    - При split обновляется НЕ ТОЛЬКО speaker, но и raw_speaker_id
-    - Создан обратный маппинг speaker_roles для конвертации (Исаев → SPEAKER_01)
-    - Исправлен баг: TXT выводил старый speaker из-за несинхронизации полей
+    **РЕШЕНИЕ v16.23:**
+    1. Создаём ПОЛНЫЙ маппинг: имена + роли → raw_speaker_id:
+       - "Исаев" → "SPEAKER_00" (через speaker_surname)
+       - "Спикер" → "SPEAKER_00" (из speaker_roles)
+       - "Журналист" → "SPEAKER_01" (из speaker_roles)
+    2. При split используем улучшенный маппинг
+    3. Fallback только если speaker ВООБЩЕ не найден (очень редко)
     
     Args:
         segments_merged: Список merged сегментов
@@ -310,10 +268,28 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
     """
     print("\n✂️ Разделение mixed-speaker сегментов...")
     
-    # 🆕 v16.12: Создаём обратный маппинг speaker → raw_speaker_id
+    # 🆕 v16.23: УЛУЧШЕННЫЙ МАППИНГ - имена + роли → raw_speaker_id
     reverse_roles = {}
+    
+    # Сначала добавляем роли из speaker_roles
     for raw_id, role in speaker_roles.items():
         reverse_roles[role] = raw_id
+    
+    # 🆕 v16.23: Добавляем speaker_surname → raw_speaker_id основного спикера
+    # Основной спикер = самый длительный (обычно SPEAKER_00)
+    if speaker_surname:
+        # Находим raw_speaker_id основного спикера (НЕ "Журналист")
+        main_speaker_id = None
+        for raw_id, role in speaker_roles.items():
+            if role not in ("Журналист", "Оператор"):
+                main_speaker_id = raw_id
+                break
+        
+        if main_speaker_id:
+            reverse_roles[speaker_surname] = main_speaker_id
+            print(f"  🔗 Маппинг: \"{speaker_surname}\" → {main_speaker_id}")
+    
+    print(f"  📋 Reverse roles: {reverse_roles}")
     
     result = []
     splitcount = 0
@@ -326,7 +302,7 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
         end = seg.get('end', 0)
         duration = end - start
         
-        # 🆕 ЗАЩИТА: НЕ разделять анонсы вопросов
+        # ЗАЩИТА: НЕ разделять анонсы вопросов
         if is_question_announcement(text):
             result.append(seg)
             continue
@@ -339,7 +315,7 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
             result.append(seg)
             continue
         
-        # 🆕 v16.15: DEBUG HEADER
+        # DEBUG HEADER
         if debug and len(sentences) >= 2:
             print(f"\n  🔍 АНАЛИЗ СЕГМЕНТА: {seconds_to_hms(start)} ({speaker}) — {len(sentences)} предложений")
         
@@ -359,12 +335,12 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
             is_expert_sent = is_expert_phrase(sentence, speaker_surname)
             is_continuation = is_continuation_phrase(sentence)
             
-            # 🆕 v16.15: DEBUG OUTPUT для каждого предложения
+            # DEBUG OUTPUT для каждого предложения
             if debug:
                 print(f"    [{sent_idx+1}] \"{sentence[:60]}...\"")
                 print(f"        Journalist={is_journalist_sent} | Expert={is_expert_sent} | Continuation={is_continuation}")
             
-            # 🆕 v16.11: ПРАВИЛЬНАЯ ЛОГИКА ОПРЕДЕЛЕНИЯ СПИКЕРА
+            # ПРАВИЛЬНАЯ ЛОГИКА ОПРЕДЕЛЕНИЯ СПИКЕРА
             sentence_speaker = None
             reason = ""
             
@@ -375,11 +351,9 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
                 sentence_speaker = speaker_surname
                 reason = "is_expert_phrase=True"
             elif is_continuation:
-                # 🔧 v16.11: CONTINUATION PHRASE LOGIC
-                # Проверяем контекст ВНУТРИ текущего split
+                # CONTINUATION PHRASE LOGIC
                 current_group_words = sum(len(s.split()) for s in current_group)
                 
-                # Если УЖЕ накоплено много слов (>80) → продолжение текущего монолога
                 if current_group_words > 80:
                     sentence_speaker = current_speaker
                     reason = f"continuation + context (>{current_group_words} слов)"
@@ -387,7 +361,6 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
                         print(f"        → {sentence_speaker} ({reason})")
                     continuation_fixed += 1
                 else:
-                    # Если мало накоплено, используем контекст сегмента
                     sentence_speaker = current_speaker
                     reason = f"continuation + inherit ({current_group_words} слов)"
             else:
@@ -395,17 +368,17 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
                 sentence_speaker = current_speaker
                 reason = "neutral (inherit)"
             
-            # 🆕 v16.15: DEBUG - показываем определённого спикера
+            # DEBUG - показываем определённого спикера
             if debug:
                 print(f"        → SPEAKER: {sentence_speaker} ({reason})")
             
             # Если спикер изменился - создаем новый сегмент
             if sentence_speaker != current_speaker and current_group:
-                # 🆕 v16.15: DEBUG - логируем смену спикера
+                # DEBUG - логируем смену спикера
                 if debug:
                     print(f"        ⚠️ СМЕНА СПИКЕРА: {current_speaker} → {sentence_speaker}")
                 
-                # 🆕 Вычисляем пропорциональное время
+                # Вычисляем пропорциональное время
                 group_text = '. '.join(current_group) + '.'
                 group_words = len(group_text.split())
                 group_duration = (group_words / total_words) * duration if total_words > 0 else 0
@@ -418,8 +391,11 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
                 newseg['end'] = group_end
                 newseg['time'] = seconds_to_hms(current_time)
                 
-                # 🆕 v16.12: ОБНОВЛЯЕМ raw_speaker_id через обратный маппинг
-                newseg['raw_speaker_id'] = reverse_roles.get(current_speaker, seg.get('raw_speaker_id'))
+                # 🆕 v16.23: ПРАВИЛЬНЫЙ МАППИНГ через улучшенный reverse_roles
+                newseg['raw_speaker_id'] = reverse_roles.get(
+                    current_speaker, 
+                    seg.get('raw_speaker_id')  # Fallback только если НЕ найден
+                )
                 
                 result.append(newseg)
                 splitcount += 1
@@ -441,11 +417,14 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
             newseg['text'] = group_text
             newseg['speaker'] = current_speaker
             newseg['start'] = current_time
-            newseg['end'] = end  # До конца оригинального сегмента
+            newseg['end'] = end
             newseg['time'] = seconds_to_hms(current_time)
             
-            # 🆕 v16.12: ОБНОВЛЯЕМ raw_speaker_id через обратный маппинг
-            newseg['raw_speaker_id'] = reverse_roles.get(current_speaker, seg.get('raw_speaker_id'))
+            # 🆕 v16.23: ПРАВИЛЬНЫЙ МАППИНГ через улучшенный reverse_roles
+            newseg['raw_speaker_id'] = reverse_roles.get(
+                current_speaker,
+                seg.get('raw_speaker_id')
+            )
             
             result.append(newseg)
     
