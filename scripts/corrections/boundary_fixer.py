@@ -238,24 +238,21 @@ def boundary_correction_raw(segments_raw, speaker_surname, speaker_roles):
 
 def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles, debug=True):
     """
+    🆕 v16.24.1: FIX #2 - Neutral фразы возвращаются к original speaker
     🆕 v16.23: КРИТИЧЕСКИЙ FIX БАГ #4 - Правильный raw_speaker_id маппинг!
     
-    **ПРОБЛЕМА v16.12:**
-    При split обновлялся speaker, но raw_speaker_id маппился неправильно:
-    - reverse_roles создавался из speaker_roles: {"SPEAKER_00": "Спикер", ...}
-    - Обратный маппинг: {"Спикер": "SPEAKER_00", "Журналист": "SPEAKER_01"}
-    - НО! В split мы работаем с ИМЕНАМИ ("Исаев"), а не ролями ("Спикер")!
-    - Результат: reverse_roles.get("Исаев") → None → берётся fallback (старый raw_speaker_id)
-    - Следствие: два соседних сегмента "Исаев" имеют РАЗНЫЕ raw_speaker_id
-    - Auto_merge их НЕ сливает → БАГ #4 (adjacent same speaker)!
+    **ПРОБЛЕМА v16.23:**
+    При split neutral фраза наследовала current_speaker вместо original_speaker.
     
-    **РЕШЕНИЕ v16.23:**
-    1. Создаём ПОЛНЫЙ маппинг: имена + роли → raw_speaker_id:
-       - "Исаев" → "SPEAKER_00" (через speaker_surname)
-       - "Спикер" → "SPEAKER_00" (из speaker_roles)
-       - "Журналист" → "SPEAKER_01" (из speaker_roles)
-    2. При split используем улучшенный маппинг
-    3. Fallback только если speaker ВООБЩЕ не найден (очень редко)
+    Пример:
+    Сегмент: speaker="Исаев"
+    1. "Первое предложение" → Исаев
+    2. "Расскажите" → Журналист (split)
+    3. "Третье предложение" (neutral) → наследовало "Журналист" ❌
+    
+    **РЕШЕНИЕ v16.24.1:**
+    Запоминаем original_speaker = speaker в начале обработки сегмента.
+    Neutral фразы используют original_speaker вместо current_speaker.
     
     Args:
         segments_merged: Список merged сегментов
@@ -268,17 +265,15 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
     """
     print("\n✂️ Разделение mixed-speaker сегментов...")
     
-    # 🆕 v16.23: УЛУЧШЕННЫЙ МАППИНГ - имена + роли → raw_speaker_id
+    # v16.23: УЛУЧШЕННЫЙ МАППИНГ - имена + роли → raw_speaker_id
     reverse_roles = {}
     
     # Сначала добавляем роли из speaker_roles
     for raw_id, role in speaker_roles.items():
         reverse_roles[role] = raw_id
     
-    # 🆕 v16.23: Добавляем speaker_surname → raw_speaker_id основного спикера
-    # Основной спикер = самый длительный (обычно SPEAKER_00)
+    # v16.23: Добавляем speaker_surname → raw_speaker_id основного спикера
     if speaker_surname:
-        # Находим raw_speaker_id основного спикера (НЕ "Журналист")
         main_speaker_id = None
         for raw_id, role in speaker_roles.items():
             if role not in ("Журналист", "Оператор"):
@@ -318,6 +313,9 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
         # DEBUG HEADER
         if debug and len(sentences) >= 2:
             print(f"\n  🔍 АНАЛИЗ СЕГМЕНТА: {seconds_to_hms(start)} ({speaker}) — {len(sentences)} предложений")
+        
+        # 🆕 v16.24.1: Запоминаем ИСХОДНОГО спикера сегмента
+        original_speaker = speaker
         
         # Анализируем каждое предложение на принадлежность спикеру
         current_group = []
@@ -364,9 +362,9 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
                     sentence_speaker = current_speaker
                     reason = f"continuation + inherit ({current_group_words} слов)"
             else:
-                # Нейтральная фраза - используем контекст
-                sentence_speaker = current_speaker
-                reason = "neutral (inherit)"
+                # 🆕 v16.24.1: Нейтральная фраза - возвращаемся к ИСХОДНОМУ спикеру
+                sentence_speaker = original_speaker
+                reason = "neutral (return to original)"
             
             # DEBUG - показываем определённого спикера
             if debug:
@@ -391,10 +389,10 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
                 newseg['end'] = group_end
                 newseg['time'] = seconds_to_hms(current_time)
                 
-                # 🆕 v16.23: ПРАВИЛЬНЫЙ МАППИНГ через улучшенный reverse_roles
+                # v16.23: ПРАВИЛЬНЫЙ МАППИНГ через улучшенный reverse_roles
                 newseg['raw_speaker_id'] = reverse_roles.get(
                     current_speaker, 
-                    seg.get('raw_speaker_id')  # Fallback только если НЕ найден
+                    seg.get('raw_speaker_id')
                 )
                 
                 result.append(newseg)
@@ -420,7 +418,7 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
             newseg['end'] = end
             newseg['time'] = seconds_to_hms(current_time)
             
-            # 🆕 v16.23: ПРАВИЛЬНЫЙ МАППИНГ через улучшенный reverse_roles
+            # v16.23: ПРАВИЛЬНЫЙ МАППИНГ через улучшенный reverse_roles
             newseg['raw_speaker_id'] = reverse_roles.get(
                 current_speaker,
                 seg.get('raw_speaker_id')
