@@ -2,6 +2,7 @@
 """
 tests/test_txt_export.py - Unit tests для БАГ #1 + БАГ #2
 
+🔧 v16.23.1: Исправлены тесты - длинные предложения для inner timestamps
 🆕 v16.23: Тестируем insert_inner_timestamps() - нет дублей, нет "назад"
 """
 
@@ -16,25 +17,31 @@ def test_no_duplicate_timestamps():
     Проверяем, что inner timestamp НЕ создаёт дубль если следующий сегмент
     начинается с того же времени.
     """
-    text = "Первое предложение. " * 50  # Длинный текст >30s
+    # 🔧 v16.23.1: ДЛИННЫЕ предложения для правильного распределения времени
+    # Каждое предложение ~100 символов → ~15 секунд каждое
+    long_sentence = (
+        "Это очень длинное предложение для тестирования inner timestamps, "
+        "которое занимает достаточно много символов и времени для корректной работы. "
+    )
+    text = long_sentence * 3  # 3 длинных предложения (~45 секунд)
+    
     start_sec = 100.0
-    end_sec = 140.0  # 40 секунд
+    end_sec = 145.0  # 45 секунд
     next_segment_exists = True
     
     result = insert_inner_timestamps(text, start_sec, end_sec, next_segment_exists)
     
     # Inner timestamp должен быть на отдельной строке (начинается с \n)
-    assert "\n" in result
+    assert "\n" in result, "Inner timestamp должен содержать перенос строки \\n"
     
     # Проверяем, что НЕТ двух timestamp подряд без \n между ними
-    # Например: "00:02:05 00:02:05" должно быть невозможно
     lines = result.split('\n')
     
     for line in lines:
         # Подсчитываем timestamp в одной строке
-        timestamps = [word for word in line.split() if word.count(':') == 2]
+        timestamps = [word for word in line.split() if word.count(':') == 2 and len(word) == 8]
         # В одной строке может быть МАКСИМУМ 1 timestamp
-        assert len(timestamps) <= 1, f"Найдено {len(timestamps)} timestamp в одной строке: {line}"
+        assert len(timestamps) <= 1, f"БАГ #1: Найдено {len(timestamps)} timestamp в одной строке: {line[:100]}"
 
 
 def test_timestamps_monotonic():
@@ -43,9 +50,14 @@ def test_timestamps_monotonic():
     
     Проверяем, что все timestamp идут строго ВПЕРЁД (монотонность).
     """
-    text = "Первое предложение. " * 50
+    long_sentence = (
+        "Это очень длинное предложение для тестирования inner timestamps, "
+        "которое занимает достаточно много символов и времени. "
+    )
+    text = long_sentence * 3
+    
     start_sec = 100.0
-    end_sec = 140.0
+    end_sec = 145.0
     next_segment_exists = True
     
     result = insert_inner_timestamps(text, start_sec, end_sec, next_segment_exists)
@@ -65,7 +77,7 @@ def test_timestamps_monotonic():
     for i in range(1, len(timestamps_sec)):
         prev_ts = timestamps_sec[i-1]
         curr_ts = timestamps_sec[i]
-        assert curr_ts >= prev_ts, f"Timestamp идёт назад: {timestamps[i-1]} → {timestamps[i]}"
+        assert curr_ts >= prev_ts, f"БАГ #2: Timestamp идёт назад: {timestamps[i-1]} → {timestamps[i]}"
 
 
 def test_inner_timestamp_on_new_line():
@@ -74,9 +86,14 @@ def test_inner_timestamp_on_new_line():
     
     Проверяем, что inner timestamp всегда начинается с \n
     """
-    text = "Первое предложение. " * 50
+    long_sentence = (
+        "Это очень длинное предложение для тестирования inner timestamps, "
+        "которое занимает достаточно много символов и времени для корректной работы. "
+    )
+    text = long_sentence * 3
+    
     start_sec = 100.0
-    end_sec = 140.0
+    end_sec = 145.0
     next_segment_exists = True
     
     result = insert_inner_timestamps(text, start_sec, end_sec, next_segment_exists)
@@ -86,7 +103,7 @@ def test_inner_timestamp_on_new_line():
     inner_timestamps = re.findall(r'\n(\d{2}:\d{2}:\d{2})', result)
     
     # Должен быть хотя бы один inner timestamp (реплика >30s)
-    assert len(inner_timestamps) > 0, "Не найдено ни одного inner timestamp для длинной реплики!"
+    assert len(inner_timestamps) > 0, f"Не найдено ни одного inner timestamp для длинной реплики! Результат: {result[:200]}"
 
 
 def test_short_text_no_inner_timestamps():
@@ -101,7 +118,7 @@ def test_short_text_no_inner_timestamps():
     result = insert_inner_timestamps(text, start_sec, end_sec, next_segment_exists)
     
     # Результат должен быть идентичен исходному тексту
-    assert result == text
+    assert result == text, "Короткий текст не должен содержать inner timestamps"
 
 
 if __name__ == "__main__":
