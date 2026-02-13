@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """
-corrections/hallucinations.py - Удаление галлюцинаций Whisper v16.19
+corrections/hallucinations.py - Удаление галлюцинаций Whisper
+
+🔧 v16.27: ДОБАВЛЕНА clean_loops() - удаление hallucination loops
+- N-gram анализ для детекции repeating patterns
+- Adaptive threshold: короткие (<5 слов) → 85%, длинные → 75%
+- Проверка минимального расстояния между n-граммами
 
 🆕 v16.19: КРИТИЧЕСКИЙ FIX - Удаление дублей + "Продолжение следует"
 - Детекция дублированных фраз (similarity >95%)
 - Удаление Whisper hallucination в конце файла ("Продолжение следует", "Спасибо за внимание")
 - Удаление дублей с разным регистром ("логичным Логичным")
-- Сохранена старая функция is_hallucination() для обратной совместимости
 """
 
 import re
@@ -50,6 +54,148 @@ def is_hallucination(text):
         return True
     
     return False
+
+
+def clean_loops(text, is_gap_filled=False, debug=False):
+    """
+    🆕 v16.27: Удаление hallucination loops - repeating n-grams
+    
+    Whisper иногда создаёт петли при force-transcribe gaps:
+    "учитывать была немецкая артиллерия вправь до еще фактором
+     которые надо учитывать это было немецкая вплоть до. который
+     надо учитывать, это была немецкая артиллерия, вплоть до"
+    
+    Алгоритм:
+    1. Разбивает текст на слова
+    2. Создаёт n-граммы (2-8 слов)
+    3. Ищет похожие n-граммы (similarity > threshold)
+    4. Удаляет дубли, оставляет первое вхождение
+    
+    Args:
+        text: Текст для очистки
+        is_gap_filled: Это gap-filled сегмент (stricter threshold)
+        debug: Показывать debug output
+    
+    Returns:
+        Очищенный текст
+    """
+    if not text or len(text) < 20:
+        return text
+    
+    # Нормализуем: пунктуация → пробелы
+    normalized = re.sub(r'[^\w\s]', ' ', text.lower())
+    words = [w for w in normalized.split() if w]
+    
+    if len(words) < 5:
+        return text  # Слишком короткий текст
+    
+    # Ищем repeating n-grams
+    removed_ranges = []  # [(start_word_idx, end_word_idx), ...]
+    
+    for ngram_size in range(8, 1, -1):  # От больших к малым (8→2)
+        if ngram_size > len(words) // 2:
+            continue
+        
+        # Adaptive threshold
+        if ngram_size < 5:
+            base_threshold = 0.85  # Короткие фразы → строже
+        else:
+            base_threshold = 0.75  # Длинные фразы → мягче
+        
+        # Gap-filled bonus
+        threshold = base_threshold + (0.10 if is_gap_filled else 0.0)
+        
+        # Минимальное расстояние между n-граммами
+        min_distance = max(ngram_size // 2, 2)
+        
+        # Создаём n-граммы
+        ngrams = []
+        for i in range(len(words) - ngram_size + 1):
+            # Пропускаем уже удалённые диапазоны
+            if any(start <= i < end for start, end in removed_ranges):
+                continue
+            
+            ngram = ' '.join(words[i:i+ngram_size])
+            ngrams.append((i, ngram))
+        
+        # Ищем повторы
+        for idx1, (pos1, ngram1) in enumerate(ngrams):
+            if any(start <= pos1 < end for start, end in removed_ranges):
+                continue
+            
+            for pos2, ngram2 in ngrams[idx1+1:]:
+                # Проверяем расстояние
+                if pos2 - pos1 < min_distance:
+                    continue
+                
+                # Уже удалено?
+                if any(start <= pos2 < end for start, end in removed_ranges):
+                    continue
+                
+                # Similarity
+                similarity = SequenceMatcher(None, ngram1, ngram2).ratio()
+                
+                if similarity >= threshold:
+                    if debug:
+                        print(f"  🔍 LOOP (n={ngram_size}, sim={similarity:.0%}): \"{ngram1}\" ≈ \"{ngram2}\"")
+                    
+                    # Удаляем второе вхождение
+                    removed_ranges.append((pos2, pos2 + ngram_size))
+    
+    # Если нашли loops → пересобираем текст
+    if removed_ranges:
+        # Сортируем по start position
+        removed_ranges.sort()
+        
+        # Объединяем пересекающиеся диапазоны
+        merged_ranges = []
+        for start, end in removed_ranges:
+            if merged_ranges and start < merged_ranges[-1][1]:
+                # Пересечение → расширяем последний диапазон
+                merged_ranges[-1] = (merged_ranges[-1][0], max(merged_ranges[-1][1], end))
+            else:
+                merged_ranges.append((start, end))
+        
+        # Создаём маску: какие слова оставить
+        keep_mask = [True] * len(words)
+        for start, end in merged_ranges:
+            for i in range(start, min(end, len(words))):
+                keep_mask[i] = False
+        
+        # Фильтруем слова
+        original_words = text.split()  # Оригинальный регистр
+        
+        # Нормализованные слова → оригинальные слова (с пунктуацией)
+        # Проблема: нормализация убрала пунктуацию, нужно восстановить
+        # Решение: берём оригинальные слова, но применяем маску
+        cleaned_words = []
+        norm_idx = 0
+        
+        for orig_word in original_words:
+            # Убираем пунктуацию для сопоставления
+            word_clean = re.sub(r'[^\w]', '', orig_word.lower())
+            
+            if word_clean:  # Не пустое слово
+                if norm_idx < len(keep_mask) and keep_mask[norm_idx]:
+                    cleaned_words.append(orig_word)
+                norm_idx += 1
+            else:
+                # Пунктуация между словами (например "слово. слово")
+                # Добавляем если предыдущее слово не удалено
+                if cleaned_words:
+                    cleaned_words.append(orig_word)
+        
+        cleaned_text = ' '.join(cleaned_words)
+        
+        # Очистка двойных пробелов
+        cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()
+        
+        if debug:
+            print(f"  ✅ Loops removed: {len(original_words)} → {len(cleaned_words)} слов")
+        
+        return cleaned_text
+    
+    return text
 
 
 def is_duplicate_phrase(text, debug=False):
@@ -161,18 +307,20 @@ def remove_ending_hallucinations(text, debug=False):
     return text
 
 
-def clean_hallucinations_from_text(text, speaker=None, debug=False):
+def clean_hallucinations_from_text(text, speaker=None, is_gap_filled=False, debug=False):
     """
-    🆕 v16.19: Комплексная очистка текста от галлюцинаций
+    🔧 v16.27: Комплексная очистка текста от галлюцинаций
     
     Выполняет:
-    1. Удаление дублированных фраз
-    2. Удаление ending hallucinations
-    3. Очистка multiple пробелов и пунктуации
+    1. 🆕 Удаление hallucination loops (clean_loops)
+    2. Удаление дублированных фраз
+    3. Удаление ending hallucinations
+    4. Очистка multiple пробелов и пунктуации
     
     Args:
         text: Текст для очистки
         speaker: Спикер (для контекста)
+        is_gap_filled: Это gap-filled сегмент (stricter threshold)
         debug: Показывать debug output
     
     Returns:
@@ -183,13 +331,16 @@ def clean_hallucinations_from_text(text, speaker=None, debug=False):
     
     original_text = text
     
-    # 1. Удаление дублей
+    # 1. 🆕 v16.27: Удаление hallucination loops
+    text = clean_loops(text, is_gap_filled=is_gap_filled, debug=debug)
+    
+    # 2. Удаление дублей
     has_dupl, text = is_duplicate_phrase(text, debug=debug)
     
-    # 2. Удаление ending hallucinations
+    # 3. Удаление ending hallucinations
     text = remove_ending_hallucinations(text, debug=debug)
     
-    # 3. Очистка пробелов и пунктуации
+    # 4. Очистка пробелов и пунктуации
     text = re.sub(r'\s+', ' ', text)  # Multiple spaces → one
     text = re.sub(r'([.!?]){2,}', r'\1', text)  # Multiple punctuation → one
     text = text.strip()
@@ -202,10 +353,11 @@ def clean_hallucinations_from_text(text, speaker=None, debug=False):
 
 def filter_hallucination_segments(segments, debug=True):
     """
-    🆕 v16.19: Фильтрует сегменты от галлюцинаций
+    🔧 v16.27: Фильтрует сегменты от галлюцинаций
     
     Применяет clean_hallucinations_from_text() к каждому сегменту.
     Удаляет сегменты, ставшие пустыми после очистки.
+    Передаёт is_gap_filled флаг для gap-filled сегментов.
     
     Args:
         segments: Список сегментов
@@ -223,8 +375,11 @@ def filter_hallucination_segments(segments, debug=True):
     for seg in segments:
         text = seg.get('text', '')
         speaker = seg.get('speaker', '')
+        is_gap_filled = seg.get('source') == 'GAP_FILLED'  # 🆕 v16.27
         
-        cleaned_text = clean_hallucinations_from_text(text, speaker, debug=debug)
+        cleaned_text = clean_hallucinations_from_text(
+            text, speaker, is_gap_filled=is_gap_filled, debug=debug
+        )
         
         if cleaned_text:
             seg['text'] = cleaned_text
