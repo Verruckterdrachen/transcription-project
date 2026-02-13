@@ -1,7 +1,7 @@
 """
 export/txt_export.py - Экспорт в TXT формат
 
-🆕 v16.23: КРИТИЧЕСКИЙ FIX БАГ #1 + БАГ #2 - Inner timestamps с переносом строки
+🆕 v16.25: ОТКАТ к v16.3 + FIX дублей (простое решение)
 """
 
 import json
@@ -11,18 +11,17 @@ from core.utils import seconds_to_hms
 
 def insert_inner_timestamps(text, start_sec, end_sec, next_segment_exists):
     """
-    🔧 v16.24: FIX дубль timestamp - проверка расстояния от start_sec
-    🔧 v16.23: КРИТИЧЕСКИЙ FIX БАГ #1 + БАГ #2 - Перенос строки перед timestamp!
+    🔧 v16.25: ОТКАТ к v16.3 + простой FIX дублей timestamp
     
-    **ПРОБЛЕМА v16.23:**
-    Inner timestamp мог вставляться в начало сегмента если первое
-    предложение длинное (~30s) → дубль с основным timestamp.
+    ПРОБЛЕМА v16.22-v16.24:
+    - v16.23: Добавили \n → разбивает реплику на несколько строк
+    - v16.24: is_too_close_to_start → не работает для первого предложения
     
-    Пример: 00:00:56 00:00:56 То есть это было...
+    РЕШЕНИЕ v16.25:
+    - Откатились к v16.3 (БЕЗ \n)
+    - Добавили простое условие: НЕ вставлять timestamp для i == 0
     
-    **РЕШЕНИЕ v16.24:**
-    Добавлена проверка минимального расстояния от начала сегмента (2 сек).
-    Inner timestamp НЕ вставляется если sent_start < start_sec + 2.0.
+    Для реплик длительностью > 30 секунд добавляет timestamp каждые ~25 секунд.
     
     Args:
         text: Текст реплики
@@ -31,7 +30,7 @@ def insert_inner_timestamps(text, start_sec, end_sec, next_segment_exists):
         next_segment_exists: Есть ли следующий сегмент
     
     Returns:
-        Текст с inner timestamps на отдельных строках
+        Текст с добавленными timestamps
     """
     duration = end_sec - start_sec
     
@@ -88,24 +87,20 @@ def insert_inner_timestamps(text, start_sec, end_sec, next_segment_exists):
         time_since_last = sent_start - last_timestamp_at
         time_to_end = end_sec - sent_start
         
-        # 🆕 v16.24: Проверка расстояния от начала сегмента
-        is_too_close_to_start = (sent_start - start_sec) < 2.0
-        
         # Вставляем timestamp если:
-        # 1. Прошло >= 25 секунд с последнего timestamp
-        # 2. И до конца реплики >= 30 секунд (или это последняя реплика файла)
-        # 3. 🆕 И НЕ слишком близко к началу сегмента
+        # 1. НЕ первое предложение (i > 0) 🆕 v16.25!
+        # 2. Прошло >= 25 секунд с последнего timestamp
+        # 3. И до конца реплики >= 30 секунд (или это последняя реплика файла)
         should_insert = (
+            i > 0 and  # 🆕 v16.25: КРИТИЧЕСКОЕ! Первое предложение БЕЗ inner timestamp!
             time_since_last >= 25 and 
-            (time_to_end >= 30 or not next_segment_exists) and
-            not is_too_close_to_start  # 🆕 v16.24
+            (time_to_end >= 30 or not next_segment_exists)
         )
         
-        # 🆕 v16.23: ПЕРЕНОС СТРОКИ ПЕРЕД timestamp!
-        if should_insert and i > 0:
+        if should_insert:
             timestamp_str = seconds_to_hms(sent_start)
-            # Добавляем перенос строки, затем timestamp, затем текст
-            result.append(f"\n{timestamp_str} {sent_text}")
+            # Timestamp ПЕРЕД текстом (без \n!)
+            result.append(f" {timestamp_str} {sent_text}")
             last_timestamp_at = sent_start
         else:
             # Обычное добавление (с пробелом если не первое предложение)
@@ -136,7 +131,7 @@ def export_to_txt(txt_path, segments, speaker_surname):
             # Проверяем, есть ли следующий сегмент
             next_segment_exists = (i + 1) < len(segments)
             
-            # 🆕 v16.23: Исправленные inner timestamps с переносом строки
+            # Добавляем inner timestamps для длинных реплик
             text_with_timestamps = insert_inner_timestamps(
                 text, start, end, next_segment_exists
             )
@@ -148,10 +143,10 @@ def export_to_txt(txt_path, segments, speaker_surname):
 
 def jsons_to_txt(json_files, txt_path, speaker_surname):
     """
-    🔧 v16.23: Исправлены inner timestamps + убран # из названий файлов
+    🔧 v16.25: Откат к v16.3 + простой FIX дублей
     
     Объединяет все JSON файлы интервью в единый TXT с правильной нумерацией
-    и временными метками на отдельных строках.
+    и временными метками внутри длинных реплик.
     
     Args:
         json_files: Список Path к JSON файлам
@@ -218,7 +213,7 @@ def jsons_to_txt(json_files, txt_path, speaker_surname):
                     if next_seg["type"] in ("speaker", "file"):
                         next_segment_exists = True
                 
-                # 🆕 v16.23: Исправленные inner timestamps с переносом строки
+                # Добавляем inner timestamps
                 text_with_timestamps = insert_inner_timestamps(
                     seg["text"],
                     seg["start"],
@@ -228,5 +223,5 @@ def jsons_to_txt(json_files, txt_path, speaker_surname):
                 
                 f.write(f"{seg['time']} {seg['speaker']}: {text_with_timestamps}\n")
     
-    print(f" ✅ TXT: {txt_path.name} (v16.23 - inner timestamps fixed)")
+    print(f" ✅ TXT: {txt_path.name} (v16.25 - inner timestamps fixed)")
     return txt_path
