@@ -1,15 +1,6 @@
 #!/usr/bin/env python3
 """
-transcribe_v16.py - Главный файл пайплайна транскрибации v16.29
-
-🔥 v16.29: Hallucination cleaning ОТКЛЮЧЕНА (loops оставляем как есть)
-- Любые эвристики (n-gram, similarity) вырезают нормальный текст
-- Пайплайн сильно замедляется
-- Решение: loops оставляем, проблему решаем отдельно (оффлайн / ручная правка)
-
-🔥 v16.26: FIX дублей timestamp - синхронизация replica_merger + txt_export
-- txt_export проверяет наличие inner timestamps от replica_merger
-- Устранены дубли: "00:00:56 00:00:56" → "00:00:56"
+transcribe_v16.py - Главный файл пайплайна транскрибации v16.25
 
 🔥 v16.25: ОТКАТ txt_export.py к v16.3 + простой FIX дублей
 - Удалили `\n` перед inner timestamp (причина БАГ #2 - разбиение строк)
@@ -111,17 +102,16 @@ from core.diarization import (
 from core.alignment import align_whisper_with_diarization
 from core.transcription import transcribe_audio, force_transcribe_diar_gaps
 
-# v16.29: Импорт hallucinations оставлен, но не используется
-# from corrections.hallucinations import (
-#     filter_hallucination_segments, clean_hallucinations_from_text
-# )
+from corrections.hallucinations import (
+    filter_hallucination_segments, clean_hallucinations_from_text
+)
 from corrections.speaker_classifier import apply_speaker_classification_v15
 from corrections.boundary_fixer import (
     boundary_correction_raw, split_mixed_speaker_segments
 )
 from corrections.journalist_commands import detect_journalist_commands_cross_segment
 from corrections.text_corrections import text_based_correction
-from corrections.timestamp_fixer import (
+from corrections.timestamp_fixer import (  # 🆕 v16.19
     insert_intermediate_timestamps, correct_timestamp_drift
 )
 
@@ -170,8 +160,8 @@ class TeeOutput:
 # ВЕРСИЯ
 # ═══════════════════════════════════════════════════════════════════════════
 
-VERSION = "16.29"
-VERSION_NAME = "Hallucination cleaning отключена (loops оставляем как есть)"
+VERSION = "16.25"
+VERSION_NAME = "ОТКАТ txt_export + простой FIX дублей"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ PIPELINE
@@ -420,7 +410,7 @@ def process_audio_file(
     # ═══════════════════════════════════════════════════════════════════════
     # ЭТАП 6: MERGE REPLICAS
     # ═══════════════════════════════════════════════════════════════════════
-    segments_merged = merge_replicas(segments_raw, debug=True)
+    segments_merged = merge_replicas(segments_raw, debug=True) # 🆕 v16.20: добавлен debug=True
 
     # ═══════════════════════════════════════════════════════════════════════
     # 🆕 v16.19: ЭТАП 6.1 - TIMESTAMP INJECTION в блоки >30 сек
@@ -435,7 +425,7 @@ def process_audio_file(
     print("🎯 v15: Применяем весовую классификацию спикеров (v16.13)...")
     print("="*70)
     segments_merged, classification_stats = apply_speaker_classification_v15(
-        segments_merged, speaker_surname, speaker_roles, debug=True
+        segments_merged, speaker_surname, speaker_roles, debug=True  # 🆕 v16.13: передаём speaker_roles
     )
     print("="*70)
     print()
@@ -448,23 +438,16 @@ def process_audio_file(
     # ═══════════════════════════════════════════════════════════════════════
     print("\n✂️ Разделение mixed-speaker сегментов (v16.21)...")
     segments_merged = split_mixed_speaker_segments(
-        segments_merged, speaker_surname, speaker_roles
+        segments_merged, speaker_surname, speaker_roles  # 🆕 v16.12: передаём speaker_roles
     )
     
     print("\n🔍 Text-based correction (v16.4)...")
     segments_merged = text_based_correction(segments_merged, speaker_surname)
 
     # ═══════════════════════════════════════════════════════════════════════
-    # v16.29: ЭТАП 8.1 ОТКЛЮЧЕН - Hallucination REMOVAL
-    # Причина:
-    # - сложные эвристики (n-gram, similarity) вырезали нормальный текст
-    # - шаг сильно замедлял пайплайн
-    # Решение:
-    # - loops и повторы оставляем как есть
-    # - проблему галлюцинаций решаем отдельно (оффлайн / ручная правка)
+    # 🆕 v16.19: ЭТАП 8.1 - HALLUCINATION REMOVAL
     # ═══════════════════════════════════════════════════════════════════════
-    print("\n🧹 Hallucination cleaning отключена в v16.29 (loops НЕ трогаем)")
-    # segments_merged = filter_hallucination_segments(segments_merged, debug=True)
+    segments_merged = filter_hallucination_segments(segments_merged, debug=True)
 
     # ═══════════════════════════════════════════════════════════════════════
     # ЭТАП 9: ВАЛИДАЦИЯ + AUTO-MERGE
@@ -491,7 +474,7 @@ def process_audio_file(
         "gaps_final": len(gaps),
         "retry_added": len(gap_segments),
         "speaker_stats": dict(stats),
-        "pipeline_version": VERSION,
+        "pipeline_version": VERSION,  # 🆕 v16.12: версия в metadata
         "params": {
             "model_name": "large-v3-turbo",
             "language": "ru",
@@ -538,19 +521,37 @@ def main():
     print(f"GPU: {'✅ CUDA' if torch.cuda.is_available() else '⚠️ CPU'}")
     print("=" * 70)
     print()
-    print("💡 v16.29 ИЗМЕНЕНИЯ:")
-    print("   ❌ ЭТАП 8.1 (Hallucination cleaning) ОТКЛЮЧЕН!")
-    print("   ✅ Loops и повторы остаются как есть (не вырезаем)")
-    print("   ✅ Пайплайн быстрее, текст полный")
-    print("   ✅ Проблему галлюцинаций решаем отдельно (оффлайн / ручная правка)")
+    print("💡 v16.22 ИЗМЕНЕНИЯ:")
+    print("   ✅ БАГ #1 FIX: Дублирующиеся timestamp (00:00:55 00:00:55)")
+    print("   ✅ БАГ #2 FIX: Timestamp назад (00:03:06 → 00:03:03)")
+    print("   ✅ insert_intermediate_timestamps: проверка дубля перед вставкой")
+    print("   ✅ correct_timestamp_drift: монотонность (только вперёд)")
     print()
-    print("💡 v16.26 ИЗМЕНЕНИЯ:")
-    print("   ✅ FIX дублей timestamp: txt_export проверяет наличие inner timestamps")
-    print("   ✅ Синхронизация replica_merger + txt_export")
+    print("💡 v16.21 ИЗМЕНЕНИЯ:")
+    print("   ✅ КРИТИЧЕСКИЙ FIX: Проверка позиции continuation phrase")
+    print("   ✅ Накопленный текст теперь включает текущее предложение")
+    print("   ✅ Threshold: если фраза ближе к началу (≤30%) → считаем \"началом\"")
+    print("   ✅ Debug: показ позиции и расстояния до конца текста")
+    print()
+    print("💡 v16.19 ИЗМЕНЕНИЯ:")
+    print("   ✅ ЭТАП 5.2: Исправление сдвига timestamp после gap filling")
+    print("   ✅ ЭТАП 6.1: Вставка промежуточных timestamp в блоки >30 сек")
+    print("   ✅ ЭТАП 8.1: Удаление дублей + 'Продолжение следует'")
+    print("   ✅ Continuation phrase threshold: 80% → 90%")
+    print()
+    print("💡 v16.12 ИЗМЕНЕНИЯ:")
+    print("   ✅ КРИТИЧЕСКИЙ FIX: raw_speaker_id обновляется при split")
+    print("   ✅ Создан обратный маппинг speaker_roles (Исаев → SPEAKER_01)")
+    print("   ✅ Исправлен баг: TXT выводил старый speaker вместо нового")
+    print("   ✅ Добавлено поле pipeline_version в JSON metadata")
+    print()
+    print("💡 v16.11 ИЗМЕНЕНИЯ:")
+    print("   ✅ ПРАВИЛЬНАЯ логика continuation phrase fix")
+    print("   ✅ Проверка контекста ВНУТРИ текущего split (не предыдущий сегмент)")
     print()
 
     # Запрос пути к папке
-    folder_path = input("📂 Путь к папке спикера (\\\\ или /): ").strip().replace('"', '')
+    folder_path = input("📂 Путь к папке спикера (\\\\  или /): ").strip().replace('"', '')
     folder = Path(folder_path)
 
     if not folder.exists():
