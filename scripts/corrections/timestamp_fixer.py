@@ -1,84 +1,69 @@
 #!/usr/bin/env python3
 """
-corrections/timestamp_fixer.py - Исправление timestamp v16.28
+corrections/timestamp_fixer.py - Исправление timestamp v16.31
+
+🆕 v16.31: FIX БАГ #5 + БАГ #7
+- Использование реальных timestamps из segments_raw
+- Защита от timestamp дублей (проверка близости к seg['start'])
 
 🆕 v16.28: FIX БАГ #3 - Потеря последнего предложения
 - range(0, len(sentences), 2) вместо range(0, len(sentences)-1, 2)
-- Обрабатываем ВСЕ элементы при парсинге предложений
 
 🆕 v16.22: FIX БАГ #1 - Дублирующиеся timestamp
 - Проверка: timestamp НЕ вставляется, если предложение уже начинается с HH:MM:SS
-- Regex check: r'^\d{2}:\d{2}:\d{2}'
 
 🆕 v16.22: FIX БАГ #2 - Timestamp назад
-- Проверка монотонности: new_start >= old_start (никогда не двигаем назад!)
-- Защита от gap filling artifacts
-
-🆕 v16.19: КРИТИЧЕСКИЙ FIX - Timestamp injection в блоки >30 сек
-- Детекция блоков без промежуточных timestamp (длительность >30s)
-- Вставка промежуточных меток каждые ~30 сек
-- Исправление сдвигов timestamp после gap filling
+- Проверка монотонности: new_start >= old_start
 """
 
 import re
 from core.utils import seconds_to_hms
 
 
-def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
+def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=True):
     """
-    🆕 v16.28: FIX БАГ #3 - Потеря последнего предложения
-    🆕 v16.22: FIX - Защита от дублей timestamp
-    🆕 v16.19: Вставляет промежуточные timestamp в блоки >30 сек
-        
-    **ПРОБЛЕМА (БАГ #3 v16.28):**
-    range(0, len(sentences)-1, 2) пропускает последний элемент массива!
+    🆕 v16.31: FIX БАГ #5 - Использование реальных timestamps из segments_raw
+    🆕 v16.31: FIX БАГ #7 - Защита от timestamp дублей
+    
+    **ПРОБЛЕМА (БАГ #5):**
+    Inner timestamps вычислялись пропорционально от начала merged блока
+    → Сдвиг на 4-5 сек назад от реальных timestamps!
     
     Пример:
-    sentences = ['Текст 1', '.', ' ', 'Текст 2', '.', ' ', 'Текст 3']
-    # 7 элементов (индексы 0-6)
+    Merged segment: start=9.06 (00:00:09), end=220.5 (00:03:40), текст ~500 слов
+    Raw segment 3: start=46.22 (00:00:46), text="Соответственно отзывом..."
     
-    range(0, 6, 2) = [0, 2, 4]  ← НЕ обрабатывается индекс 6!
-    → Предложение 'Текст 3' ПОТЕРЯНО!
+    СТАРАЯ ЛОГИКА (пропорционально):
+    - Текст до предложения: 200 символов
+    - Пропорциональное время: 9.06 + (200/2000) * (220.5 - 9.06) = 30.2 сек (00:00:30)
+    - Ошибка: -16 сек от реального времени 46.22!
     
-    **FIX v16.28:**
-    range(0, len(sentences), 2) обрабатывает ВСЕ элементы включая последний
+    НОВАЯ ЛОГИКА (реальные timestamps):
+    - Находим raw segment по пропорциональному времени
+    - Используем raw_segment['start'] = 46.22 (00:00:46) ✅
     
-    **ПРОБЛЕМА (БАГ #1):**
-    Функция вставляла timestamp БЕЗ проверки, что предложение
-    УЖЕ начинается с timestamp → дубль: "00:00:55 00:00:55 Текст"
+    **ПРОБЛЕМА (БАГ #7):**
+    Timestamp вставлялся, даже если он слишком близко к seg['time']
+    → Дубль: "00:16:25 Исаев: 00:16:25 Кроме того..."
     
-    **FIX v16.22:**
-    Перед вставкой проверяем, что предложение НЕ начинается с HH:MM:SS
-    
-    **ПРОБЛЕМА (v16.19):**
-    После merge_replicas() блоки могут быть >60 сек без меток.
-    Пример: 00:06:12 → 00:10:03 (~231 сек, 500 слов) — нет промежуточных меток!
-    
-    **РЕШЕНИЕ:**
-    1. Определяем блоки длительностью > interval (30s)
-    2. Разбиваем текст на предложения
-    3. Вставляем timestamp каждые ~30 сек перед новым предложением
+    **FIX v16.31:**
+    Проверяем abs(timestamp_sec - seg['start']) < 2.0 → пропускаем!
     
     Args:
-        segments: Список сегментов после merge_replicas
-        interval: Интервал вставки timestamp (по умолчанию 30s)
+        segments: Список merged segments
+        segments_raw: Список raw segments с реальными timestamps ← 🆕 v16.31
+        interval: Интервал вставки timestamp (30s)
         debug: Показывать debug output
     
     Returns:
-        segments с вставленными timestamp в тексте
-    
-    Example:
-        БЫЛО:
-        00:06:12 Текст 231 сек без меток...
-        
-        СТАЛО:
-        00:06:12 Текст начало... 00:06:42 Текст продолжение... 00:07:12 ...
+        segments с вставленными timestamp
     """
     if debug:
-        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s)...")
+        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s) v16.31...")
     
     injection_count = 0
     skipped_duplicates = 0
+    skipped_too_close = 0  # 🆕 v16.31
     
     for seg_idx, seg in enumerate(segments):
         start = seg.get('start', 0)
@@ -93,7 +78,6 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
         
         # Разбиваем на предложения
         sentences = re.split(r'([.!?]+)\s+', text)
-        # Объединяем предложения с пунктуацией: ['Текст', '.', ' '] → ['Текст.']
         sentences = [''.join(sentences[i:i+2]).strip() for i in range(0, len(sentences), 2)]
         sentences = [s for s in sentences if s]
         
@@ -116,17 +100,55 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
         
         for sent_idx, (sent, sent_dur) in enumerate(zip(sentences, sentence_durations)):
             # Проверяем, нужна ли вставка timestamp
-            if elapsed >= interval and sent_idx < len(sentences) - 1:  # НЕ перед последним
+            if elapsed >= interval and sent_idx < len(sentences) - 1:
                 
-                # 🆕 v16.22: FIX БАГ #1 - Проверяем, что предложение НЕ начинается с timestamp
+                # v16.22: Проверяем, что предложение НЕ начинается с timestamp
                 if not re.match(r'^\d{2}:\d{2}:\d{2}', sent.strip()):
-                    timestamp_str = f" {seconds_to_hms(current_time)} "
-                    new_text_parts.append(timestamp_str)
                     
-                    if debug:
-                        print(f"  📌 {seg.get('time', '???')} ({seg.get('speaker')}) → inject {timestamp_str.strip()} после {elapsed:.1f}s")
+                    # 🆕 v16.31: Ищем реальный raw segment
+                    timestamp_sec = current_time
                     
-                    injection_count += 1
+                    # Находим raw segment, который ближайший к current_time
+                    closest_raw_seg = None
+                    min_diff = float('inf')
+                    
+                    for raw_seg in segments_raw:
+                        raw_start = raw_seg.get('start', 0)
+                        raw_end = raw_seg.get('end', 0)
+                        
+                        # Проверяем, попадает ли current_time в этот raw segment
+                        if raw_start <= current_time <= raw_end:
+                            closest_raw_seg = raw_seg
+                            break
+                        
+                        # Или ближайший по времени
+                        diff = abs(raw_start - current_time)
+                        if diff < min_diff:
+                            min_diff = diff
+                            closest_raw_seg = raw_seg
+                    
+                    if closest_raw_seg:
+                        timestamp_sec = closest_raw_seg.get('start', current_time)
+                        
+                        if debug and abs(timestamp_sec - current_time) > 2.0:
+                            print(f"  🔧 Корректировка timestamp: {seconds_to_hms(current_time)} → {seconds_to_hms(timestamp_sec)} (raw segment)")
+                    
+                    # 🆕 v16.31: FIX БАГ #7 - Проверяем близость к seg['start']
+                    if abs(timestamp_sec - seg['start']) < 2.0:
+                        # Слишком близко к началу сегмента → пропускаем!
+                        if debug:
+                            print(f"  ⏭️ Пропускаем: {seconds_to_hms(timestamp_sec)} слишком близко к началу {seg.get('time')}")
+                        skipped_too_close += 1
+                    else:
+                        timestamp_str = f" {seconds_to_hms(timestamp_sec)} "
+                        new_text_parts.append(timestamp_str)
+                        
+                        if debug:
+                            print(f"  📌 {seg.get('time', '???')} ({seg.get('speaker')}) → inject {timestamp_str.strip()} после {elapsed:.1f}s")
+                        
+                        injection_count += 1
+                    
+                    elapsed = 0.0
                 else:
                     # Предложение УЖЕ начинается с timestamp → пропускаем
                     if debug:
@@ -147,7 +169,9 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
             print(f"✅ Вставлено промежуточных timestamp: {injection_count}")
         if skipped_duplicates > 0:
             print(f"⏭️ Пропущено дублей: {skipped_duplicates}")
-        if injection_count == 0 and skipped_duplicates == 0:
+        if skipped_too_close > 0:
+            print(f"⏭️ Пропущено (слишком близко к началу): {skipped_too_close}")
+        if injection_count == 0 and skipped_duplicates == 0 and skipped_too_close == 0:
             print(f"✅ Блоков >30s не найдено")
     
     return segments
@@ -158,38 +182,7 @@ def correct_timestamp_drift(segments, debug=True):
     🆕 v16.22: FIX БАГ #2 - Timestamp назад
     🆕 v16.19: Исправляет сдвиг timestamp после gap filling
     
-    **ПРОБЛЕМА (БАГ #2):**
-    Функция сдвигала timestamp НАЗАД:
-    - prev_seg.end = 183.5 (00:03:03)
-    - current_seg.start = 186.2 (00:03:06)
-    - new_start = prev_end = 183.5  ← МЕНЬШЕ чем 186.2!
-    - Результат: 00:03:06 → 00:03:03 (НАЗАД!)
-    
-    **FIX v16.22:**
-    Проверяем монотонность: new_start ДОЛЖЕН быть >= old_start
-    Если new_start < old_start → НЕ корректируем (оставляем как есть)
-    
-    **ПРОБЛЕМА (v16.19):**
-    После gap filling + overlap adjustment меняется segment.end,
-    но segment.start остаётся старым → timestamp в TXT не совпадает с аудио.
-    
-    Пример:
-    - segment.start = 551.2 (00:09:11)
-    - реальное начало речи (после adjustment) = 559.5 (00:09:19)
-    - Сдвиг: +8 сек!
-    
-    **РЕШЕНИЕ:**
-    После gap filling пересчитываем start по реальным границам:
-    - Для первого сегмента после gap: start = конец предыдущего
-    - Обновляем segment['time'] по новому start
-    - 🆕 Проверяем монотонность (НЕ двигаем назад!)
-    
-    Args:
-        segments: Список сегментов после gap filling
-        debug: Показывать debug output
-    
-    Returns:
-        segments с исправленными timestamp
+    (код без изменений - оставляем как в v16.30)
     """
     if debug:
         print(f"\n🔧 Исправление сдвига timestamp после gap filling...")
@@ -204,17 +197,13 @@ def correct_timestamp_drift(segments, debug=True):
         prev_end = prev_seg.get('end', 0)
         current_start = current_seg.get('start', 0)
         
-        # Если есть overlap (отрицательная пауза) или маленькая пауза
         gap = current_start - prev_end
         
-        if -10.0 <= gap <= 0.5:  # Overlap до 10s или микропауза
-            # Корректируем start
+        if -10.0 <= gap <= 0.5:
             old_start = current_start
             new_start = prev_end
             
-            # 🆕 v16.22: FIX БАГ #2 - Проверяем монотонность
             if new_start >= old_start:
-                # Сдвиг ВПЕРЁД или не изменился → OK
                 current_seg['start'] = new_start
                 current_seg['time'] = seconds_to_hms(new_start)
                 
@@ -223,7 +212,6 @@ def correct_timestamp_drift(segments, debug=True):
                 
                 corrections += 1
             else:
-                # Сдвиг НАЗАД → НЕ корректируем!
                 if debug:
                     print(f"  ⏭️ ПРОПУСКАЕМ: {seconds_to_hms(old_start)} → {seconds_to_hms(new_start)} (сдвиг назад {new_start - old_start:.1f}s)")
                 skipped_backward += 1

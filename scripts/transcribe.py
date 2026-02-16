@@ -1,5 +1,11 @@
 """
-transcribe_v16.py - Главный файл пайплайна транскрибации v16.28
+transcribe_v16.py - Главный файл пайплайна транскрибации v16.31
+
+🔥 v16.31: FIX 3 БАГА - Timestamp drift + Diarization errors + Gap attribution
+- БАГ #5: Inner timestamps используют реальные timestamps из segments_raw
+- БАГ #6: Context-aware diarization correction (короткие сегменты между длинными)
+- БАГ #7: Gap attribution учитывает длину текста (>20 слов)
+- Защита от timestamp дублей (проверка близости к seg['start'])
 
 🎓 v16.28: FIX БАГ #3 - Потеря последнего предложения при timestamp injection
 - Исправлен range(0, len(sentences)-1, 2) → range(0, len(sentences), 2)
@@ -121,6 +127,7 @@ from core.transcription import transcribe_audio, force_transcribe_diar_gaps
 from corrections.hallucinations import (
 	filter_hallucination_segments, clean_hallucinations_from_text
 )
+from corrections.diarization_correction import correct_diarization_errors  # 🆕 v16.31
 from corrections.speaker_classifier import apply_speaker_classification_v15
 from corrections.boundary_fixer import (
 	boundary_correction_raw, split_mixed_speaker_segments
@@ -232,8 +239,8 @@ class TeeOutput:
 # ВЕРСИЯ
 # ═══════════════════════════════════════════════════════════════════════════
 
-VERSION = "16.28"
-VERSION_NAME = "FIX last sentence loss in timestamp injection"
+VERSION = "16.31"
+VERSION_NAME = "FIX 3 БАГА: Timestamp drift + Diarization errors + Gap attribution"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ PIPELINE
@@ -432,6 +439,13 @@ def process_audio_file(
     debug_checkpoint(segments_raw, "AFTER ALIGNMENT")
 
     # ═══════════════════════════════════════════════════════════════════════
+    # 🆕 v16.31: ЭТАП 3.5 - CONTEXT-AWARE DIARIZATION CORRECTION
+    # ═══════════════════════════════════════════════════════════════════════
+    segments_raw = correct_diarization_errors(segments_raw, debug=True)
+    
+    debug_checkpoint(segments_raw, "AFTER DIARIZATION CORRECTION")
+
+    # ═══════════════════════════════════════════════════════════════════════
     # ЭТАП 4: КОРРЕКЦИИ
     # ═══════════════════════════════════════════════════════════════════════
 
@@ -470,6 +484,7 @@ def process_audio_file(
     # ═══════════════════════════════════════════════════════════════════════
     # ЭТАП 5: GAPS (если есть)
     # 🆕 v16.5: Умная атрибуция GAP_FILLED по семантическому сходству
+    # 🆕 v16.31: Учёт длины gap текста при атрибуции
     # ═══════════════════════════════════════════════════════════════════════
     gaps = gap_detector(segments_raw, threshold=3.0)
     gap_segments = []
@@ -479,7 +494,7 @@ def process_audio_file(
         for gap in gaps:
             print(f"   🚨 GAP {gap['gap_hms_start']}–{gap['gap_hms_end']} ({gap['duration']}s)")
 
-        # Force transcribe gaps (v16.5: умная атрибуция)
+        # Force transcribe gaps (v16.31: учёт длины текста)
         gap_segments = force_transcribe_diar_gaps(
             whisper_model, wav_path, gaps, segments_raw, speaker_surname
         )
@@ -510,8 +525,14 @@ def process_audio_file(
 
     # ═══════════════════════════════════════════════════════════════════════
     # 🆕 v16.19: ЭТАП 6.1 - TIMESTAMP INJECTION в блоки >30 сек
+    # 🆕 v16.31: Передаём segments_raw для реальных timestamps
     # ═══════════════════════════════════════════════════════════════════════
-    segments_merged = insert_intermediate_timestamps(segments_merged, interval=30.0, debug=True)
+    segments_merged = insert_intermediate_timestamps(
+        segments_merged, 
+        segments_raw,  # 🆕 v16.31: Передаём raw segments
+        interval=30.0, 
+        debug=True
+    )
     
     # 🆕 v16.28: CHECKPOINT
     debug_checkpoint(segments_merged, "AFTER TIMESTAMP INJECTION")
@@ -638,6 +659,14 @@ def main():
 	print(f"🔥 ПАЙПЛАЙН v{VERSION}: {VERSION_NAME}")
 	print(f"GPU: {'✅ CUDA' if torch.cuda.is_available() else '⚠️ CPU'}")
 	print("=" * 70)
+	print()
+	print("💡 v16.31 ИЗМЕНЕНИЯ:")
+	print("   ✅ БАГ #5 FIX: Timestamp drift (inner timestamps сдвинуты на 4-5 сек)")
+	print("   ✅ БАГ #6 FIX: Diarization errors (короткие сегменты между длинными)")
+	print("   ✅ БАГ #7 FIX: Gap misattribution + timestamp дубль")
+	print("   ✅ insert_intermediate_timestamps: реальные timestamps из segments_raw")
+	print("   ✅ correct_diarization_errors: context-aware speaker correction")
+	print("   ✅ force_transcribe_diar_gaps: учёт длины gap текста (>20 слов)")
 	print()
 	print("💡 v16.28 ИЗМЕНЕНИЯ:")
 	print("   ✅ БАГ #3 FIX: Потеря последнего предложения (110 символов, 19 слов)")

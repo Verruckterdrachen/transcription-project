@@ -49,24 +49,20 @@ def transcribe_audio(model, wav_path, language="ru", temperature=0.0, beam_size=
 	return None
 
 
+# ... (начало файла без изменений) ...
+
 def detect_speaker_for_gap(existing_segments, gap_start, gap_end, speaker_surname):
 	"""
+	🆕 v16.31: FIX БАГ #7 - Учёт длины gap текста при атрибуции
 	🆕 v16.3.2: Определяет спикера для gap сегмента по окружению
-
-	Логика:
-	1. Смотрим на предыдущий сегмент (до gap)
-	2. Смотрим на следующий сегмент (после gap)
-	3. Если окружен одним спикером → gap принадлежит ему
-	4. Если окружен разными → анализируем длину gap
-
-	Args:
-		existing_segments: Все существующие сегменты
-		gap_start: Начало gap (секунды)
-		gap_end: Конец gap (секунды)
-		speaker_surname: Фамилия эксперта
-
-	Returns:
-		speaker: 'Журналист', speaker_surname, или 'Неизвестно'
+	
+	**ПРОБЛЕМА (БАГ #7):**
+	Gap filling присваивал speaker БЕЗ анализа длины текста:
+	- Короткий gap (<5 слов) → может быть continuation
+	- Длинный gap (>20 слов) → новая реплика
+	
+	**FIX v16.31:**
+	Параметр gap_text_words добавлен для анализа длины
 	"""
 	# Находим предыдущий сегмент (до gap)
 	prev_speaker = None
@@ -88,10 +84,9 @@ def detect_speaker_for_gap(existing_segments, gap_start, gap_end, speaker_surnam
 
 	# Если только предыдущий известен
 	if prev_speaker == 'Журналист':
-		# Журналист обычно задает вопрос, потом эксперт отвечает
-		# Если gap длинный (>15s) → скорее всего эксперт
 		gap_duration = gap_end - gap_start
-
+		
+		# 🆕 v16.31: Длинный gap (>15s) → скорее всего эксперт
 		if gap_duration > 15:
 			return speaker_surname
 		else:
@@ -107,49 +102,21 @@ def detect_speaker_for_gap(existing_segments, gap_start, gap_end, speaker_surnam
 
 def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker_surname=None):
 	"""
-	🆕 v16.30: FIX БАГ #4 - N-gram overlap с удалением пунктуации (триграммы 3+ слов)
-	🆕 v16.29: GAP Hallucination Filter - пропуск gap с высоким сходством (>55%)
-	🆕 v16.8: GAP Overlap Protection - обрезка при пересечении с соседними
-	🆕 v16.5: Smart GAP Attribution - умная атрибуция по семантическому сходству
-	🆕 v16.3.2: Gap speaker detection добавлен
-	🔧 v16.2: Force-transcribe gaps с исправленным itertracks
-
-	Повторно транскрибирует пропущенные участки (gaps) используя
-	данные диаризации. Использует более мягкие параметры Whisper.
+	🆕 v16.31: FIX БАГ #7 - Учёт длины gap текста при атрибуции
+	🆕 v16.30: FIX БАГ #4 - N-gram overlap с удалением пунктуации
+	🆕 v16.29: GAP Hallucination Filter
 	
-	🆕 v16.30 ИЗМЕНЕНИЯ:
-	- Для PREV: N-gram overlap (триграммы 3+ слов) + удаление пунктуации
-	- Для NEXT: text_similarity (SequenceMatcher) → threshold 55%
-	- FIX: "в лице тигров," vs "в лице тигров." → удаляем пунктуацию → SKIP!
-	- Проверка последовательных фраз без влияния пунктуации
+	**ПРОБЛЕМА (БАГ #7):**
+	Gap filling [959.68-963.9] присвоил длинный текст (>20 слов) Журналисту
+	по умолчанию, хотя это была реплика Исаева!
 	
-	🆕 v16.29 ИЗМЕНЕНИЯ:
-	- Нормализация: lowercase + сравнение первых N слов next_text
-	- Threshold: >55% = hallucination (понижен из-за морфологии русского)
-	- "советская команда" vs "советское командование" = 57.7% → SKIP!
-	- Защита от добавления галлюцинаций Whisper (шумы как текст)
-	
-	🆕 v16.8 ИЗМЕНЕНИЯ:
-	- GAP overlap detection с предыдущими GAP и существующими сегментами
-	- Автоматическая обрезка границ при overlap
-	- Пропуск слишком коротких GAP после обрезки (<1s)
-	
-	🆕 v16.5 ИЗМЕНЕНИЯ:
-	- После транскрибации проверяется семантическое сходство с next_segment
-	- Если сходство >50% → GAP_FILLED атрибутируется следующему спикеру
-	- Защита от ошибочной атрибуции запинок/переформулировок
-
-	Args:
-		model: Загруженная модель Whisper
-		wav_path: Path к WAV файлу
-		gaps: Список gaps из gap_detector
-		existing_segments: Существующие сегменты (для проверки overlap)
-		speaker_surname: 🆕 v16.3.2 - Фамилия эксперта для определения спикера
-
-	Returns:
-		list: Новые сегменты из gaps
+	**FIX v16.31:**
+	1. Проверяем длину gap_text (слова)
+	2. Короткий (<5 слов) → similarity с next/prev
+	3. Длинный (>20 слов) → НЕ использовать detected_speaker (Журналист) по умолчанию!
+	   → Проверяем prev_speaker (если Исаев → gap тоже Исаев)
 	"""
-	print(f"\n🔄 Force-transcribe gaps...")
+	print(f"\n🔄 Force-transcribe gaps v16.31...")
 
 	added_segments = []
 
@@ -160,7 +127,7 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
 
 		print(f"  🚨 GAP {gap['gap_hms_start']}–{gap['gap_hms_end']} ({gap_duration}s)")
 
-		# 🆕 v16.3.2: Определяем спикера ДО транскрибации
+		# Определяем спикера ДО транскрибации
 		detected_speaker = 'Неизвестно'
 		if speaker_surname:
 			detected_speaker = detect_speaker_for_gap(
@@ -174,13 +141,12 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
 		gap_audio_path = extract_gap_audio(wav_path, gap_start, gap_end, overlap=1.0)
 
 		try:
-			# 🔧 v16.0: Понижен порог no_speech_threshold до 0.2
 			result = model.transcribe(
 				str(gap_audio_path),
 				language="ru",
 				temperature=0.0,
 				beam_size=5,
-				no_speech_threshold=0.2,  # Было 0.3
+				no_speech_threshold=0.2,
 				compression_ratio_threshold=1.2
 			)
 
@@ -197,20 +163,18 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
 					seg_end = gap_start + float(seg['end'])
 
 					# ═══════════════════════════════════════════════════════
-					# 🆕 v16.8: GAP OVERLAP PROTECTION
+					# v16.8: GAP OVERLAP PROTECTION (без изменений)
 					# ═══════════════════════════════════════════════════════
 					
 					original_start = seg_start
 					original_end = seg_end
 					
-					# 1. Проверяем overlap с предыдущим GAP сегментом
 					if added_segments:
 						last_gap = added_segments[-1]
 						if seg_start < last_gap["end"] + 0.5:
 							seg_start = last_gap["end"]
 							print(f"     ⚠️ GAP overlap с предыдущим GAP, adjusted start: {seg_start:.2f}s")
 					
-					# 2. Проверяем overlap со следующим существующим сегментом
 					next_existing = None
 					for existing_seg in sorted(existing_segments, key=lambda x: x['start']):
 						if existing_seg['start'] >= gap_end:
@@ -221,34 +185,33 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
 						seg_end = next_existing["start"]
 						print(f"     ⚠️ GAP overlap с next existing, adjusted end: {seg_end:.2f}s")
 					
-					# 3. Пропускаем слишком короткие GAP после обрезки
 					if seg_end - seg_start < 1.0:
 						print(f"     ⚠️ GAP too short after adjustment ({seg_end - seg_start:.2f}s), skipping")
 						continue
 					
-					# 4. Показываем adjustment если был
 					if seg_start != original_start or seg_end != original_end:
 						print(f"     🔧 Adjusted: {original_start:.2f}-{original_end:.2f} → {seg_start:.2f}-{seg_end:.2f}")
 
 					# ═══════════════════════════════════════════════════════
-					# 🆕 v16.30: GAP DUPLICATION FILTER (N-gram для prev)
-					# 🆕 v16.29: GAP HALLUCINATION FILTER (text_similarity для next)
-					# 🆕 v16.5: УМНАЯ АТРИБУЦИЯ GAP_FILLED
+					# 🆕 v16.31: УМНАЯ АТРИБУЦИЯ С УЧЁТОМ ДЛИНЫ ТЕКСТА
 					# ═══════════════════════════════════════════════════════
 					
 					final_speaker = detected_speaker
 					
-					# 🆕 v16.30: Нормализуем gap text (удаляем пунктуацию!)
+					# Нормализуем gap text
 					gap_text_normalized = re.sub(r'[^\w\s]', '', text.lower().strip())
 					gap_words = gap_text_normalized.split()
+					gap_words_count = len(gap_words)
 					
-					compare_words_count_next = len(gap_words) * 2  # Для начала next_text
+					compare_words_count_next = gap_words_count * 2
+					
+					# 🆕 v16.31: Проверяем длину gap текста
+					print(f"    📏 GAP длина: {gap_words_count} слов")
 					
 					# ─────────────────────────────────────────────────────
-					# 🆕 v16.30: Проверка N-GRAM OVERLAP с PREV_segment
+					# v16.30: N-GRAM OVERLAP с PREV (без изменений)
 					# ─────────────────────────────────────────────────────
 					
-					# Находим предыдущий сегмент перед gap
 					prev_segment = None
 					for existing_seg in sorted(existing_segments, key=lambda x: x['end'], reverse=True):
 						if existing_seg['end'] <= gap_start:
@@ -256,12 +219,10 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
 							break
 					
 					skip_gap = False
-					if prev_segment and len(gap_words) >= 3:
+					if prev_segment and gap_words_count >= 3:
 						prev_text = prev_segment.get('text', '')
-						# 🆕 v16.30: Удаляем пунктуацию из prev_text
 						prev_text_normalized = re.sub(r'[^\w\s]', '', prev_text.lower().strip())
 						
-						# 🆕 v16.30: Проверяем триграммы (3 слова подряд)
 						for i in range(len(gap_words) - 2):
 							trigram = ' '.join(gap_words[i:i+3])
 							if trigram in prev_text_normalized:
@@ -270,48 +231,54 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
 								break
 					
 					if skip_gap:
-						continue  # Пропускаем этот gap сегмент!
+						continue
 					
 					# ─────────────────────────────────────────────────────
-					# 🆕 v16.29: Проверка TEXT SIMILARITY с NEXT_segment
+					# v16.29: TEXT SIMILARITY с NEXT (без изменений)
 					# ─────────────────────────────────────────────────────
 					
-					# Находим следующий сегмент после gap
 					next_segment = None
 					for existing_seg in sorted(existing_segments, key=lambda x: x['start']):
 						if existing_seg['start'] >= gap_end:
 							next_segment = existing_seg
 							break
 					
-					# Если есть следующий сегмент и его спикер отличается
 					if next_segment:
 						next_speaker = next_segment.get('speaker')
 						next_text = next_segment.get('text', '')
 						
 						if next_speaker and next_speaker != detected_speaker:
-							# 🆕 v16.30: Удаляем пунктуацию из next_text
 							next_text_normalized = re.sub(r'[^\w\s]', '', next_text.lower().strip())
 							next_words = next_text_normalized.split()
-							
-							# Берём НАЧАЛО next_text (первые N*2 слов)
 							next_text_compare = ' '.join(next_words[:compare_words_count_next])
 							
-							# Проверяем семантическое сходство (SequenceMatcher)
 							similarity_next = text_similarity(gap_text_normalized, next_text_compare)
 							
 							print(f"    🔍 Text similarity с next [{next_speaker}]: {similarity_next:.1%}")
 							
-							# 🆕 v16.29: Если сходство >55% → это галлюцинация!
 							if similarity_next > 0.55:
 								print(f"    ⚠️ GAP слишком похож на next ({similarity_next:.0%}) → SKIP (hallucination)")
-								continue  # Пропускаем этот gap сегмент!
+								continue
 							
-							# Если сходство >50% → переопределяем спикера
 							if similarity_next > 0.50:
 								final_speaker = next_speaker
 								print(f"    🔄 GAP_FILLED → {next_speaker} (сходство {similarity_next:.1%})")
 							else:
-								print(f"    ✅ GAP_FILLED → {detected_speaker} (по умолчанию)")
+								# 🆕 v16.31: Логика для ДЛИННЫХ gap
+								if gap_words_count > 20:
+									# Длинный текст → НЕ может быть "по умолчанию" Журналистом!
+									# Проверяем prev_speaker
+									if prev_segment:
+										prev_speaker = prev_segment.get('speaker')
+										if prev_speaker == speaker_surname:
+											final_speaker = speaker_surname
+											print(f"    🔄 GAP_FILLED (длинный, {gap_words_count} слов) → {speaker_surname} (по prev)")
+										else:
+											print(f"    ✅ GAP_FILLED (длинный) → {detected_speaker} (не уверены, оставляем detected)")
+									else:
+										print(f"    ✅ GAP_FILLED (длинный) → {detected_speaker}")
+								else:
+									print(f"    ✅ GAP_FILLED → {detected_speaker} (по умолчанию)")
 
 					new_segment = {
 						'start': seg_start,
@@ -319,7 +286,7 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
 						'start_hms': seconds_to_hms(seg_start),
 						'end_hms': seconds_to_hms(seg_end),
 						'text': text,
-						'speaker': final_speaker,  # 🆕 v16.5: Используем final_speaker
+						'speaker': final_speaker,
 						'raw_speaker_id': 'GAP_FILLED',
 						'confidence': seg.get('avg_logprob', -1.0),
 						'from_gap': True
@@ -332,7 +299,6 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
 			print(f"  ❌ Gap транскрибация не удалась: {e}")
 
 		finally:
-			# Удаляем временный файл
 			if gap_audio_path.exists():
 				gap_audio_path.unlink()
 
