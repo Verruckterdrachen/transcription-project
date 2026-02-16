@@ -7,7 +7,7 @@
   "vad_threshold_used": 0.8,
   "gaps_detected": 2,
   "gaps_final": 2,
-  "retry_added": 2,
+  "retry_added": 1,
   "speaker_identification": "v16.0-modular",
   "pipeline_version": "16.28",
   "params": {
@@ -16,8 +16,8 @@
     "min_speakers": 2,
     "max_speakers": 3
   },
-  "segments_count": 210,
-  "merged_count": 15,
+  "segments_count": 209,
+  "merged_count": 14,
   "speaker_stats": {
     "SPEAKER_02": 42.86926994906642,
     "SPEAKER_01": 930.0000000000002,
@@ -289,18 +289,6 @@
       "confidence": -0.204448534094769
     },
     {
-      "start": 236.26,
-      "end": 239.44,
-      "start_hms": "00:03:56",
-      "end_hms": "00:03:59",
-      "text": "советская команда",
-      "speaker": "Журналист",
-      "raw_speaker_id": "GAP_FILLED",
-      "confidence": -0.6075214658464704,
-      "from_gap": true,
-      "time": "00:03:56"
-    },
-    {
       "start": 239.44,
       "end": 244.82,
       "start_hms": "00:03:59",
@@ -308,8 +296,7 @@
       "text": "Советское командование, не сказать, что проводило операцию безукоризненно.",
       "raw_speaker_id": "SPEAKER_01",
       "speaker": "Исаев",
-      "confidence": -0.204448534094769,
-      "time": "00:03:59"
+      "confidence": -0.204448534094769
     },
     {
       "start": 246.4,
@@ -2244,15 +2231,6 @@
       "text": "А вы про пароль-то сказали, которые вы сказали. 22-й вопрос. Какие ошибки допустило в ходе проведения операции «Искра» советское командование. Какие ошибки были обороняющиеся, то ли 18-й армии. То есть, 18-й армии немцев.",
       "confidence": -0.1379236418625404,
       "raw_speaker_id": "SPEAKER_00"
-    },
-    {
-      "speaker": "Журналист",
-      "time": "00:03:56",
-      "start": 236.26,
-      "end": 239.44,
-      "text": "советская команда",
-      "confidence": -0.6075214658464704,
-      "raw_speaker_id": "GAP_FILLED"
     },
     {
       "speaker": "Исаев",
