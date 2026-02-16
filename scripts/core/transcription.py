@@ -2,12 +2,14 @@
 """
 core/transcription.py - Транскрибация аудио с Whisper
 
+🆕 v16.30: FIX БАГ #4 - N-gram overlap с удалением пунктуации (триграммы 3+ слов)
 🆕 v16.29: GAP Hallucination Filter - пропуск gap с высоким сходством (>55%)
 🆕 v16.5: Smart GAP Attribution - умная атрибуция GAP_FILLED по семантическому сходству
 🆕 v16.3.2: Gap speaker detection - определение спикера по окружению
 🆕 v16.2: Исправлен синтаксис itertracks() в force_transcribe_diar_gaps
 """
 
+import re
 import whisper
 from core.utils import seconds_to_hms, gap_detector, extract_gap_audio, text_similarity
 from core.diarization import align_segment_to_diarization
@@ -105,6 +107,7 @@ def detect_speaker_for_gap(existing_segments, gap_start, gap_end, speaker_surnam
 
 def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker_surname=None):
 	"""
+	🆕 v16.30: FIX БАГ #4 - N-gram overlap с удалением пунктуации (триграммы 3+ слов)
 	🆕 v16.29: GAP Hallucination Filter - пропуск gap с высоким сходством (>55%)
 	🆕 v16.8: GAP Overlap Protection - обрезка при пересечении с соседними
 	🆕 v16.5: Smart GAP Attribution - умная атрибуция по семантическому сходству
@@ -113,6 +116,12 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
 
 	Повторно транскрибирует пропущенные участки (gaps) используя
 	данные диаризации. Использует более мягкие параметры Whisper.
+	
+	🆕 v16.30 ИЗМЕНЕНИЯ:
+	- Для PREV: N-gram overlap (триграммы 3+ слов) + удаление пунктуации
+	- Для NEXT: text_similarity (SequenceMatcher) → threshold 55%
+	- FIX: "в лице тигров," vs "в лице тигров." → удаляем пунктуацию → SKIP!
+	- Проверка последовательных фраз без влияния пунктуации
 	
 	🆕 v16.29 ИЗМЕНЕНИЯ:
 	- Нормализация: lowercase + сравнение первых N слов next_text
@@ -222,11 +231,50 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
 						print(f"     🔧 Adjusted: {original_start:.2f}-{original_end:.2f} → {seg_start:.2f}-{seg_end:.2f}")
 
 					# ═══════════════════════════════════════════════════════
-					# 🆕 v16.29: GAP HALLUCINATION FILTER (normalized, threshold=55%)
+					# 🆕 v16.30: GAP DUPLICATION FILTER (N-gram для prev)
+					# 🆕 v16.29: GAP HALLUCINATION FILTER (text_similarity для next)
 					# 🆕 v16.5: УМНАЯ АТРИБУЦИЯ GAP_FILLED
 					# ═══════════════════════════════════════════════════════
 					
 					final_speaker = detected_speaker
+					
+					# 🆕 v16.30: Нормализуем gap text (удаляем пунктуацию!)
+					gap_text_normalized = re.sub(r'[^\w\s]', '', text.lower().strip())
+					gap_words = gap_text_normalized.split()
+					
+					compare_words_count_next = len(gap_words) * 2  # Для начала next_text
+					
+					# ─────────────────────────────────────────────────────
+					# 🆕 v16.30: Проверка N-GRAM OVERLAP с PREV_segment
+					# ─────────────────────────────────────────────────────
+					
+					# Находим предыдущий сегмент перед gap
+					prev_segment = None
+					for existing_seg in sorted(existing_segments, key=lambda x: x['end'], reverse=True):
+						if existing_seg['end'] <= gap_start:
+							prev_segment = existing_seg
+							break
+					
+					skip_gap = False
+					if prev_segment and len(gap_words) >= 3:
+						prev_text = prev_segment.get('text', '')
+						# 🆕 v16.30: Удаляем пунктуацию из prev_text
+						prev_text_normalized = re.sub(r'[^\w\s]', '', prev_text.lower().strip())
+						
+						# 🆕 v16.30: Проверяем триграммы (3 слова подряд)
+						for i in range(len(gap_words) - 2):
+							trigram = ' '.join(gap_words[i:i+3])
+							if trigram in prev_text_normalized:
+								print(f"    ⚠️ GAP содержит фразу из prev ('{trigram}') → SKIP (duplicate)")
+								skip_gap = True
+								break
+					
+					if skip_gap:
+						continue  # Пропускаем этот gap сегмент!
+					
+					# ─────────────────────────────────────────────────────
+					# 🆕 v16.29: Проверка TEXT SIMILARITY с NEXT_segment
+					# ─────────────────────────────────────────────────────
 					
 					# Находим следующий сегмент после gap
 					next_segment = None
@@ -241,30 +289,27 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
 						next_text = next_segment.get('text', '')
 						
 						if next_speaker and next_speaker != detected_speaker:
-							# 🆕 v16.29: Нормализуем тексты
-							gap_text_normalized = text.lower().strip()
-							next_text_normalized = next_text.lower().strip()
-							
-							# Берём первые N слов next_text (где N*2 = количество слов в gap)
-							gap_words = gap_text_normalized.split()
+							# 🆕 v16.30: Удаляем пунктуацию из next_text
+							next_text_normalized = re.sub(r'[^\w\s]', '', next_text.lower().strip())
 							next_words = next_text_normalized.split()
-							compare_words_count = len(gap_words) * 2  # В 2 раза больше для контекста
-							next_text_compare = ' '.join(next_words[:compare_words_count])
 							
-							# Проверяем семантическое сходство
-							similarity = text_similarity(gap_text_normalized, next_text_compare)
+							# Берём НАЧАЛО next_text (первые N*2 слов)
+							next_text_compare = ' '.join(next_words[:compare_words_count_next])
 							
-							print(f"    🔍 Сходство с next [{next_speaker}]: {similarity:.1%} (words={len(gap_words)}→{compare_words_count})")
+							# Проверяем семантическое сходство (SequenceMatcher)
+							similarity_next = text_similarity(gap_text_normalized, next_text_compare)
+							
+							print(f"    🔍 Text similarity с next [{next_speaker}]: {similarity_next:.1%}")
 							
 							# 🆕 v16.29: Если сходство >55% → это галлюцинация!
-							if similarity > 0.55:
-								print(f"    ⚠️ GAP слишком похож на next ({similarity:.0%}) → SKIP (hallucination)")
+							if similarity_next > 0.55:
+								print(f"    ⚠️ GAP слишком похож на next ({similarity_next:.0%}) → SKIP (hallucination)")
 								continue  # Пропускаем этот gap сегмент!
 							
 							# Если сходство >50% → переопределяем спикера
-							if similarity > 0.50:
+							if similarity_next > 0.50:
 								final_speaker = next_speaker
-								print(f"    🔄 GAP_FILLED → {next_speaker} (сходство {similarity:.1%})")
+								print(f"    🔄 GAP_FILLED → {next_speaker} (сходство {similarity_next:.1%})")
 							else:
 								print(f"    ✅ GAP_FILLED → {detected_speaker} (по умолчанию)")
 
