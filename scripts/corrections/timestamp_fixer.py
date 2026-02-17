@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
-corrections/timestamp_fixer.py - Исправление timestamp v16.40
+corrections/timestamp_fixer.py - Исправление timestamp v16.42
+
+🔥 v16.42: FIX БАГ #14 - Timestamp injection: tracking last_timestamp_time
+- БАГ: time_since_start считался от начала сегмента → timestamp каждые 4-15s
+- FIX: last_timestamp_time tracking → правильный интервал ≥30s
 
 🔥 v16.40: УПРОЩЕНИЕ - Timestamp injection ПОСЛЕ split
 - Split уже разбил текст на предложения с точками
@@ -17,7 +21,22 @@ from core.utils import seconds_to_hms, hms_to_seconds
 
 def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=True):
     """
+    🔥 v16.42: FIX БАГ #14 - Tracking last_timestamp_time для правильного интервала
     🔥 v16.40: УПРОЩЁННАЯ ВЕРСИЯ - вставка ПОСЛЕ split
+    
+    **ПРОБЛЕМА v16.40:**
+    ```python
+    time_since_start = cumulative_time - start  # ← От НАЧАЛА сегмента!
+    if time_since_start >= interval:
+        # Вставляем timestamp
+    ```
+    
+    Результат: timestamp вставлялся КАЖДЫЙ РАЗ когда cumulative_time > start+30,
+    игнорируя расстояние между timestamp! Получалось 4-15s вместо ≥30s.
+    
+    **FIX v16.42:**
+    Добавлена переменная `last_timestamp_time` для tracking последнего timestamp.
+    Проверяем `cumulative_time - last_timestamp_time >= interval`.
     
     ИЗМЕНЕНИЯ v16.40:
     - Split УЖЕ разбил на предложения → точки известны
@@ -35,7 +54,7 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
         segments с вставленными timestamps
     """
     if debug:
-        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s) v16.40...")
+        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s) v16.42...")
     
     injection_count = 0
     
@@ -76,6 +95,9 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
         if total_chars == 0:
             continue
         
+        # 🆕 v16.42: Tracking последнего вставленного timestamp
+        last_timestamp_time = start
+        
         # Строим карту: позиция конца предложения → timestamp
         sentence_timestamps = []
         cumulative_time = start
@@ -84,11 +106,11 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
             sent_duration = (len(sent) / total_chars) * duration
             cumulative_time += sent_duration
             
-            # Проверяем, нужен ли timestamp здесь
-            time_since_start = cumulative_time - start
+            # 🆕 v16.42: Проверяем время от ПОСЛЕДНЕГО timestamp, не от начала!
+            time_since_last_ts = cumulative_time - last_timestamp_time
             time_to_end = end - cumulative_time
             
-            if time_since_start >= interval and time_to_end >= 15:
+            if time_since_last_ts >= interval and time_to_end >= 15:
                 # ✅ Нужен timestamp!
                 # Ищем ближайший raw segment к этому времени
                 closest_raw = min(
@@ -97,6 +119,9 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
                 )
                 
                 sentence_timestamps.append((sent, seconds_to_hms(closest_raw['start'])))
+                
+                # 🆕 v16.42: ОБНОВЛЯЕМ last_timestamp_time!
+                last_timestamp_time = cumulative_time
         
         if not sentence_timestamps:
             continue
