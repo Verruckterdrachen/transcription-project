@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 """
-corrections/boundary_fixer.py - Boundary correction v16.37
+corrections/boundary_fixer.py - Boundary correction v16.41
 
+🔥 v16.41: FIX БАГ #12, #13 - Split regex + journalist "вопрос"
 🔥 v16.37: КРИТИЧЕСКИЙ FIX БАГ #8.1 - Приоритет continuation ПЕРЕД journalist markers
-🆕 v16.23: КРИТИЧЕСКИЙ FIX БАГ #4 - Raw speaker ID маппинг в split
-🆕 v16.19: КРИТИЧЕСКИЙ FIX БАГ #3 - Повышен порог similarity с 80% до 90%
-🔥 v16.16: КРИТИЧЕСКИЙ FIX - Word Boundary в regex паттернах!
 """
 
 import re
@@ -15,6 +13,7 @@ from core.utils import seconds_to_hms
 
 def is_journalist_phrase(text):
     """
+    🆕 v16.41: Добавлен паттерн \\bвопрос\\b
     v16.16: Проверяет, является ли фраза журналистской
     
     🔥 v16.16: Добавлен \\b (word boundary) для точного поиска целых слов
@@ -22,6 +21,7 @@ def is_journalist_phrase(text):
     text_lower = text.lower()
     
     journalist_markers = [
+        r'\bвопрос\b',  # 🆕 v16.41: FIX БАГ #13
         r'\bвы\s+(можете|могли|должны)?',
         r'\bрасскажите\b',
         r'\bобъясните\b',
@@ -71,13 +71,6 @@ def detect_continuation_phrase(current_text, previous_texts, threshold=0.90):
     Порог 80% слишком низкий для детекции заикания.
     Заикание обычно имеет similarity 85-95% (почти идентичный текст).
     
-    Примеры НЕ детектировались:
-    - "...точки зрения коммуникации, «Невский пятачок», несмотря..." (similarity ~92%)
-    - "...был прежде всего Леонид Говоров, была основа плана..." (similarity ~88%)
-    
-    **РЕШЕНИЕ v16.19:**
-    Повысить порог до 90% для точной детекции заикания.
-    
     Args:
         current_text: Текущий текст для проверки
         previous_texts: Список предыдущих текстов (для контекста)
@@ -108,7 +101,7 @@ def is_continuation_phrase(text):
     🆕 v16.39: FIX БАГ #10 - Учитываем timestamps в начале текста
     
     **ПРОБЛЕМА v16.37:**
-    Паттерн r'^несмотря\b' НЕ срабатывал для "00:16:06 Несмотря..."
+    Паттерн r'^несмотря\\b' НЕ срабатывал для "00:16:06 Несмотря..."
     Timestamp в начале текста ломает проверку ^
     
     **РЕШЕНИЕ v16.39:**
@@ -168,6 +161,7 @@ def is_question_announcement(text):
 
 def boundary_correction_raw(segments_raw, speaker_surname, speaker_roles):
     """
+    🆕 v16.41: FIX БАГ #12 - Split regex \s* (ноль или больше пробелов)
     v16.3.2: Boundary correction между спикерами
     """
     if len(segments_raw) < 2:
@@ -188,9 +182,10 @@ def boundary_correction_raw(segments_raw, speaker_surname, speaker_roles):
             i += 1
             continue
         
-        # Разбиваем текст на предложения
+        # 🆕 v16.41: FIX БАГ #12 - \s* вместо \s+
+        # Разбиваем на предложения (БЕЗ требования пробела после точки!)
         current_text = current.get('text', '')
-        sentences = re.split(r'[.!?]+\s+', current_text)
+        sentences = re.split(r'[.!?]+\s*', current_text)  # ← \s* = ноль или больше пробелов!
         
         if len(sentences) < 2:
             i += 1
@@ -252,26 +247,10 @@ def boundary_correction_raw(segments_raw, speaker_surname, speaker_roles):
 
 def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles, debug=True):
     """
+    🆕 v16.41: FIX БАГ #12 - Split regex \s* (ноль или больше пробелов)
     🔥 v16.37: КРИТИЧЕСКИЙ FIX БАГ #8.1 - Приоритет continuation ПЕРЕД journalist markers
     🆕 v16.24.1: FIX #2 - Neutral фразы возвращаются к original speaker
     🆕 v16.23: КРИТИЧЕСКИЙ FIX БАГ #4 - Правильный raw_speaker_id маппинг!
-    
-    **ПРОБЛЕМА v16.36:**
-    Когда предложение имеет ОДНОВРЕМЕННО:
-    - Continuation marker ("несмотря") = True
-    - Journalist marker ("давайте") = True
-    
-    Проверка `if is_journalist_sent:` выполнялась ПЕРВОЙ!
-    Результат: continuation игнорировался, фраза становилась Журналистом.
-    
-    **РЕШЕНИЕ v16.37:**
-    Изменён ПОРЯДОК ПРОВЕРОК:
-    1. ✅ Сначала continuation (ПРИОРИТЕТ!)
-    2. ✅ Потом journalist/expert markers
-    3. ✅ Потом neutral
-    
-    **ROOT CAUSE:**
-    ПРИОРИТЕТ ПРОВЕРОК НЕПРАВИЛЬНЫЙ: Journalist/Expert проверялись ДО continuation
     
     Args:
         segments_merged: Список merged сегментов
@@ -282,7 +261,7 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
     Returns:
         Список сегментов с разделенными mixed-speaker блоками
     """
-    print("\n✂️ Разделение mixed-speaker сегментов (v16.37: приоритет continuation)...")
+    print("\n✂️ Разделение mixed-speaker сегментов (v16.41: FIX split regex)...")
     
     # v16.23: УЛУЧШЕННЫЙ МАППИНГ - имена + роли → raw_speaker_id
     reverse_roles = {}
@@ -321,8 +300,9 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
             result.append(seg)
             continue
         
-        # Разбиваем на предложения
-        sentences = re.split(r'[.!?]+\s+', text)
+        # 🆕 v16.41: FIX БАГ #12 - \s* вместо \s+
+        # Разбиваем на предложения (БЕЗ требования пробела после точки!)
+        sentences = re.split(r'[.!?]+\s*', text)  # ← \s* = ноль или больше пробелов!
         sentences = [s.strip() for s in sentences if s.strip()]
         
         if len(sentences) < 2:
