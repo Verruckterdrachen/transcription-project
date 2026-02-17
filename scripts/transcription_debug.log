@@ -165,7 +165,7 @@ GPU: ✅ CUDA
   🔍 SPEAKER_01 [00:15:05-00:17:08] 123.2s
   🔍 SPEAKER_00 [00:17:09-00:17:10] 1.4s
   🔍 SPEAKER_01 [00:17:10-00:17:11] 0.8s
-  👥 Спикеров: 3, ['SPEAKER_01', 'SPEAKER_02', 'SPEAKER_00']
+  👥 Спикеров: 3, ['SPEAKER_00', 'SPEAKER_02', 'SPEAKER_01']
   📊 Stats: {'SPEAKER_02': 42.86926994906642, 'SPEAKER_01': 930.0000000000002, 'SPEAKER_00': 30.47538200339521}
 📏 Адаптивный VAD: 0.8
   🎙️ Whisper транскрибация NW Uckpa0003_01.wav...
@@ -401,9 +401,10 @@ GPU: ✅ CUDA
 
       ❌ Целевая фраза "то есть накопленный опыт" НЕ НАЙДЕНА в тексте!
 
-🔧 Context-aware diarization correction v16.31...
+🔧 Context-aware diarization correction v16.32...
   🔄 00:08:39 (2.32s): Журналист → Исаев
      Текст: "Два вопроса поводрения...."
+     Причина: Зажат между одинаковыми prev=Исаев
 ✅ Исправлено speaker: 1
 
 🔍 CHECKPOINT [AFTER DIARIZATION CORRECTION]: 213 сегментов
