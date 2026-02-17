@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
 """
-corrections/timestamp_fixer.py - Исправление timestamp v16.33
+corrections/timestamp_fixer.py - Исправление timestamp v16.34
+
+🆕 v16.34: FIX БАГ #9 + улучшение логики interval checking
+- Inner timestamp НЕ РАНЬШЕ чем start + interval (30s)
+- Не ставить inner timestamp если до конца < 15s
+- Удаление inner timestamps в TXT export (они не должны быть видны)
 
 🆕 v16.33: FIX БАГ #11 - Timestamp через raw segments (ТОЧНЫЕ timestamps!)
 - Находим raw segments внутри merged segment
-- Используем raw_segment['start'] напрямую (не пропорциональное распределение!)
-- Находим соответствующий текст raw segment в merged text
-- Вставляем timestamp перед этим текстом
-
-🆕 v16.32: FIX БАГ #11 - Timestamp drift (УДАЛЕНА логика поиска raw segments)
-- current_time УЖЕ правильный (accumulated time)!
-- Удалена перезапись timestamp_sec = raw_segment['start']
-- ROOT CAUSE: v16.31 заменял правильное время на НАЧАЛО raw segment
-
-🆕 v16.28: FIX БАГ #3 - Потеря последнего предложения
-- range(0, len(sentences), 2) вместо range(0, len(sentences)-1, 2)
+- Используем raw_segment['start'] напрямую
 """
 
 import re
@@ -23,19 +18,11 @@ from core.utils import seconds_to_hms
 
 def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=True):
     """
-    🆕 v16.33: FIX БАГ #11 - Используем ТОЧНЫЕ timestamps из raw segments
+    🆕 v16.34: ПРАВИЛЬНАЯ логика interval checking
     
-    **ПРОБЛЕМА v16.32:**
-    Пропорциональное распределение времени по словам предполагает равномерную скорость,
-    но это НЕ так! Накопленная ошибка ±5-10 сек.
-    
-    **FIX v16.33:**
-    1. Находим raw segments внутри merged segment
-    2. Фильтруем: raw_seg['start'] - seg['start'] >= interval (30s)
-    3. Находим текст raw segment в merged text
-    4. Вставляем timestamp raw_seg['start'] перед этим текстом
-    
-    → ТОЧНЫЕ timestamps напрямую из Whisper!
+    1. Первый inner timestamp: НЕ РАНЬШЕ чем start + interval (30s)
+    2. Между собой: ~interval (30s) от предыдущего
+    3. От конца: НЕ ставить если до конца < 15s
     
     Args:
         segments: Список merged segments
@@ -47,10 +34,11 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
         segments с вставленными timestamp
     """
     if debug:
-        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s) v16.33...")
+        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s) v16.34...")
     
     injection_count = 0
-    skipped_too_close = 0
+    skipped_too_close_start = 0
+    skipped_too_close_end = 0
     
     for seg_idx, seg in enumerate(segments):
         start = seg.get('start', 0)
@@ -72,29 +60,36 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
         if not raw_segs_in_merge:
             continue
         
-        # 🆕 v16.33: Фильтруем кандидатов на inner timestamp
+        # 🆕 v16.34: ПРАВИЛЬНАЯ логика фильтрации кандидатов
         candidates = []
         last_timestamp = start
         
         for raw_seg in raw_segs_in_merge:
             raw_start = raw_seg.get('start', 0)
             time_since_last = raw_start - last_timestamp
+            time_to_end = end - raw_start
             
-            # Условия для вставки:
-            # 1. Расстояние >= interval от последнего timestamp
-            # 2. Не слишком близко к началу merged segment (>2s)
+            # 🆕 v16.34: Условия для вставки:
+            # 1. Расстояние >= interval от последнего timestamp (включая start)
+            # 2. До конца >= 15s (не ставим inner timestamp в самом конце)
             # 3. Есть текст для поиска
             if (time_since_last >= interval and 
-                raw_start - start > 2.0 and
+                time_to_end >= 15.0 and
                 raw_seg.get('text', '').strip()):
                 
                 candidates.append(raw_seg)
                 last_timestamp = raw_start
+            else:
+                # Debug почему пропустили
+                if debug and time_since_last >= interval and time_to_end < 15.0:
+                    skipped_too_close_end += 1
+                elif debug and time_since_last < interval:
+                    skipped_too_close_start += 1
         
         if not candidates:
             continue
         
-        # 🆕 v16.33: Вставляем timestamps на основе raw segments
+        # v16.33: Вставляем timestamps на основе raw segments
         text_parts = []
         current_pos = 0
         
@@ -128,7 +123,7 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
                 injection_count += 1
                 
                 if debug:
-                    print(f"  📌 {seg.get('time', '???')} ({seg.get('speaker')}) → inject {timestamp_str.strip()} (raw seg)")
+                    print(f"  📌 {seg.get('time', '???')} ({seg.get('speaker')}) → inject {timestamp_str.strip()} (от начала: {candidate_start - start:.1f}s)")
             else:
                 if debug:
                     print(f"  ⏭️ Пропускаем: не нашли текст '{search_text[:30]}...' в merged segment")
@@ -142,9 +137,11 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
     if debug:
         if injection_count > 0:
             print(f"✅ Вставлено промежуточных timestamp: {injection_count}")
-        if skipped_too_close > 0:
-            print(f"⏭️ Пропущено (слишком близко к началу): {skipped_too_close}")
-        if injection_count == 0 and skipped_too_close == 0:
+        if skipped_too_close_start > 0:
+            print(f"⏭️ Пропущено (< {interval}s от предыдущего): {skipped_too_close_start}")
+        if skipped_too_close_end > 0:
+            print(f"⏭️ Пропущено (< 15s до конца): {skipped_too_close_end}")
+        if injection_count == 0:
             print(f"✅ Блоков >30s не найдено")
     
     return segments
@@ -155,7 +152,7 @@ def correct_timestamp_drift(segments, debug=True):
     🆕 v16.22: FIX БАГ #2 - Timestamp назад
     🆕 v16.19: Исправляет сдвиг timestamp после gap filling
     
-    (код без изменений - оставляем как в v16.30)
+    (код без изменений)
     """
     if debug:
         print(f"\n🔧 Исправление сдвига timestamp после gap filling...")

@@ -184,12 +184,9 @@ def insert_inner_timestamps(text, start_sec, end_sec, next_segment_exists):
 
 def export_to_txt(txt_path, segments, speaker_surname):
     """
-    Экспорт одного JSON в TXT
+    🆕 v16.34: Удаление inner timestamps перед записью
     
-    Args:
-        txt_path: Path к TXT файлу
-        segments: Список merged сегментов
-        speaker_surname: Фамилия спикера
+    Экспорт одного JSON в TXT
     """
     with open(txt_path, 'w', encoding='utf-8') as f:
         for i, seg in enumerate(segments):
@@ -206,6 +203,10 @@ def export_to_txt(txt_path, segments, speaker_surname):
             text_with_timestamps = insert_inner_timestamps(
                 text, start, end, next_segment_exists
             )
+            
+            # 🆕 v16.34: FIX БАГ #9 - Удаляем inner timestamps из текста
+            # (они служебные, не должны быть видны в TXT!)
+            text_with_timestamps = re.sub(r'\s+\d{2}:\d{2}:\d{2}\s+', ' ', text_with_timestamps)
             
             # Форматируем
             f.write(f"{time} {speaker}: {text_with_timestamps}\n")
