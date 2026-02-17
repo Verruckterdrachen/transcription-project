@@ -1,7 +1,6 @@
 """
 merge/replica_merger.py - Склейка реплик одного спикера
 
-🆕 v16.42: FIX БАГ #12 - clean_loops() пропускал только 1 слово вместо 3
 🆕 v16.22: FIX БАГ #3 - Loop artifacts с вариациями слов
 🆕 v16.21: CRITICAL FIX - Infinite Loop в overlap handling
 🆕 v16.20: DEBUG OUTPUT для диагностики зависания
@@ -15,20 +14,20 @@ from corrections.hallucinations import clean_hallucinations_from_text
 
 def clean_loops(text, debug=False):
     """
-    🆕 v16.42: FIX БАГ #12 - Правильный пропуск loop artifacts (3 слова, не 1!)
     🆕 v16.22: FIX БАГ #3 - Детекция вариаций с fuzzy matching
     🔧 v16.1: Удаляет зацикленные фразы (loop artifacts)
     🆕 v16.20: Добавлен debug параметр
     
-    **ПРОБЛЕМА (БАГ #12 v16.40):**
-    При обнаружении loop, код делал `i += 1` (пропуск ОДНОГО слова),
-    но loop phrase состоит из 3 слов! Это приводило к:
-    - Неполному удалению loop artifacts
-    - Потере пробелов между словами после loop
-    - "фронта.Заранее" вместо "фронта. Заранее"
+    **ПРОБЛЕМА (БАГ #3):**
+    Функция детектировала только ТОЧНЫЕ повторы:
+    - "учитывать была немецкая" ← phrase1
+    - "учитывать это было" ← phrase2 (РАЗНЫЕ слова!)
+    - phrase1 ≠ phrase2 → НЕ детектируется!
     
-    **FIX v16.42:**
-    При обнаружении loop делаем `i += 3` (пропуск ВСЕЙ фразы из 3 слов)
+    **FIX v16.22:**
+    Используем fuzzy matching (SequenceMatcher) для детекции вариаций:
+    - Если фразы похожи ≥75% → считаем повтором
+    - Удаляем ВСЕ вариации, оставляем только первую
     
     Args:
         text: Текст для очистки
@@ -67,8 +66,7 @@ def clean_loops(text, debug=False):
                 break
         
         if is_loop:
-            # 🆕 v16.42: FIX БАГ #12 - Пропускаем ВСЮ loop phrase (3 слова)!
-            i += 3  # Было: i += 1 (ошибка!)
+            i += 1  # Пропускаем повтор
             continue
         
         # Добавляем фразу в seen
@@ -362,72 +360,3 @@ def merge_replicas(segments, debug=False):
         print(f"\n✅ merge_replicas завершён: {len(merged)} merged сегментов из {len(segments)} исходных")
 
     return merged
-
-def auto_merge_adjacent_same_speaker(segments, max_pause=5.0, debug=True):
-    """
-    🆕 v16.40: Автоматически склеивает соседние блоки одного спикера
-    
-    Вызывается ПОСЛЕ всех основных этапов, перед экспортом.
-    Решает проблему "adjacent same speaker" когда merge_replicas
-    остановился из-за короткой паузы (2-3s).
-    
-    Args:
-        segments: Список merged segments
-        max_pause: Максимальная пауза для склейки (секунды)
-        debug: Показывать debug output
-    
-    Returns:
-        segments с склеенными соседними блоками одного спикера
-    """
-    if debug:
-        print(f"\n🔗 Auto-merge adjacent same speaker (max_pause={max_pause}s)...")
-    
-    merged_count = 0
-    result = []
-    i = 0
-    
-    while i < len(segments):
-        current_seg = segments[i]
-        
-        # Ищем следующий сегмент того же спикера
-        if i + 1 < len(segments):
-            next_seg = segments[i + 1]
-            
-            # Проверяем условия для склейки
-            same_speaker = current_seg.get('speaker') == next_seg.get('speaker')
-            pause = next_seg.get('start', 0) - current_seg.get('end', 0)
-            
-            if same_speaker and pause <= max_pause:
-                # Склеиваем!
-                merged_text = current_seg.get('text', '').strip() + ' ' + next_seg.get('text', '').strip()
-                
-                merged_seg = {
-                    'time': current_seg.get('time'),
-                    'speaker': current_seg.get('speaker'),
-                    'text': merged_text,
-                    'start': current_seg.get('start'),
-                    'end': next_seg.get('end'),
-                    'raw_speaker_id': current_seg.get('raw_speaker_id'),
-                    'confidence': current_seg.get('confidence', '')
-                }
-                
-                if debug:
-                    print(f"  🔗 {current_seg.get('time')} + {next_seg.get('time')} (пауза {pause:.1f}s)")
-                    print(f"     {current_seg.get('speaker')}: {len(current_seg.get('text', ''))} + {len(next_seg.get('text', ''))} = {len(merged_text)} символов")
-                
-                result.append(merged_seg)
-                merged_count += 1
-                i += 2  # Пропускаем оба сегмента
-                continue
-        
-        # Не склеиваем - добавляем как есть
-        result.append(current_seg)
-        i += 1
-    
-    if debug:
-        if merged_count > 0:
-            print(f"✅ Auto-merged: {merged_count} пар → {len(segments)} → {len(result)} сегментов")
-        else:
-            print(f"✅ Auto-merge не требуется")
-    
-    return result

@@ -25,22 +25,52 @@ def insert_inner_timestamps(text, start_sec, end_sec, next_segment_exists):
     Returns:
         Текст с добавленными timestamps (если нужно)
     """
+    # 🆕 v16.28.3: Целевая фраза для tracking
+    target_phrase = "то есть это был такой пункт"
+    
+    # 🆕 v16.28.3: Проверяем, попадает ли блок в целевой диапазон
+    in_target_range = (start_sec >= 150 and end_sec <= 280)
+    
+    if in_target_range:
+        print(f"\n  🎯 TXT EXPORT TARGET RANGE: [{seconds_to_hms(start_sec)}-{seconds_to_hms(end_sec)}]")
+        print(f"     Длительность: {end_sec - start_sec:.1f}s")
+        print(f"     📝 Исходный текст ({len(text)} символов, {len(text.split())} слов):")
+        print(f"        Начало: \"{text[:100]}...\"")
+        print(f"        Конец:  \"...{text[-100:]}\"")
+        
+        if target_phrase in text.lower():
+            print(f"     ✅ Целевая фраза \"{target_phrase}\" НАЙДЕНА в исходном тексте!")
+        else:
+            print(f"     ❌ Целевая фраза \"{target_phrase}\" НЕ НАЙДЕНА в исходном тексте!")
+    
     # ✅ v16.26: Проверяем наличие inner timestamps от replica_merger
     has_inner_timestamps = bool(re.search(r'\d{2}:\d{2}:\d{2}', text))
     
     if has_inner_timestamps:
+        if in_target_range:
+            print(f"     ⏭️ Inner timestamps уже есть → возвращаем текст без изменений")
         return text  # УЖЕ есть timestamps от replica_merger (ЭТАП 6.1)!
     
     duration = end_sec - start_sec
     
     # Короткие реплики не трогаем
     if duration <= 30:
+        if in_target_range:
+            print(f"     ⏭️ Длительность ≤30s → возвращаем текст без изменений")
         return text
+    
+    if in_target_range:
+        print(f"     🔧 Начинаем обработку (duration={duration:.1f}s > 30s)...")
     
     # Разбиваем на предложения (сохраняем знаки препинания)
     sentences = re.split(r'([.!?])\s*', text)
     
+    if in_target_range:
+        print(f"     📊 Разбито на {len(sentences)} частей после split")
+    
     if len(sentences) <= 2:
+        if in_target_range:
+            print(f"     ⏭️ Слишком мало предложений → возвращаем текст без изменений")
         return text
     
     # Склеиваем предложения с их знаками препинания
@@ -55,10 +85,17 @@ def insert_inner_timestamps(text, start_sec, end_sec, next_segment_exists):
     if len(sentences) % 2 != 0:
         sentence_list.append(sentences[-1])
     
+    if in_target_range:
+        print(f"     📊 Склеено в {len(sentence_list)} предложений")
+        for idx, sent in enumerate(sentence_list[:3]):  # Показываем первые 3
+            print(f"        #{idx}: \"{sent[:60]}...\"")
+    
     # Вычисляем долю каждого предложения
     total_chars = sum(len(s) for s in sentence_list)
     
     if total_chars == 0:
+        if in_target_range:
+            print(f"     ⚠️ total_chars = 0 → возвращаем исходный текст")
         return text
     
     # Распределяем время по предложениям
@@ -75,9 +112,13 @@ def insert_inner_timestamps(text, start_sec, end_sec, next_segment_exists):
         })
         current_time += sentence_duration
     
+    if in_target_range:
+        print(f"     📊 Распределено время по {len(sentence_times)} предложениям")
+    
     # Вставляем timestamps
     result = []
     last_timestamp_at = start_sec
+    inserted_count = 0
     
     for i, sent_info in enumerate(sentence_times):
         sent_start = sent_info["start"]
@@ -87,11 +128,11 @@ def insert_inner_timestamps(text, start_sec, end_sec, next_segment_exists):
         time_to_end = end_sec - sent_start
         
         # Вставляем timestamp если:
-        # 1. НЕ первое предложение (i > 0)
+        # 1. НЕ первое предложение (i > 0) - v16.25!
         # 2. Прошло >= 25 секунд с последнего timestamp
         # 3. И до конца реплики >= 30 секунд (или это последняя реплика файла)
         should_insert = (
-            i > 0 and
+            i > 0 and  # v16.25: КРИТИЧЕСКОЕ! Первое предложение БЕЗ inner timestamp!
             time_since_last >= 25 and 
             (time_to_end >= 30 or not next_segment_exists)
         )
@@ -101,6 +142,10 @@ def insert_inner_timestamps(text, start_sec, end_sec, next_segment_exists):
             # Timestamp ПЕРЕД текстом (без \n!)
             result.append(f" {timestamp_str} {sent_text}")
             last_timestamp_at = sent_start
+            inserted_count += 1
+            
+            if in_target_range:
+                print(f"     ⏰ Вставлен timestamp {timestamp_str} перед предложением #{i}")
         else:
             # Обычное добавление (с пробелом если не первое предложение)
             if i > 0:
@@ -108,11 +153,43 @@ def insert_inner_timestamps(text, start_sec, end_sec, next_segment_exists):
             else:
                 result.append(sent_text)
     
-    return ''.join(result)
+    final_text = ''.join(result)
+    
+    if in_target_range:
+        print(f"\n     ✅ ФИНАЛЬНЫЙ текст после insert_inner_timestamps:")
+        print(f"        Длина: {len(final_text)} символов, {len(final_text.split())} слов")
+        print(f"        Вставлено timestamp: {inserted_count}")
+        print(f"        Начало: \"{final_text[:100]}...\"")
+        print(f"        Конец:  \"...{final_text[-100:]}\"")
+        
+        if target_phrase in final_text.lower():
+            print(f"     ✅ Целевая фраза \"{target_phrase}\" НАЙДЕНА в финальном тексте!")
+        else:
+            print(f"     ❌ Целевая фраза \"{target_phrase}\" ПОТЕРЯНА после обработки!")
+            print(f"     🔍 Проверка где именно пропала фраза...")
+            
+            # Проверяем в каком предложении была фраза
+            for idx, sent in enumerate(sentence_list):
+                if target_phrase in sent.lower():
+                    print(f"        Фраза была в предложении #{idx}: \"{sent[:80]}...\"")
+                    print(f"        Проверяем, попала ли она в result...")
+                    
+                    # Ищем это предложение в result
+                    if any(target_phrase in r.lower() for r in result):
+                        print(f"        ✅ Предложение ЕСТЬ в result!")
+                    else:
+                        print(f"        ❌ Предложение ПОТЕРЯНО при сборке result!")
+    
+    return final_text
 
 def export_to_txt(txt_path, segments, speaker_surname):
     """
     Экспорт одного JSON в TXT
+    
+    Args:
+        txt_path: Path к TXT файлу
+        segments: Список merged сегментов
+        speaker_surname: Фамилия спикера
     """
     with open(txt_path, 'w', encoding='utf-8') as f:
         for i, seg in enumerate(segments):
@@ -130,7 +207,7 @@ def export_to_txt(txt_path, segments, speaker_surname):
                 text, start, end, next_segment_exists
             )
             
-            # Форматируем (БЕЗ УДАЛЕНИЯ inner timestamps!)
+            # Форматируем
             f.write(f"{time} {speaker}: {text_with_timestamps}\n")
     
     return txt_path
@@ -141,6 +218,14 @@ def jsons_to_txt(json_files, txt_path, speaker_surname):
     
     Объединяет все JSON файлы интервью в единый TXT с правильной нумерацией
     и временными метками внутри длинных реплик.
+    
+    Args:
+        json_files: Список Path к JSON файлам
+        txt_path: Path к итоговому TXT файлу
+        speaker_surname: Фамилия спикера
+    
+    Returns:
+        Path к созданному TXT файлу
     """
     print(f"\n📄 {len(json_files)} JSON → {txt_path.name}")
     
@@ -207,8 +292,7 @@ def jsons_to_txt(json_files, txt_path, speaker_surname):
                     next_segment_exists
                 )
                 
-                # Записываем (БЕЗ УДАЛЕНИЯ inner timestamps!)
                 f.write(f"{seg['time']} {seg['speaker']}: {text_with_timestamps}\n")
     
-    print(f" ✅ TXT: {txt_path.name} (v16.33 ОТКАТ)")
+    print(f" ✅ TXT: {txt_path.name} (v16.26 - no duplicate timestamps)")
     return txt_path
