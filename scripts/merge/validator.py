@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 merge/validator.py - Валидация и auto-merge для v16.0
+🆕 v16.40: Ослабленная защита raw_speaker_id для основного спикера
 🆕 v16.0: Проверка raw_speaker_id перед слиянием
 """
 
@@ -55,6 +56,7 @@ def validate_adjacent_same_speaker(merged_segments):
 
 # ═══════════════════════════════════════════════════════════════════════════
 # AUTO-MERGE ADJACENT SAME SPEAKER
+# 🆕 v16.40: Ослабленная защита raw_speaker_id для основного спикера
 # 🆕 v16.0: FIX #4 - Проверка raw_speaker_id
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -62,7 +64,8 @@ def auto_merge_adjacent_same_speaker(merged_segments):
     """
     Безопасное автоматическое слияние соседних реплик одного спикера
 
-    🆕 v16.0: НЕ сливает если raw_speaker_id разные (защита от ошибочной атрибуции)
+    🆕 v16.40: ОСЛАБЛЕННАЯ защита - для основного спикера raw_speaker_id НЕ блокирует merge
+    🆕 v16.0: НЕ сливает если raw_speaker_id разные (защита для Журналиста)
 
     Args:
         merged_segments: Список merged сегментов
@@ -100,13 +103,18 @@ def auto_merge_adjacent_same_speaker(merged_segments):
                     print(f"  🛑 SKIP MERGE: {current['time']}-{next_seg['time']} (другой спикер между)")
                     break
 
-                # 🆕 v16.0: ЗАЩИТА - Не склеивать если raw_speaker_id разные
+                # 🆕 v16.40: ОСЛАБЛЕННАЯ ЗАЩИТА - Для НЕ-Журналиста разные raw_speaker_id OK
                 current_raw_id = current.get("raw_speaker_id")
                 next_raw_id = next_seg.get("raw_speaker_id")
 
                 if current_raw_id and next_raw_id and current_raw_id != next_raw_id:
-                    print(f"  🛡️ SKIP MERGE: {current['time']}-{next_seg['time']} (разные raw_speaker_id)")
-                    break
+                    # Для Журналиста/Оператора - строгая проверка
+                    if current['speaker'] in ("Журналист", "Оператор"):
+                        print(f"  🛡️ SKIP MERGE: {current['time']}-{next_seg['time']} (разные raw_speaker_id для {current['speaker']})")
+                        break
+                    else:
+                        # Для основного спикера (Исаев и т.д.) - разные raw_speaker_id OK
+                        print(f"  ⚠️ {current['time']}-{next_seg['time']}: разные raw_speaker_id ({current_raw_id} vs {next_raw_id}), но speaker={current['speaker']} → merge OK")
 
                 if pause < 5.0:
                     to_merge.append(next_seg)

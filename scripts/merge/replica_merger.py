@@ -360,3 +360,72 @@ def merge_replicas(segments, debug=False):
         print(f"\n✅ merge_replicas завершён: {len(merged)} merged сегментов из {len(segments)} исходных")
 
     return merged
+
+def auto_merge_adjacent_same_speaker(segments, max_pause=5.0, debug=True):
+    """
+    🆕 v16.40: Автоматически склеивает соседние блоки одного спикера
+    
+    Вызывается ПОСЛЕ всех основных этапов, перед экспортом.
+    Решает проблему "adjacent same speaker" когда merge_replicas
+    остановился из-за короткой паузы (2-3s).
+    
+    Args:
+        segments: Список merged segments
+        max_pause: Максимальная пауза для склейки (секунды)
+        debug: Показывать debug output
+    
+    Returns:
+        segments с склеенными соседними блоками одного спикера
+    """
+    if debug:
+        print(f"\n🔗 Auto-merge adjacent same speaker (max_pause={max_pause}s)...")
+    
+    merged_count = 0
+    result = []
+    i = 0
+    
+    while i < len(segments):
+        current_seg = segments[i]
+        
+        # Ищем следующий сегмент того же спикера
+        if i + 1 < len(segments):
+            next_seg = segments[i + 1]
+            
+            # Проверяем условия для склейки
+            same_speaker = current_seg.get('speaker') == next_seg.get('speaker')
+            pause = next_seg.get('start', 0) - current_seg.get('end', 0)
+            
+            if same_speaker and pause <= max_pause:
+                # Склеиваем!
+                merged_text = current_seg.get('text', '').strip() + ' ' + next_seg.get('text', '').strip()
+                
+                merged_seg = {
+                    'time': current_seg.get('time'),
+                    'speaker': current_seg.get('speaker'),
+                    'text': merged_text,
+                    'start': current_seg.get('start'),
+                    'end': next_seg.get('end'),
+                    'raw_speaker_id': current_seg.get('raw_speaker_id'),
+                    'confidence': current_seg.get('confidence', '')
+                }
+                
+                if debug:
+                    print(f"  🔗 {current_seg.get('time')} + {next_seg.get('time')} (пауза {pause:.1f}s)")
+                    print(f"     {current_seg.get('speaker')}: {len(current_seg.get('text', ''))} + {len(next_seg.get('text', ''))} = {len(merged_text)} символов")
+                
+                result.append(merged_seg)
+                merged_count += 1
+                i += 2  # Пропускаем оба сегмента
+                continue
+        
+        # Не склеиваем - добавляем как есть
+        result.append(current_seg)
+        i += 1
+    
+    if debug:
+        if merged_count > 0:
+            print(f"✅ Auto-merged: {merged_count} пар → {len(segments)} → {len(result)} сегментов")
+        else:
+            print(f"✅ Auto-merge не требуется")
+    
+    return result
