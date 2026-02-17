@@ -105,9 +105,20 @@ def detect_continuation_phrase(current_text, previous_texts, threshold=0.90):
 
 def is_continuation_phrase(text):
     """
-    🆕 v16.10: Определяет continuation phrases (продолжение мысли)
+    🆕 v16.39: FIX БАГ #10 - Учитываем timestamps в начале текста
+    
+    **ПРОБЛЕМА v16.37:**
+    Паттерн r'^несмотря\b' НЕ срабатывал для "00:16:06 Несмотря..."
+    Timestamp в начале текста ломает проверку ^
+    
+    **РЕШЕНИЕ v16.39:**
+    Удаляем timestamp ПЕРЕД проверкой continuation patterns
     """
     text_lower = text.lower().strip()
+    
+    # 🆕 v16.39: Удаляем timestamp из начала текста
+    # Формат: "00:12:34 Текст..." или " 00:12:34 Текст..."
+    text_cleaned = re.sub(r'^\s*\d{2}:\d{2}:\d{2}\s+', '', text_lower)
     
     continuation_patterns = [
         r'^то\s+есть\b',
@@ -122,13 +133,12 @@ def is_continuation_phrase(text):
         r'^однако\b',
         r'^тем\s+не\s+менее\b',
         r'^впрочем\b',
-        # 🆕 v16.37: Добавляем continuation стартеры
-        r'^несмотря\b',
+        r'^несмотря\b',  # БЫЛ: не работал с timestamp
         r'^хотя\b',
     ]
     
     for pattern in continuation_patterns:
-        if re.search(pattern, text_lower):
+        if re.search(pattern, text_cleaned):  # 🆕 Используем cleaned text!
             return True
     
     return False

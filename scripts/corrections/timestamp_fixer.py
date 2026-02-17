@@ -1,28 +1,38 @@
 #!/usr/bin/env python3
 """
-corrections/timestamp_fixer.py - Исправление timestamp v16.34
+corrections/timestamp_fixer.py - Исправление timestamp v16.38
 
-🆕 v16.34: FIX БАГ #9 + улучшение логики interval checking
-- Inner timestamp НЕ РАНЬШЕ чем start + interval (30s)
-- Не ставить inner timestamp если до конца < 15s
-- Удаление inner timestamps в TXT export (они не должны быть видны)
+🆕 v16.38: FIX БАГ #9 - Sentence-aware timestamps + gap check
+- Timestamps ВСЕГДА на границах предложений
+- Optimal candidate selection (ближайший к 30s)
+- Gap check между блоками (>45s)
 
-🆕 v16.33: FIX БАГ #11 - Timestamp через raw segments (ТОЧНЫЕ timestamps!)
-- Находим raw segments внутри merged segment
-- Используем raw_segment['start'] напрямую
+ROOT CAUSE (3 проблемы):
+1. Timestamps посередине предложений (6%)
+2. Пропущенные блоки >45s (5 gaps)
+3. Неравномерные интервалы (37-45s вместо ~30s)
+
+РЕШЕНИЕ:
+- find_sentence_boundary_before() из utils.py
+- Выбор ближайшего кандидата к target_time
+- Дополнительная проверка gaps между блоками
 """
 
 import re
-from core.utils import seconds_to_hms
+from core.utils import seconds_to_hms, find_sentence_boundary_before, find_sentence_boundary_after
 
 
 def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=True):
     """
-    🆕 v16.34: ПРАВИЛЬНАЯ логика interval checking
+    🆕 v16.38: SENTENCE-AWARE timestamp injection + gap check
     
-    1. Первый inner timestamp: НЕ РАНЬШЕ чем start + interval (30s)
-    2. Между собой: ~interval (30s) от предыдущего
-    3. От конца: НЕ ставить если до конца < 15s
+    PASS 1: Вставка timestamp ВНУТРИ длинных блоков (>30s)
+    - Находим оптимальные raw segments (ближайшие к 30s)
+    - Вставляем timestamp на границы предложений
+    
+    PASS 2: Gap check МЕЖДУ блоками
+    - Проверяем расстояния между соседними блоками
+    - Если >45s → вставляем дополнительный timestamp
     
     Args:
         segments: Список merged segments
@@ -34,11 +44,15 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
         segments с вставленными timestamp
     """
     if debug:
-        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s) v16.34...")
+        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s) v16.38...")
     
     injection_count = 0
-    skipped_too_close_start = 0
+    skipped_no_boundary = 0
     skipped_too_close_end = 0
+    
+    # ═══════════════════════════════════════════════════════════════════════
+    # PASS 1: ВНУТРИ БЛОКОВ (блоки >30s)
+    # ═══════════════════════════════════════════════════════════════════════
     
     for seg_idx, seg in enumerate(segments):
         start = seg.get('start', 0)
@@ -51,7 +65,7 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
         
         text = seg.get('text', '')
         
-        # 🆕 v16.33: Находим raw segments внутри этого merged segment
+        # Находим raw segments внутри этого merged segment
         raw_segs_in_merge = [
             r for r in segments_raw
             if start <= r['start'] < end
@@ -60,36 +74,54 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
         if not raw_segs_in_merge:
             continue
         
-        # 🆕 v16.34: ПРАВИЛЬНАЯ логика фильтрации кандидатов
+        # 🆕 v16.38: OPTIMAL CANDIDATE SELECTION
+        # Вместо "первого подходящего" → "ближайшего к target_time"
         candidates = []
         last_timestamp = start
         
-        for raw_seg in raw_segs_in_merge:
-            raw_start = raw_seg.get('start', 0)
-            time_since_last = raw_start - last_timestamp
-            time_to_end = end - raw_start
+        while True:
+            target_time = last_timestamp + interval  # Целевое время (30s от последнего)
             
-            # 🆕 v16.34: Условия для вставки:
-            # 1. Расстояние >= interval от последнего timestamp (включая start)
-            # 2. До конца >= 15s (не ставим inner timestamp в самом конце)
-            # 3. Есть текст для поиска
-            if (time_since_last >= interval and 
-                time_to_end >= 15.0 and
-                raw_seg.get('text', '').strip()):
+            if target_time >= end - 15:  # Не ставим timestamp в конце (<15s до end)
+                break
+            
+            # Ищем кандидатов в окне [target-5s, target+10s]
+            window_candidates = []
+            
+            for raw_seg in raw_segs_in_merge:
+                raw_start = raw_seg.get('start', 0)
                 
-                candidates.append(raw_seg)
-                last_timestamp = raw_start
-            else:
-                # Debug почему пропустили
-                if debug and time_since_last >= interval and time_to_end < 15.0:
-                    skipped_too_close_end += 1
-                elif debug and time_since_last < interval:
-                    skipped_too_close_start += 1
+                # Кандидат должен быть:
+                # 1. >= interval от последнего timestamp
+                # 2. В окне допуска [target-5, target+10]
+                # 3. >= 15s до конца блока
+                time_since_last = raw_start - last_timestamp
+                time_to_end = end - raw_start
+                delta_from_target = abs(raw_start - target_time)
+                
+                if (time_since_last >= interval - 5 and 
+                    delta_from_target <= 10 and
+                    time_to_end >= 15.0 and
+                    raw_seg.get('text', '').strip()):
+                    
+                    window_candidates.append((raw_seg, delta_from_target))
+            
+            if not window_candidates:
+                # Нет кандидатов в окне → сдвигаем target дальше
+                last_timestamp = target_time
+                continue
+            
+            # Сортируем по близости к target_time
+            window_candidates.sort(key=lambda x: x[1])
+            best_candidate = window_candidates[0][0]
+            
+            candidates.append(best_candidate)
+            last_timestamp = best_candidate.get('start', 0)
         
         if not candidates:
             continue
         
-        # v16.33: Вставляем timestamps на основе raw segments
+        # 🆕 v16.38: SENTENCE-AWARE INJECTION
         text_parts = []
         current_pos = 0
         
@@ -98,7 +130,6 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
             candidate_start = candidate.get('start', 0)
             
             # Ищем текст raw segment в merged text
-            # Используем первые 50 символов для поиска
             search_text = candidate_text[:50].lower()
             
             # Ищем позицию в тексте
@@ -106,24 +137,45 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
             
             if pos == -1:
                 # Не нашли точное совпадение - пробуем по словам
-                words = search_text.split()[:5]  # Первые 5 слов
+                words = search_text.split()[:5]
                 search_pattern = ' '.join(words)
                 pos = text.lower().find(search_pattern, current_pos)
             
             if pos != -1:
-                # Нашли! Вставляем timestamp перед этим текстом
+                # ✅ ПРОВЕРЯЕМ ГРАНИЦУ ПРЕДЛОЖЕНИЯ
+                # Ищем ближайшую точку ПЕРЕД pos
+                sentence_boundary = find_sentence_boundary_before(text, pos, max_distance=100)
+                
+                if sentence_boundary != -1 and sentence_boundary > current_pos:
+                    # Нашли границу - вставляем ПОСЛЕ точки
+                    inject_pos = sentence_boundary
+                    inject_type = "after ."
+                else:
+                    # Граница далеко/не найдена - ищем границу ПОСЛЕ pos
+                    sentence_boundary_after = find_sentence_boundary_after(text, pos, max_distance=100)
+                    
+                    if sentence_boundary_after != -1 and sentence_boundary_after < len(text):
+                        inject_pos = sentence_boundary_after
+                        inject_type = "after . (next)"
+                    else:
+                        # Нет границ - вставляем перед найденным текстом
+                        inject_pos = pos
+                        inject_type = "before text"
+                        skipped_no_boundary += 1
+                
+                # Создаём timestamp
                 timestamp_str = f" {seconds_to_hms(candidate_start)} "
                 
-                # Добавляем текст до позиции
-                text_parts.append(text[current_pos:pos])
+                # Добавляем текст до inject_pos
+                text_parts.append(text[current_pos:inject_pos])
                 # Добавляем timestamp
                 text_parts.append(timestamp_str)
                 
-                current_pos = pos
+                current_pos = inject_pos
                 injection_count += 1
                 
                 if debug:
-                    print(f"  📌 {seg.get('time', '???')} ({seg.get('speaker')}) → inject {timestamp_str.strip()} (от начала: {candidate_start - start:.1f}s)")
+                    print(f"  📌 {seg.get('time', '???')} ({seg.get('speaker')}) → inject {timestamp_str.strip()} [{inject_type}] (от начала: {candidate_start - start:.1f}s)")
             else:
                 if debug:
                     print(f"  ⏭️ Пропускаем: не нашли текст '{search_text[:30]}...' в merged segment")
@@ -134,15 +186,58 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
         # Обновляем текст сегмента
         seg['text'] = ''.join(text_parts)
     
+    # ═══════════════════════════════════════════════════════════════════════
+    # PASS 2: МЕЖДУ БЛОКАМИ (gaps >45s)
+    # ═══════════════════════════════════════════════════════════════════════
+    
+    if debug:
+        print(f"\n🔍 Gap check между блоками (threshold=45s)...")
+    
+    gap_injections = 0
+    
+    for i in range(len(segments) - 1):
+        current_seg = segments[i]
+        next_seg = segments[i + 1]
+        
+        current_end = current_seg.get('end', 0)
+        next_start = next_seg.get('start', 0)
+        gap = next_start - current_end
+        
+        if gap > 45:
+            # ✅ Большой gap! Вставляем timestamp в начало next_segment
+            # Ищем первое предложение в next_segment
+            next_text = next_seg.get('text', '')
+            
+            # Ищем первую точку
+            first_boundary = find_sentence_boundary_after(next_text, 0, max_distance=200)
+            
+            if first_boundary != -1 and first_boundary < len(next_text):
+                # Вставляем timestamp ПОСЛЕ первой точки
+                timestamp_str = f" {next_seg.get('time', '00:00:00')} "
+                
+                # Проверяем, нет ли уже timestamp в начале
+                if not re.match(r'\s*\d{2}:\d{2}:\d{2}\s', next_text[:20]):
+                    next_seg['text'] = next_text[:first_boundary] + timestamp_str + next_text[first_boundary:]
+                    gap_injections += 1
+                    
+                    if debug:
+                        print(f"  📌 GAP {seconds_to_hms(current_end)} → {seconds_to_hms(next_start)} ({gap:.1f}s) → inject {timestamp_str.strip()} в начало next")
+    
+    # ═══════════════════════════════════════════════════════════════════════
+    # ИТОГИ
+    # ═══════════════════════════════════════════════════════════════════════
+    
     if debug:
         if injection_count > 0:
-            print(f"✅ Вставлено промежуточных timestamp: {injection_count}")
-        if skipped_too_close_start > 0:
-            print(f"⏭️ Пропущено (< {interval}s от предыдущего): {skipped_too_close_start}")
+            print(f"\n✅ PASS 1: Вставлено inner timestamps: {injection_count}")
+        if gap_injections > 0:
+            print(f"✅ PASS 2: Вставлено gap timestamps: {gap_injections}")
+        if skipped_no_boundary > 0:
+            print(f"⚠️ Вставлено БЕЗ sentence boundary: {skipped_no_boundary} (не нашли точку)")
         if skipped_too_close_end > 0:
             print(f"⏭️ Пропущено (< 15s до конца): {skipped_too_close_end}")
-        if injection_count == 0:
-            print(f"✅ Блоков >30s не найдено")
+        if injection_count == 0 and gap_injections == 0:
+            print(f"✅ Timestamp injection не требуется")
     
     return segments
 
