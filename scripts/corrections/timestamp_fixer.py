@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
 """
-corrections/timestamp_fixer.py - Исправление timestamp v16.42
+corrections/timestamp_fixer.py - Исправление timestamp v16.43
+
+🔥 v16.43: FIX БАГ #12 + БАГ #14
+- БАГ #12: Точки без пробелов → ''.join(text_parts) → text_parts.append(' ')
+- БАГ #14: Timestamp >30s → last_timestamp_time глобальный (между сегментами!)
 
 🔥 v16.42: FIX БАГ #14 - Timestamp injection: tracking last_timestamp_time
-- БАГ: time_since_start считался от начала сегмента → timestamp каждые 4-15s
-- FIX: last_timestamp_time tracking → правильный интервал ≥30s
-
 🔥 v16.40: УПРОЩЕНИЕ - Timestamp injection ПОСЛЕ split
-- Split уже разбил текст на предложения с точками
-- Просто вставляем timestamp МЕЖДУ предложениями
-- НЕ НУЖНО искать точку в радиусе 100 символов!
-- Timestamp ВСЕГДА на границе предложений
-
-🆕 v16.39: FIX БАГ #10 - Text-based gap detection
-...
 """
 
 import re
@@ -21,28 +15,40 @@ from core.utils import seconds_to_hms, hms_to_seconds
 
 def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=True):
     """
-    🔥 v16.42: FIX БАГ #14 - Tracking last_timestamp_time для правильного интервала
-    🔥 v16.40: УПРОЩЁННАЯ ВЕРСИЯ - вставка ПОСЛЕ split
+    🔥 v16.43: FIX БАГ #12 + БАГ #14
     
-    **ПРОБЛЕМА v16.40:**
+    **БАГ #12: Точки без пробелов**
+    ПРОБЛЕМА v16.42:
     ```python
-    time_since_start = cumulative_time - start  # ← От НАЧАЛА сегмента!
-    if time_since_start >= interval:
-        # Вставляем timestamp
+    text_parts.append(sent)  # "предложение1."
+    text_parts.append(f" {timestamp} ")  # " 00:01:30 "
+    text_parts.append(sent)  # "предложение2."
+    ''.join(text_parts)  # "предложение1. 00:01:30 предложение2."
+    #                                      ^^^ НЕТ пробела!
     ```
     
-    Результат: timestamp вставлялся КАЖДЫЙ РАЗ когда cumulative_time > start+30,
-    игнорируя расстояние между timestamp! Получалось 4-15s вместо ≥30s.
+    FIX v16.43:
+    Добавляем пробел ПОСЛЕ каждого предложения:
+    text_parts.append(sent + ' ')  # "предложение1. "
     
-    **FIX v16.42:**
-    Добавлена переменная `last_timestamp_time` для tracking последнего timestamp.
-    Проверяем `cumulative_time - last_timestamp_time >= interval`.
+    **БАГ #14: Timestamp интервал > 30s**
+    ПРОБЛЕМА v16.42:
+    ```python
+    for seg in segments:
+        last_timestamp_time = start  # ← Сбрасывается каждый сегмент!
+    ```
     
-    ИЗМЕНЕНИЯ v16.40:
-    - Split УЖЕ разбил на предложения → точки известны
-    - Просто разбиваем text на предложения и вставляем timestamp
-    - НЕ НУЖЕН поиск точки в радиусе 100 символов!
-    - Timestamp ВСЕГДА после точки
+    Если есть несколько коротких сегментов (<30s) подряд:
+    - Seg1 (20s): last_timestamp_time сброшен → НЕТ timestamp
+    - Seg2 (25s): last_timestamp_time сброшен → НЕТ timestamp
+    - Seg3 (30s): last_timestamp_time сброшен → НЕТ timestamp
+    → Накапливается 75s БЕЗ timestamp!
+    
+    FIX v16.43:
+    last_timestamp_time ГЛОБАЛЬНЫЙ (отслеживается между сегментами):
+    - Seg1 (20s): 0s < 30s → НЕТ timestamp, last=20s
+    - Seg2 (25s): 20s < 30s → НЕТ timestamp, last=45s
+    - Seg3 (30s): 45s >= 30s → ЕСТЬ timestamp! ✅
     
     Args:
         segments: Список merged segments (ПОСЛЕ split!)
@@ -54,30 +60,38 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
         segments с вставленными timestamps
     """
     if debug:
-        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s) v16.42...")
+        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s) v16.43...")
     
     injection_count = 0
+    
+    # 🆕 v16.43: ГЛОБАЛЬНЫЙ tracking последнего timestamp (между сегментами!)
+    global_last_timestamp_time = 0
     
     for seg_idx, seg in enumerate(segments):
         start = seg.get('start', 0)
         end = seg.get('end', 0)
         duration = end - start
         
-        # Пропускаем короткие блоки
-        if duration <= interval:
-            continue
+        # 🆕 v16.43: Обновляем global tracking (если сегмент идёт после предыдущего)
+        if seg_idx == 0:
+            global_last_timestamp_time = start
         
         text = seg.get('text', '')
         
         # 🔥 v16.40: УПРОЩЁННОЕ РАЗБИЕНИЕ на предложения
-        # Split УЖЕ сделал это, поэтому у нас короткие сегменты
-        # Но если всё же есть длинные (>30s) - разбиваем здесь
         sentences = re.split(r'([.!?]+)\s+', text)
         sentences = [''.join(sentences[i:i+2]).strip() for i in range(0, len(sentences), 2)]
         sentences = [s for s in sentences if s]
         
         if len(sentences) < 2:
             # Нечего делить - только одно предложение
+            # 🆕 v16.43: Обновляем global tracking для следующего сегмента
+            global_last_timestamp_time = end
+            continue
+        
+        # Короткие сегменты пропускаем (но tracking продолжаем!)
+        if duration <= interval:
+            global_last_timestamp_time = end
             continue
         
         # Находим raw segments внутри этого merged segment
@@ -87,16 +101,15 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
         ]
         
         if not raw_segs_in_merge:
+            global_last_timestamp_time = end
             continue
         
         # Вычисляем пропорциональное время для каждого предложения
         total_chars = sum(len(s) for s in sentences)
         
         if total_chars == 0:
+            global_last_timestamp_time = end
             continue
-        
-        # 🆕 v16.42: Tracking последнего вставленного timestamp
-        last_timestamp_time = start
         
         # Строим карту: позиция конца предложения → timestamp
         sentence_timestamps = []
@@ -106,8 +119,8 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
             sent_duration = (len(sent) / total_chars) * duration
             cumulative_time += sent_duration
             
-            # 🆕 v16.42: Проверяем время от ПОСЛЕДНЕГО timestamp, не от начала!
-            time_since_last_ts = cumulative_time - last_timestamp_time
+            # 🆕 v16.43: Проверяем время от ГЛОБАЛЬНОГО последнего timestamp!
+            time_since_last_ts = cumulative_time - global_last_timestamp_time
             time_to_end = end - cumulative_time
             
             if time_since_last_ts >= interval and time_to_end >= 15:
@@ -120,10 +133,12 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
                 
                 sentence_timestamps.append((sent, seconds_to_hms(closest_raw['start'])))
                 
-                # 🆕 v16.42: ОБНОВЛЯЕМ last_timestamp_time!
-                last_timestamp_time = cumulative_time
+                # 🆕 v16.43: ОБНОВЛЯЕМ ГЛОБАЛЬНЫЙ last_timestamp_time!
+                global_last_timestamp_time = cumulative_time
         
         if not sentence_timestamps:
+            # Timestamp не вставлен, но обновляем tracking
+            global_last_timestamp_time = end
             continue
         
         # Собираем текст с timestamps
@@ -131,14 +146,15 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
         sentence_idx = 0
         
         for sent in sentences:
-            text_parts.append(sent)
+            # 🆕 v16.43: FIX БАГ #12 - Добавляем пробел ПОСЛЕ предложения!
+            text_parts.append(sent + ' ')  # "предложение. "
             
             # Проверяем, нужен ли timestamp после этого предложения
             if sentence_idx < len(sentence_timestamps):
                 target_sent, timestamp = sentence_timestamps[sentence_idx]
                 
                 if sent == target_sent:
-                    text_parts.append(f" {timestamp} ")
+                    text_parts.append(f"{timestamp} ")  # "00:01:30 "
                     injection_count += 1
                     sentence_idx += 1
                     
@@ -146,7 +162,10 @@ def insert_intermediate_timestamps(segments, segments_raw, interval=30.0, debug=
                         print(f"  📌 {seg.get('time', '???')} ({seg.get('speaker')}) → inject {timestamp}")
         
         # Обновляем текст сегмента
-        seg['text'] = ''.join(text_parts)
+        seg['text'] = ''.join(text_parts).strip()  # trim trailing space
+        
+        # 🆕 v16.43: Обновляем global tracking для следующего сегмента
+        global_last_timestamp_time = end
     
     if debug:
         if injection_count > 0:
