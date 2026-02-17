@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-core/utils.py - Утилиты общего назначения для v16.38
+core/utils.py - Утилиты общего назначения для v16.39
 """
 
 import re
@@ -21,6 +21,42 @@ def seconds_to_hms(seconds):
     minutes = (total_seconds % 3600) // 60
     secs = total_seconds % 60
     return f"{hours:02d}:{minutes:02d}:{secs:02d}"
+
+
+def hms_to_seconds(hms):
+    """
+    🆕 v16.39: Конвертирует HH:MM:SS в секунды
+    
+    Args:
+        hms: Строка формата "00:04:30" или "04:30" или "30"
+    
+    Returns:
+        Число секунд (float)
+    
+    Examples:
+        >>> hms_to_seconds("00:04:30")
+        270.0
+        >>> hms_to_seconds("04:30")
+        270.0
+        >>> hms_to_seconds("30")
+        30.0
+    """
+    parts = hms.strip().split(':')
+    
+    if len(parts) == 3:
+        # HH:MM:SS
+        hours, minutes, seconds = int(parts[0]), int(parts[1]), int(parts[2])
+        return hours * 3600 + minutes * 60 + seconds
+    elif len(parts) == 2:
+        # MM:SS
+        minutes, seconds = int(parts[0]), int(parts[1])
+        return minutes * 60 + seconds
+    elif len(parts) == 1:
+        # SS
+        return int(parts[0])
+    else:
+        raise ValueError(f"Invalid time format: {hms}")
+
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ТЕКСТОВОЕ СХОДСТВО
