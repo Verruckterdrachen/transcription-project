@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-corrections/boundary_fixer.py - Boundary correction v16.23
+corrections/boundary_fixer.py - Boundary correction v16.37
 
+🔥 v16.37: КРИТИЧЕСКИЙ FIX БАГ #8.1 - Приоритет continuation ПЕРЕД journalist markers
 🆕 v16.23: КРИТИЧЕСКИЙ FIX БАГ #4 - Raw speaker ID маппинг в split
 🆕 v16.19: КРИТИЧЕСКИЙ FIX БАГ #3 - Повышен порог similarity с 80% до 90%
 🔥 v16.16: КРИТИЧЕСКИЙ FIX - Word Boundary в regex паттернах!
@@ -121,6 +122,9 @@ def is_continuation_phrase(text):
         r'^однако\b',
         r'^тем\s+не\s+менее\b',
         r'^впрочем\b',
+        # 🆕 v16.37: Добавляем continuation стартеры
+        r'^несмотря\b',
+        r'^хотя\b',
     ]
     
     for pattern in continuation_patterns:
@@ -238,21 +242,26 @@ def boundary_correction_raw(segments_raw, speaker_surname, speaker_roles):
 
 def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles, debug=True):
     """
+    🔥 v16.37: КРИТИЧЕСКИЙ FIX БАГ #8.1 - Приоритет continuation ПЕРЕД journalist markers
     🆕 v16.24.1: FIX #2 - Neutral фразы возвращаются к original speaker
     🆕 v16.23: КРИТИЧЕСКИЙ FIX БАГ #4 - Правильный raw_speaker_id маппинг!
     
-    **ПРОБЛЕМА v16.23:**
-    При split neutral фраза наследовала current_speaker вместо original_speaker.
+    **ПРОБЛЕМА v16.36:**
+    Когда предложение имеет ОДНОВРЕМЕННО:
+    - Continuation marker ("несмотря") = True
+    - Journalist marker ("давайте") = True
     
-    Пример:
-    Сегмент: speaker="Исаев"
-    1. "Первое предложение" → Исаев
-    2. "Расскажите" → Журналист (split)
-    3. "Третье предложение" (neutral) → наследовало "Журналист" ❌
+    Проверка `if is_journalist_sent:` выполнялась ПЕРВОЙ!
+    Результат: continuation игнорировался, фраза становилась Журналистом.
     
-    **РЕШЕНИЕ v16.24.1:**
-    Запоминаем original_speaker = speaker в начале обработки сегмента.
-    Neutral фразы используют original_speaker вместо current_speaker.
+    **РЕШЕНИЕ v16.37:**
+    Изменён ПОРЯДОК ПРОВЕРОК:
+    1. ✅ Сначала continuation (ПРИОРИТЕТ!)
+    2. ✅ Потом journalist/expert markers
+    3. ✅ Потом neutral
+    
+    **ROOT CAUSE:**
+    ПРИОРИТЕТ ПРОВЕРОК НЕПРАВИЛЬНЫЙ: Journalist/Expert проверялись ДО continuation
     
     Args:
         segments_merged: Список merged сегментов
@@ -263,7 +272,7 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
     Returns:
         Список сегментов с разделенными mixed-speaker блоками
     """
-    print("\n✂️ Разделение mixed-speaker сегментов...")
+    print("\n✂️ Разделение mixed-speaker сегментов (v16.37: приоритет continuation)...")
     
     # v16.23: УЛУЧШЕННЫЙ МАППИНГ - имена + роли → raw_speaker_id
     reverse_roles = {}
@@ -338,18 +347,13 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
                 print(f"    [{sent_idx+1}] \"{sentence[:60]}...\"")
                 print(f"        Journalist={is_journalist_sent} | Expert={is_expert_sent} | Continuation={is_continuation}")
             
-            # ПРАВИЛЬНАЯ ЛОГИКА ОПРЕДЕЛЕНИЯ СПИКЕРА
+            # 🔥 v16.37: ПРАВИЛЬНЫЙ ПОРЯДОК ПРОВЕРОК!
+            # Continuation checks ПЕРВЫМИ (до journalist/expert markers)
             sentence_speaker = None
             reason = ""
             
-            if is_journalist_sent:
-                sentence_speaker = "Журналист"
-                reason = "is_journalist_phrase=True"
-            elif is_expert_sent:
-                sentence_speaker = speaker_surname
-                reason = "is_expert_phrase=True"
-            elif is_continuation:
-                # CONTINUATION PHRASE LOGIC
+            if is_continuation:
+                # 🔥 v16.37: CONTINUATION ИМЕЕТ ПРИОРИТЕТ!
                 current_group_words = sum(len(s.split()) for s in current_group)
                 
                 if current_group_words > 80:
@@ -361,6 +365,17 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
                 else:
                     sentence_speaker = current_speaker
                     reason = f"continuation + inherit ({current_group_words} слов)"
+            
+            elif is_journalist_sent:
+                # Journalist markers ВТОРЫЕ
+                sentence_speaker = "Журналист"
+                reason = "is_journalist_phrase=True"
+            
+            elif is_expert_sent:
+                # Expert markers ТРЕТЬИ
+                sentence_speaker = speaker_surname
+                reason = "is_expert_phrase=True"
+            
             else:
                 # 🆕 v16.24.1: Нейтральная фраза - возвращаемся к ИСХОДНОМУ спикеру
                 sentence_speaker = original_speaker
