@@ -79,9 +79,15 @@ text
 - Коммитишь, когда всё GREEN
 
 **Я (AI):**
-- Читаю docs/ перед каждой сессией
-- Присылаю: полный код изменённых `scripts/*.py` + `VERSION.md` (шапка) + `KNOWN-ISSUES.md` (при закрытии бага)
-- НЕ коммичу, НЕ пишу unit-тесты, НЕ обновляю docs/ до GREEN
+- Читаю docs/ перед каждой сессией (порядок: VERSION.md → KNOWN-ISSUES.md → WORKFLOW.md)
+- **ДО real test:** присылаю только `scripts/*.py` (полностью)
+- **ПОСЛЕ GREEN:** присылаю:
+  - `docs/VERSION.md` (полностью, ~30 строк)
+  - `docs/KNOWN-ISSUES.md` (полностью)
+  - `docs/CHANGELOG.md` (только новый блок — prepend в начало)
+  - Git команды для коммита
+- НЕ коммичу сам, НЕ пишу unit-тесты, НЕ обновляю docs/ до GREEN
+- Подробный формат отправки → см. `INTEGRATION-CHECKLIST.md` раздел 2.8
 
 ---
 
