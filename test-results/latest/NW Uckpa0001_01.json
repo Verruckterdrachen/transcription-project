@@ -9,7 +9,7 @@
   "gaps_final": 5,
   "retry_added": 5,
   "speaker_identification": "v16.0-modular",
-  "pipeline_version": "16.44",
+  "pipeline_version": "17.1-debug",
   "params": {
     "model_name": "large-v3-turbo",
     "language": "ru",
