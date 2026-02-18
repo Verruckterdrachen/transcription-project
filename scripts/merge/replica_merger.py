@@ -1,6 +1,7 @@
 """
 merge/replica_merger.py - Склейка реплик одного спикера
 
+🆕 v17.4: FIX БАГ #17 - Дубли слов на стыках при склейке
 🆕 v16.22: FIX БАГ #3 - Loop artifacts с вариациями слов
 🆕 v16.21: CRITICAL FIX - Infinite Loop в overlap handling
 🆕 v16.20: DEBUG OUTPUT для диагностики зависания
@@ -11,9 +12,11 @@ from difflib import SequenceMatcher
 import re
 from core.utils import seconds_to_hms
 from corrections.hallucinations import clean_hallucinations_from_text
+from merge.deduplicator import join_texts_deduplicated
 
 def clean_loops(text, debug=False):
     """
+    🆕 v17.3: FIX БАГ #16 (v17.2) - Увеличение LOOP_WINDOW до 30
     🆕 v17.2: FIX БАГ #16 - Ограничение окна seen[] для loop detection
     🆕 v16.22: FIX БАГ #3 - Детекция вариаций с fuzzy matching
     🔧 v16.1: Удаляет зацикленные фразы (loop artifacts)
@@ -29,8 +32,8 @@ def clean_loops(text, debug=False):
     Настоящий Whisper loop — это повтор через ~10-20 слов,
     НЕ через 60+ слов. Большое расстояние = новая мысль.
 
-    **FIX v17.2:**
-    seen[] хранит только последние LOOP_WINDOW=20 фраз (~60 слов).
+    **FIX v17.3:**
+    seen[] хранит только последние LOOP_WINDOW=30 фраз (~90 слов).
     Фразы дальше этого окна не считаются повторами.
 
     Args:
@@ -40,8 +43,8 @@ def clean_loops(text, debug=False):
     Returns:
         Очищенный текст без loop artifacts
     """
-    # Максимальное кол-во 3-словных фраз в окне сравнения (~60 слов)
-    LOOP_WINDOW = 20
+    # Максимальное кол-во 3-словных фраз в окне сравнения (~90 слов)
+    LOOP_WINDOW = 30
 
     if debug:
         print(f"    🧹 clean_loops: обработка текста ({len(text)} символов, {len(text.split())} слов)")
@@ -76,7 +79,7 @@ def clean_loops(text, debug=False):
             i += 1
             continue
 
-        # 🆕 v17.2: Добавляем фразу в seen с ограничением окна
+        # 🆕 v17.3: Добавляем фразу в seen с ограничением окна
         seen.append(phrase_lower)
         if len(seen) > LOOP_WINDOW:
             seen.pop(0)  # Удаляем самую старую фразу
@@ -97,6 +100,7 @@ def clean_loops(text, debug=False):
 
 def merge_replicas(segments, debug=False):
     """
+    🆕 v17.4: FIX БАГ #17 - join_texts_deduplicated вместо ' '.join
     🆕 v16.28.2: ДЕТАЛЬНЫЙ DEBUG для поиска потери текста
     🆕 v16.23: ОСЛАБЛЕНИЕ ЗАЩИТЫ v16.0 для БАГ #4
     🆕 v16.21: CRITICAL FIX - Infinite Loop в overlap handling
@@ -113,8 +117,8 @@ def merge_replicas(segments, debug=False):
     i = 0
     merge_count = 0
     
-    # 🆕 v16.28.2: Целевой диапазон для детального tracking
-    TARGET_RANGE = (150, 280)  # 00:04:29 = 269 секунд
+    # 🆕 v17.4: Целевой диапазон для БАГ #17 (00:09:54 = 594 секунды)
+    TARGET_RANGE = (590, 600)
 
     while i < len(segments):
         merge_count += 1
@@ -131,17 +135,17 @@ def merge_replicas(segments, debug=False):
         # Собираем ВСЕ сегменты группы
         all_segments_in_group = [current]
         
-        # 🆕 v16.28.2: Проверка - попадает ли этот merge в целевой диапазон?
+        # 🆕 v17.4: Проверка - попадает ли этот merge в целевой диапазон БАГ #17?
         in_target_range = (start_time <= TARGET_RANGE[1] and current_end >= TARGET_RANGE[0])
 
         if debug or in_target_range:
             print(f"\n  🔀 MERGE #{merge_count}: {current.get('start_hms', seconds_to_hms(start_time))} {current_speaker} — начало")
             if in_target_range:
-                print(f"     🎯 TARGET RANGE DETECTED! (ищем 00:04:29)")
+                print(f"     🎯 TARGET RANGE БАГ #17 DETECTED! (ищем 00:09:54)")
         else:
             print(f"  🔀 {current.get('start_hms', seconds_to_hms(start_time))} {current_speaker} — начало merge")
         
-        # 🆕 v16.28.2: Показываем первый сегмент
+        # 🆕 v17.4: Показываем первый сегмент
         if in_target_range:
             print(f"     📝 Сегмент #0: [{seconds_to_hms(current['start'])}-{seconds_to_hms(current['end'])}]")
             print(f"        Текст: \"{current['text'][:80]}...\"")
@@ -153,7 +157,7 @@ def merge_replicas(segments, debug=False):
         # Ищем соседние сегменты того же спикера
         j = i + 1
         merge_continue = True
-        segment_index = 1  # 🆕 v16.28.2: Счётчик сегментов
+        segment_index = 1
 
         while j < len(segments) and merge_continue:
             iteration_count += 1
@@ -193,7 +197,6 @@ def merge_replicas(segments, debug=False):
                         texts[-1] = next_seg['text']
                         all_segments_in_group[-1] = next_seg
                         
-                        # 🆕 v16.28.2: Debug замены
                         if in_target_range:
                             print(f"     🔄 Сегмент #{segment_index-1} ЗАМЕНЁН (дубликат, более длинный)")
                             print(f"        Новый текст: \"{next_seg['text'][:80]}...\"")
@@ -207,7 +210,6 @@ def merge_replicas(segments, debug=False):
                     texts.append(next_seg['text'])
                     all_segments_in_group.append(next_seg)
                     
-                    # 🆕 v16.28.2: Debug добавления
                     if in_target_range:
                         print(f"     ➕ Сегмент #{segment_index}: [{seconds_to_hms(next_seg['start'])}-{seconds_to_hms(next_seg['end'])}] (overlap, sim={sim:.2f})")
                         print(f"        Текст: \"{next_seg['text'][:80]}...\"")
@@ -222,7 +224,6 @@ def merge_replicas(segments, debug=False):
                     texts.append(next_seg['text'])
                     all_segments_in_group.append(next_seg)
                     
-                    # 🆕 v16.28.2: Debug добавления
                     if in_target_range:
                         print(f"     ➕ Сегмент #{segment_index}: [{seconds_to_hms(next_seg['start'])}-{seconds_to_hms(next_seg['end'])}] (overlap {abs(pause):.1f}s)")
                         print(f"        Текст: \"{next_seg['text'][:80]}...\"")
@@ -244,7 +245,6 @@ def merge_replicas(segments, debug=False):
                         texts.append(next_seg['text'])
                         all_segments_in_group.append(next_seg)
                         
-                        # 🆕 v16.28.2: Debug добавления
                         if in_target_range:
                             print(f"     ➕ Сегмент #{segment_index}: [{seconds_to_hms(next_seg['start'])}-{seconds_to_hms(next_seg['end'])}] (пауза {pause:.1f}s)")
                             print(f"        Текст: \"{next_seg['text'][:80]}...\"")
@@ -259,7 +259,6 @@ def merge_replicas(segments, debug=False):
                         texts.append(next_seg['text'])
                         all_segments_in_group.append(next_seg)
                         
-                        # 🆕 v16.28.2: Debug добавления
                         if in_target_range:
                             print(f"     ➕ Сегмент #{segment_index}: [{seconds_to_hms(next_seg['start'])}-{seconds_to_hms(next_seg['end'])}] (пауза {pause:.1f}s, similarity)")
                             print(f"        Текст: \"{next_seg['text'][:80]}...\"")
@@ -290,7 +289,7 @@ def merge_replicas(segments, debug=False):
                         merge_continue = False
                         break
 
-        # 🆕 v16.28.2: Итоговая статистика склеенных сегментов
+        # 🆕 v17.4: Итоговая статистика склеенных сегментов
         total_words = sum(len(t.split()) for t in texts)
         if in_target_range:
             print(f"\n     📊 Всего собрано: {len(texts)} сегментов, {total_words} слов")
@@ -304,12 +303,15 @@ def merge_replicas(segments, debug=False):
         if len(all_segments_in_group) > 1:
             print(f"    🎯 Доминирующий: {dominant_segment.get('speaker')} / {dominant_segment.get('raw_speaker_id')} (длина: {len(dominant_segment.get('text', ''))} символов)")
 
-        # Склеиваем тексты
-        final_text = ' '.join(texts)
+        # 🆕 v17.4: Склеиваем тексты через join_texts_deduplicated (FIX БАГ #17)
+        if in_target_range or debug:
+            print(f"    🔗 Вызов join_texts_deduplicated для {len(texts)} текстов...")
         
-        # 🆕 v16.28.2: Показываем текст ДО очистки
+        final_text = join_texts_deduplicated(texts, debug=(in_target_range or debug))
+        
+        # 🆕 v17.4: Показываем текст ПОСЛЕ склейки
         if in_target_range:
-            print(f"\n     📝 Склеенный текст ДО очистки ({len(final_text)} символов, {len(final_text.split())} слов):")
+            print(f"\n     📝 После join_texts_deduplicated ({len(final_text)} символов, {len(final_text.split())} слов):")
             print(f"        Начало: \"{final_text[:100]}...\"")
             print(f"        Конец:  \"...{final_text[-100:]}\"")
         
@@ -319,7 +321,6 @@ def merge_replicas(segments, debug=False):
         
         final_text = clean_loops(final_text, debug=(debug or in_target_range))
         
-        # 🆕 v16.28.2: Показываем текст ПОСЛЕ clean_loops
         if in_target_range:
             print(f"\n     📝 После clean_loops ({len(final_text)} символов, {len(final_text.split())} слов):")
             print(f"        Начало: \"{final_text[:100]}...\"")
@@ -330,18 +331,17 @@ def merge_replicas(segments, debug=False):
         
         final_text = clean_hallucinations_from_text(final_text, current_speaker, debug=(debug or in_target_range))
         
-        # 🆕 v16.28.2: Показываем ФИНАЛЬНЫЙ текст
+        # 🆕 v17.4: Показываем ФИНАЛЬНЫЙ текст
         if in_target_range:
             print(f"\n     ✅ ФИНАЛЬНЫЙ текст ({len(final_text)} символов, {len(final_text.split())} слов):")
             print(f"        Начало: \"{final_text[:100]}...\"")
             print(f"        Конец:  \"...{final_text[-100:]}\"")
             
-            # Проверяем наличие целевой фразы
-            target_phrase = "то есть это был такой пункт"
-            if target_phrase in final_text.lower():
-                print(f"        ✅ Целевая фраза \"{target_phrase}\" НАЙДЕНА!")
+            # Проверяем наличие дубля «достаточно Достаточно»
+            if "достаточно достаточно" in final_text.lower():
+                print(f"        ❌ ДУБЛЬ «достаточно Достаточно» ВСЁ ЕЩЁ ЕСТЬ!")
             else:
-                print(f"        ❌ Целевая фраза \"{target_phrase}\" НЕ НАЙДЕНА!")
+                print(f"        ✅ Дубль «достаточно Достаточно» УСТРАНЁН!")
         elif debug:
             print(f"    ✅ Очистка завершена, финальный текст: {len(final_text)} символов")
 
