@@ -2,6 +2,7 @@
 """
 core/transcription.py - Транскрибация аудио с Whisper
 
+🔥 v17.2: FIX БАГ #15 - GAP текст overlap с next segment
 🆕 v16.5: Smart GAP Attribution - умная атрибуция GAP_FILLED по семантическому сходству
 🆕 v16.3.2: Gap speaker detection - определение спикера по окружению
 🆕 v16.2: Исправлен синтаксис itertracks() в force_transcribe_diar_gaps
@@ -102,8 +103,70 @@ def detect_speaker_for_gap(existing_segments, gap_start, gap_end, speaker_surnam
     return 'Неизвестно'
 
 
+def _remove_gap_overlap_with_next(gap_text, next_text, max_check_words=5):
+    """
+    🔥 v17.2: FIX БАГ #15 - Удаление trailing overlap из GAP текста
+    
+    После force-transcribe GAP может захватить начало next segment из-за обрезки.
+    Whisper транскрибирует с запасом, но GAP обрезается до adjusted_end.
+    Результат: хвост GAP дублирует начало next (или содержит фрагменты слов).
+    
+    Примеры:
+    - GAP: "...достаточно шум" + NEXT: "достаточно шаткую..." → remove "достаточно шум"
+    - GAP: "...вправь до" + NEXT: "еще фактором..." → remove "до" (фрагмент)
+    
+    Args:
+        gap_text: Текст из заполненного GAP
+        next_text: Текст из следующего existing segment
+        max_check_words: Максимум слов для проверки overlap (default=5)
+    
+    Returns:
+        gap_text с удалённым trailing overlap
+    """
+    if not gap_text or not next_text:
+        return gap_text
+    
+    gap_words = gap_text.strip().split()
+    next_words = next_text.strip().split()
+    
+    if not gap_words or not next_words:
+        return gap_text
+    
+    # Normalize для сравнения (lowercase, без пунктуации)
+    def normalize(word):
+        return word.lower().strip('.,!?;:«»"()-–')
+    
+    next_head = [normalize(w) for w in next_words[:max_check_words]]
+    
+    # 1. Проверяем точное совпадение слов в конце GAP с началом NEXT
+    for n in range(min(max_check_words, len(gap_words)), 0, -1):
+        gap_tail = [normalize(w) for w in gap_words[-n:]]
+        
+        if gap_tail == next_head[:n]:
+            # Полное совпадение n слов - удаляем их
+            result = ' '.join(gap_words[:-n]).strip()
+            print(f"     🔧 Removed {n} overlapping words from GAP: {' '.join(gap_words[-n:])}")
+            return result
+    
+    # 2. Проверяем последнее слово GAP - возможно это фрагмент
+    last_word = normalize(gap_words[-1])
+    
+    # Если последнее слово очень короткое (≤3 символа) - вероятно обрезанный фрагмент
+    if len(last_word) <= 3:
+        first_next = next_head[0] if next_head else ""
+        
+        # Если это НЕ начало слова из next - скорее всего галлюцинация/фрагмент
+        if first_next and not first_next.startswith(last_word):
+            result = ' '.join(gap_words[:-1]).strip()
+            print(f"     🔧 Removed fragment from GAP end: '{gap_words[-1]}' (likely cut-off or hallucination)")
+            return result
+    
+    return gap_text
+
+
 def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker_surname=None):
     """
+    🔥 v17.2: FIX БАГ #15 - Удаление overlap GAP текста с next segment
     🆕 v16.8: GAP Overlap Protection - обрезка при пересечении с соседними
     🆕 v16.5: Smart GAP Attribution - умная атрибуция по семантическому сходству
     🆕 v16.3.2: Gap speaker detection добавлен
@@ -111,6 +174,11 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
 
     Повторно транскрибирует пропущенные участки (gaps) используя
     данные диаризации. Использует более мягкие параметры Whisper.
+    
+    🔥 v17.2 ИЗМЕНЕНИЯ (БАГ #15):
+    - После заполнения GAP удаляем trailing overlap с next segment
+    - Фикс "достаточно шум" → удаление дубля "достаточно" и галлюцинации "шум"
+    - Фикс фрагментов ("до", "ш", "п") которые остаются после обрезки
     
     🆕 v16.8 ИЗМЕНЕНИЯ:
     - GAP overlap detection с предыдущими GAP и существующими сегментами
@@ -212,6 +280,20 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
                     # 4. Показываем adjustment если был
                     if seg_start != original_start or seg_end != original_end:
                         print(f"     🔧 Adjusted: {original_start:.2f}-{original_end:.2f} → {seg_start:.2f}-{seg_end:.2f}")
+
+                    # ═══════════════════════════════════════════════════════
+                    # 🔥 v17.2: FIX БАГ #15 - REMOVE GAP TEXT OVERLAP
+                    # ═══════════════════════════════════════════════════════
+                    
+                    # Если GAP был обрезан (adjusted_end) - проверяем текст на overlap
+                    if next_existing and seg_end != original_end:
+                        next_text = next_existing.get('text', '')
+                        text = _remove_gap_overlap_with_next(text, next_text, max_check_words=5)
+                        
+                        # Если после удаления overlap текст стал пустым - пропускаем
+                        if not text.strip():
+                            print(f"     ⚠️ GAP text empty after overlap removal, skipping")
+                            continue
 
                     # ═══════════════════════════════════════════════════════
                     # 🆕 v16.5: УМНАЯ АТРИБУЦИЯ GAP_FILLED
