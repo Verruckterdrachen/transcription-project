@@ -85,6 +85,7 @@ Thumbs.db
 desktop.ini
 
 !golden-dataset/**/*.log
+scripts/transcription_debug.log
 
 # ═══════════════════════════════════════════════════════════════
 # Git
