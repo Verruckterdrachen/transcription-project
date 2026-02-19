@@ -226,8 +226,8 @@ class TeeOutput:
 # ВЕРСИЯ
 # ═══════════════════════════════════════════════════════════════════════════
 
-VERSION = "17.7"
-VERSION_NAME = "FIX БАГ #25 - GAP pyannote overlap attribution + text override"
+VERSION = "17.8"
+VERSION_NAME = "FIX БАГ #26 - speaker_surname в TXT вместо 'Спикер'"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ PIPELINE
@@ -412,7 +412,7 @@ def process_audio_file(
     # ЭТАП 3: ВЫРАВНИВАНИЕ С ДИАРИЗАЦИЕЙ
     # ═══════════════════════════════════════════════════════════════════════
     # Определяем роли спикеров
-    speaker_roles = identify_speaker_roles(stats, result["segments"])
+    speaker_roles = identify_speaker_roles(stats, result["segments"], speaker_surname)
 
     # Выравниваем
     segments_raw = align_whisper_with_diarization(

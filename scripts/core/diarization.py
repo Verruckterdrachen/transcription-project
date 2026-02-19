@@ -1,6 +1,8 @@
+#!/usr/bin/env python3
 """
 core/diarization.py - Диаризация аудио (speaker diarization)
 
+🔧 v17.8: FIX БАГ #26 - "Спикер" вместо speaker_surname в TXT
 v16.0 - Оригинальная версия с правильным синтаксисом itertracks()
 """
 
@@ -106,18 +108,25 @@ def align_segment_to_diarization(start, end, diarization):
 
     return None, 0
 
-def identify_speaker_roles(stats, all_segments_raw):
+def identify_speaker_roles(stats, all_segments_raw, speaker_surname=None):
     """
-    Определяет роли спикеров (Спикер, Журналист, Оператор)
+    🔧 v17.8: FIX БАГ #26 - Использование speaker_surname вместо "Спикер"
+    
+    Определяет роли спикеров (speaker_surname/Спикер, Журналист, Оператор)
 
     Args:
         stats: Статистика времени говорения
         all_segments_raw: Все raw сегменты после транскрибации
+        speaker_surname: Фамилия главного спикера (NEW v17.8)
 
     Returns:
         dict: {speaker_id: role_name}
     """
     print("\n🎭 Определение ролей спикеров...")
+    
+    # 🆕 v17.8: Используем speaker_surname если передан
+    main_speaker_role = speaker_surname if speaker_surname else "Спикер"
+    print(f"  📝 Главный спикер будет: '{main_speaker_role}'")
 
     # Паттерны для определения Оператора
     OPERATOR_PATTERNS = r'(?:' \
@@ -189,16 +198,16 @@ def identify_speaker_roles(stats, all_segments_raw):
 
     # Случай 1: Ровно 2 спикера
     if len(sorted_speakers) == 2:
-        roles[sorted_speakers[0][0]] = "Спикер"
+        roles[sorted_speakers[0][0]] = main_speaker_role  # 🔧 v17.8: было "Спикер"
         roles[sorted_speakers[1][0]] = "Журналист"
-        print(f"  ✅ 2 спикера: {sorted_speakers[0][0]}=Спикер, {sorted_speakers[1][0]}=Журналист")
+        print(f"  ✅ 2 спикера: {sorted_speakers[0][0]}={main_speaker_role}, {sorted_speakers[1][0]}=Журналист")
         return roles
 
     # Случай 2: 3+ спикера
     if len(sorted_speakers) >= 3:
         # Главный спикер - тот кто больше всех говорил
         main_speaker_id = sorted_speakers[0][0]
-        roles[main_speaker_id] = "Спикер"
+        roles[main_speaker_id] = main_speaker_role  # 🔧 v17.8: было "Спикер"
 
         # Ищем Оператора среди остальных
         operator_candidate = None

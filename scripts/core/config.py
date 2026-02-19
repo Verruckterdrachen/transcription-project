@@ -11,8 +11,8 @@ from pathlib import Path
 # ВЕРСИЯ
 # ═══════════════════════════════════════════════════════════════════════════
 
-VERSION = "16.7"
-VERSION_NAME = "Auto Test-Results Copy"
+VERSION = "17.8"
+VERSION_NAME = "FIX БАГ #26 - speaker_surname в TXT вместо 'Спикер'"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # HUGGING FACE TOKEN
