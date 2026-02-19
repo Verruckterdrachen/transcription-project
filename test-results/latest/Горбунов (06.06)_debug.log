@@ -2,7 +2,7 @@ Token will not been saved to git credential helper. Pass `add_to_git_credential=
 Token is valid (permission: fineGrained).
 Your token has been saved to C:\Users\wings\.cache\huggingface\token
 Login successful
-🔥 ПАЙПЛАЙН v17.1-debug: DEBUG БАГ #15 - Пропуск 'прорыв блокады' на 00:02:26
+🔥 ПАЙПЛАЙН v17.4: FIX БАГ #21, #24 - False positive is_journalist_phrase
 GPU: ✅ CUDA
 ======================================================================
 
@@ -17,13 +17,13 @@ GPU: ✅ CUDA
 📁 txt/:   ..\interview\2025\Неизвестные сражения\1 серия (Операция Искра)\Горбунов (06.06) 1\txt
 
 ⚙️ Режим [точный]: 
-🚀 Режим: точный (v17.1-debug)
+🚀 Режим: точный (v17.4)
 
 🤖 Загрузка Whisper large-v3-turbo...
 ✅ Whisper готов
 
 👤 'Горбунов (06.06) 1' → Горбунов (06.06).txt
-🤖 large-v3-turbo + pyannote v17.1-debug...
+🤖 large-v3-turbo + pyannote v17.4...
 
 ✅ Найдено WAV: 1
 
@@ -103,7 +103,7 @@ GPU: ✅ CUDA
   🔍 SPEAKER_01 [00:13:15-00:13:59] 44.2s
   🔍 SPEAKER_00 [00:13:42-00:13:43] 0.4s
   🔍 SPEAKER_00 [00:13:58-00:13:58] 0.6s
-  👥 Спикеров: 2, ['SPEAKER_01', 'SPEAKER_00']
+  👥 Спикеров: 2, ['SPEAKER_00', 'SPEAKER_01']
   📊 Stats: {'SPEAKER_01': 766.723259762309, 'SPEAKER_00': 66.92699490662099}
 📏 Адаптивный VAD: 0.75
   🎙️ Whisper транскрибация WW Finl.0024_01.wav...
@@ -1081,7 +1081,7 @@ GPU: ✅ CUDA
 
 ✂️ Разделение mixed-speaker сегментов (v16.21)...
 
-✂️ Разделение mixed-speaker сегментов...
+✂️ Разделение mixed-speaker сегментов (v17.4)...
   🔗 Маппинг: "Горбунов" → SPEAKER_01
   📋 Reverse roles: {'Спикер': 'SPEAKER_01', 'Журналист': 'SPEAKER_00', 'Горбунов': 'SPEAKER_01'}
 
@@ -1091,9 +1091,11 @@ GPU: ✅ CUDA
         → SPEAKER: Горбунов (neutral (return to original))
     [2] "Андрей Горбунов, заместитель директора по научной работе муз..."
         Journalist=False | Expert=True | Continuation=False
+        Context: 1 слов накоплено
         → SPEAKER: Горбунов (is_expert_phrase=True)
     [3] "Можно просто ММК жизни»...."
         Journalist=False | Expert=False | Continuation=False
+        Context: 12 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
 
   🔍 АНАЛИЗ СЕГМЕНТА: 00:00:17 (Журналист) — 2 предложений
@@ -1102,6 +1104,7 @@ GPU: ✅ CUDA
         → SPEAKER: Журналист (neutral (return to original))
     [2] "Мы также и оставляем на ВИПах...."
         Journalist=False | Expert=False | Continuation=False
+        Context: 9 слов накоплено
         → SPEAKER: Журналист (neutral (return to original))
 
   🔍 АНАЛИЗ СЕГМЕНТА: 00:00:22 (Журналист) — 4 предложений
@@ -1110,12 +1113,15 @@ GPU: ✅ CUDA
         → SPEAKER: Журналист (neutral (return to original))
     [2] "Первый вопрос..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 5 слов накоплено
         → SPEAKER: Журналист (neutral (return to original))
     [3] "С какой целью был занят Толстан-Невский Пятачок по Ленинград..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 7 слов накоплено
         → SPEAKER: Журналист (neutral (return to original))
     [4] "И как вы его пытались использовать в ноябре и декабре 1941 г..."
         Journalist=True | Expert=False | Continuation=False
+        Context: 16 слов накоплено
         → SPEAKER: Журналист (is_journalist_phrase=True)
 
   🔍 АНАЛИЗ СЕГМЕНТА: 00:00:36 (Горбунов) — 24 предложений
@@ -1124,78 +1130,98 @@ GPU: ✅ CUDA
         → SPEAKER: Горбунов (neutral (return to original))
     [2] "Это река Нева..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 31 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [3] "Ленинград в полной блокаде немцы сразу же начинают накрывать..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 34 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [4] "Но в целом все было очень тяжело, и нужно было срочно блокад..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 65 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [5] "Для этого была проведена в октябре операция, получившая назв..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 78 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [6] "Шансы были, но использовали немножко не так и танковую брига..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 91 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [7] "Следующая попытка, она была сделана войсками Ленинградского ..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 110 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [8] "Следующий шаг, это 2-я Синявинская операция, когда попыталис..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 149 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [9] "Другое дело, что Ленинградский фронт был не готов, и поэтому..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 167 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [10] "Сначала наступают с запада, немцы отбиваются, потом..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 184 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [11] "Не с востока, если я сейчас скажу..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 191 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [12] "Переговорить..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 198 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [13] "Да..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 199 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [14] "Вторая попытка снятия блокады города, уже с использованием П..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 200 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [15] "У Кулика ничего не получилось, хотя опять-таки шанс был..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 257 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [16] "И вот тут становится ясно, что, в общем-то, Пятачок это посл..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 266 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [17] "Из него начинаются яростные атаки, туда вводят танки, в отве..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 278 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [18] "Поднимают, из тепла у нем-то перебрасывают в очень негостепр..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 306 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [19] "То есть она звучит немножко не так, не мысль, она такая..."
         Journalist=False | Expert=False | Continuation=True
+        Context: 353 слов накоплено
         → Горбунов (continuation + context (>353 слов))
         → SPEAKER: Горбунов (continuation + context (>353 слов))
     [20] "При этом пленные немцы, которых мы берем, они говорят, что, ..."
         Journalist=False | Expert=False | Continuation=True
+        Context: 364 слов накоплено
         → Горбунов (continuation + context (>364 слов))
         → SPEAKER: Горбунов (continuation + context (>364 слов))
     [21] "Вы наваливаетесь, занимаете какие-то точки, но удерживать эт..."
-        Journalist=True | Expert=False | Continuation=False
-        → SPEAKER: Журналист (is_journalist_phrase=True)
-        ⚠️ СМЕНА СПИКЕРА: Горбунов → Журналист
-  ✂️ SPLIT: 00:00:36 (Горбунов) "8 сентября 1941 года немцы врываются в Лиссельбург..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 385 слов накоплено
+        🛡️ ЗАЩИТА: контекст 385 слов → игнорируем слабые паттерны
+        → SPEAKER: Горбунов (neutral (return to original))
     [22] "И я думаю, что благодаря вот этой информации, которая есть с..."
         Journalist=False | Expert=True | Continuation=False
+        Context: 398 слов накоплено
         → SPEAKER: Горбунов (is_expert_phrase=True)
-        ⚠️ СМЕНА СПИКЕРА: Журналист → Горбунов
-  ✂️ SPLIT: 00:03:36 (Журналист) "Вы наваливаетесь, занимаете какие-то точки, но уде..."
     [23] "Вот именно поэтому, в общем-то, шли тяжелые бои, где-то к ко..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 462 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [24] "И на этом такой первый этап пятачка, вот он заканчивается, н..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 486 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
 
   🔍 АНАЛИЗ СЕГМЕНТА: 00:04:31 (Журналист) — 3 предложений
@@ -1204,9 +1230,11 @@ GPU: ✅ CUDA
         → SPEAKER: Журналист (neutral (return to original))
     [2] "Что было основным препятствием для проживания с Невского пят..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 2 слов накоплено
         → SPEAKER: Журналист (neutral (return to original))
     [3] "Восьмая Гресс, может быть, какие-то промахи?..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 11 слов накоплено
         → SPEAKER: Журналист (neutral (return to original))
 
   🔍 АНАЛИЗ СЕГМЕНТА: 00:04:41 (Горбунов) — 14 предложений
@@ -1215,42 +1243,55 @@ GPU: ✅ CUDA
         → SPEAKER: Горбунов (neutral (return to original))
     [2] "Просто сложно даже с той оптикой, которая есть сейчас, на ст..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 27 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [3] "Но она не очень влияла, потому как пятачок, это все-таки нах..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 42 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [4] "И самой большой проблемой было то, что Красной Армии катастр..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 57 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [5] "Потому что немцы раз за разом выигрывали огневую дуэль..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 73 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [6] "На каждый наш выстрел в целом было 3-4 выстрелов с той сторо..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 82 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [7] "А проводить артподготовку с помощью пулеметов 76-мм снарядов..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 97 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [8] "Немцы были большие мастера обороны, они окопались, они вводи..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 111 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [9] "И 20-я мото-дивизия, в общем-то, у них считалась разгромленн..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 136 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [10] "Но там вот события последующие стали вернуть обратно..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 151 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [11] "Тогда она во Францию уехала, и очень-то очень скоро вернулас..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 159 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [12] "Здесь очень вернулась бы..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 169 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [13] "Но вот 41-й год он был такой тяжелый..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 173 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [14] "И неумение наступать, неумение удерживать позиции, помноженн..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 181 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
 
   🔍 АНАЛИЗ СЕГМЕНТА: 00:06:18 (Журналист) — 3 предложений
@@ -1259,9 +1300,11 @@ GPU: ✅ CUDA
         → SPEAKER: Журналист (neutral (return to original))
     [2] "Почему потерпели неудачу предпринимавшиеся в 42-м году попыт..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 2 слов накоплено
         → SPEAKER: Журналист (neutral (return to original))
     [3] "Есть что-то лучшее?..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 13 слов накоплено
         → SPEAKER: Журналист (neutral (return to original))
 
   🔍 АНАЛИЗ СЕГМЕНТА: 00:06:28 (Горбунов) — 4 предложений
@@ -1270,12 +1313,15 @@ GPU: ✅ CUDA
         → SPEAKER: Горбунов (neutral (return to original))
     [2] "Это Любанская и Гинская..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 8 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [3] "Это 42-го года..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 12 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [4] "Любанская наступательная операция, она вышла из контрнаступл..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 15 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
 
   🔍 АНАЛИЗ СЕГМЕНТА: 00:07:02 (Горбунов) — 43 предложений
@@ -1284,132 +1330,174 @@ GPU: ✅ CUDA
         → SPEAKER: Горбунов (neutral (return to original))
     [2] "Реальная задумка была в что в некоторых местах, в районе Пог..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 17 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [3] "Таким образом отрежут группную группировку противника, и сле..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 49 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [4] "Из-за что ничего не получилось, и правое крыло забуксовало, ..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 68 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [5] "И это начнет сказываться уже в конце марта, когда начнет тая..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 109 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [6] "На встречу Неградский фронт попытался развивать наступление,..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 121 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [7] "И большая проблема была в том, что закончился удар второй уд..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 134 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [8] "Естественно, что они отдохнули немного, и все свои резервы, ..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 152 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [9] "А вторая ударная поможет ничем не может..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 168 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [10] "То есть она вводит в бой несколько батальонов, но артиллерия..."
         Journalist=False | Expert=False | Continuation=True
+        Context: 175 слов накоплено
         → Горбунов (continuation + context (>175 слов))
         → SPEAKER: Горбунов (continuation + context (>175 слов))
     [11] "И, в общем-то, подобный эффект, это даже не удар местного зн..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 197 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [12] "В своем документах этого даже не замечают..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 213 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [13] "В итоге, когда начинает таять снег, положение засевшей в бол..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 220 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [14] "Еще большой проблемой было то, что никак не могли доложить в..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 238 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [15] "Надо отойти..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 258 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [16] "То есть вот люди, которые наступали, на них висел тамоклый м..."
         Journalist=False | Expert=False | Continuation=True
+        Context: 260 слов накоплено
         → Горбунов (continuation + context (>260 слов))
         → SPEAKER: Горбунов (continuation + context (>260 слов))
     [17] "Еще расстрел по генералу Павлова, он был, собственно, такой,..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 271 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [18] "Мерецков оказался непосредственно в застенках..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 282 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [19] "И, ну, еще раз, им туда точно не хотелось..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 287 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [20] "И у них не было веры в что их простят..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 296 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [21] "И поэтому говорили, что еще чуть-чуть, сейчас что-то потащим..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 306 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [22] "Когда стал ясно, что надо выводить войска, сообщили об этом ..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 319 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [23] "Сталин сказал, да, выводите, но только не потеряйте их..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 330 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [24] "Начинается выход, присылается такой, ну, скажем так, генерал..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 339 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [25] "Он от Киева выходил из окружения..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 353 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [26] "И он достаточно грамотно войска выводит..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 359 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [27] "Вот первый этап был красный армия выбран..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 365 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [28] "в общем-то, злятся, но ничего не получилось..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 372 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [29] "Ни один батальон отрезать не удалось..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 379 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [30] "Однако дальше удача закончилась..."
         Journalist=False | Expert=False | Continuation=True
+        Context: 385 слов накоплено
         → Горбунов (continuation + context (>385 слов))
         → SPEAKER: Горбунов (continuation + context (>385 слов))
     [31] "Немцы смогли по просекам, которые они держали в хорошем сост..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 389 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [32] "Когда ты сидишь в болоте, много не навоюешь..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 402 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [33] "Ничего нет..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 410 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [34] "И в итоге, в общем-то, прорываются с большим трудом..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 412 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [35] "У власова что-то ломается..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 421 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [36] "И он через несколько дней сдается в древних туховежек, перех..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 425 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [37] "Ну, а оставшиеся войска, там в одной дивизии осталась рация ..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 438 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [38] "Выходят из окружения..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 453 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [39] "Танкисты сначала пошли туда, и потом, как пободриво, водили ..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 456 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [40] "Причем там была страшная картина..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 467 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [41] "Согласно документам обеих сторон и воспоминаниям, в общем-то..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 472 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [42] "И у танкистов даже были бугры, чтобы очищать ходовую часть о..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 483 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [43] "В общем, это страшный, наверное, самый страшный эпизод вообщ..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 501 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
 
   🔍 АНАЛИЗ СЕГМЕНТА: 00:10:51 (Горбунов) — 23 предложений
@@ -1418,72 +1506,93 @@ GPU: ✅ CUDA
         → SPEAKER: Горбунов (neutral (return to original))
     [2] "Это летом..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 4 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [3] "Тут немножко не повезло Мерецкову..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 6 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [4] "Тело в том, что на самом деле все было сделано правильно..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 11 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [5] "Начинают наступать, прорываются, контролируют железную дорог..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 22 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [6] "Однако в этот момент советская разведка говорит о что мы не ..."
         Journalist=False | Expert=False | Continuation=True
+        Context: 28 слов накоплено
         → SPEAKER: Горбунов (continuation + inherit (28 слов))
     [7] "Они знали именно о том, что армию Манштейна перебросили, уже..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 40 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [8] "И Манштейн не дроган широкой..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 53 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [9] "Одно за одним соединение, которое поучаствовали в боях за Кр..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 58 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [10] "Волховский фронт и его ударная группировка попадают в сложну..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 75 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [11] "Она практически окружена, но в районе Тартолова в бой вступа..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 85 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [12] "И бригада дает бой..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 100 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [13] "И они, в общем-то, смогли через этот Тартолова позволить уйт..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 104 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [14] "Вывели госпиталя, артиллерию..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 116 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [15] "Погрома не произошло..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 119 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [16] "То, пишет Манштейн о горах трупов, оно не подтверждается наш..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 122 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [17] "И вот общее в этих операциях что..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 133 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [18] "Медооценка сил противника раз..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 140 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [19] "И неиспользование Ленинградского фронта как активного участн..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 144 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [20] "И это, в общем-то, стало поводом для разбора полетов наверху..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 154 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [21] "После Любанской Мерескопа сняли, потом вернули обратно..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 166 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [22] "На второй раз его снимать не стали..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 173 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [23] "Но скажут, что давайте мы так больше делать не будем...."
-        Journalist=True | Expert=False | Continuation=False
-        → SPEAKER: Журналист (is_journalist_phrase=True)
-        ⚠️ СМЕНА СПИКЕРА: Горбунов → Журналист
-  ✂️ SPLIT: 00:10:51 (Горбунов) "Следующая, это Синягинская операция. Это летом. Ту..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 180 слов накоплено
+        🛡️ ЗАЩИТА: контекст 180 слов → игнорируем слабые паттерны
+        → SPEAKER: Горбунов (neutral (return to original))
 
   🔍 АНАЛИЗ СЕГМЕНТА: 00:12:20 (Журналист) — 2 предложений
     [1] "Четвертый вопрос..."
@@ -1491,6 +1600,7 @@ GPU: ✅ CUDA
         → SPEAKER: Журналист (neutral (return to original))
     [2] "В чем заключалась основная идея операции «Искра» и кто был е..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 2 слов накоплено
         → SPEAKER: Журналист (neutral (return to original))
 
   🔍 АНАЛИЗ СЕГМЕНТА: 00:12:30 (Горбунов) — 7 предложений
@@ -1499,21 +1609,27 @@ GPU: ✅ CUDA
         → SPEAKER: Горбунов (neutral (return to original))
     [2] "И вот изначально, когда эту операцию прорабатывали, там авто..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 20 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [3] "Но потом дали это посмотреть Жукову, и он начал вносить свои..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 34 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [4] "В том числе, это, во-первых, оперативная маскировка, которая..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 46 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [5] "На этом настаивал Жуков, он за этим строго следил, и он там ..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 61 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [6] "Именно поэтому все получилось..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 74 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [7] "Здесь мне его не сказать...."
         Journalist=False | Expert=False | Continuation=False
+        Context: 78 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
 
   🔍 АНАЛИЗ СЕГМЕНТА: 00:13:07 (Журналист) — 3 предложений
@@ -1522,9 +1638,11 @@ GPU: ✅ CUDA
         → SPEAKER: Журналист (neutral (return to original))
     [2] "Почему Говоров настаивал на проведении операции по прорыву б..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 2 слов накоплено
         → SPEAKER: Журналист (neutral (return to original))
     [3] "Что в скобочках стоит форсирование форсирования?..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 13 слов накоплено
         → SPEAKER: Журналист (neutral (return to original))
 
   🔍 АНАЛИЗ СЕГМЕНТА: 00:13:15 (Горбунов) — 10 предложений
@@ -1533,39 +1651,49 @@ GPU: ✅ CUDA
         → SPEAKER: Горбунов (neutral (return to original))
     [2] "Горьми Говоров, когда прибыл в Ленинград весной 1942 года, б..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 7 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [3] "Он вообще шагнул в эту должность из достаточно интересной во..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 19 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [4] "Потому что он был сначала заместителем командующего артиллер..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 30 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [5] "Потом его назначают в октябре начальником артиллерии этого с..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 40 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [6] "По крайней мере, такой документ я лично видел..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 50 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [7] "Он находится в фонде Западного фронта..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 58 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [8] "И после этого его назначают условно с понижением и самостоят..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 64 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [9] "Где плохо вообще все..."
         Journalist=False | Expert=False | Continuation=False
+        Context: 78 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
     [10] "Вот Жуков назначил его как...."
         Journalist=False | Expert=False | Continuation=False
+        Context: 82 слов накоплено
         → SPEAKER: Горбунов (neutral (return to original))
-✅ Разделено: 3 mixed сегментов
+✅ Mixed сегментов не найдено
 ✅ Continuation phrases исправлено: 5
+🛡️ Защита от false positive: 2 фраз
 
-🔍 CHECKPOINT [AFTER SPLIT]: 19 сегментов
-   ✅ 00:02:26: НАЙДЕН в [00:00:36-00:03:36] (длит=179.9s, слов=385)
+🔍 CHECKPOINT [AFTER SPLIT]: 16 сегментов
+   ✅ 00:02:26: НАЙДЕН в [00:00:36-00:04:29] (длит=233.6s, слов=500)
 
-      📝 ПОЛНЫЙ ТЕКСТ СЕГМЕНТА (2532 символов):
-      8 сентября 1941 года немцы врываются в Лиссельбург и не просто перерезают связь Ленинграда с Большой землей, но и связь, по которой шла уже неделю, а то и полторы, движение грузов. Это река Нева. Ленинград в полной блокаде немцы сразу же начинают накрывать авиацией базы Ладожской флотилии, потому что они, в общем-то, прекрасно понимали, что это такое, и благодаря действиям первого азата им удалось отбиться. Но в целом все было очень тяжело, и нужно было срочно блокаду снимать. Для этого была проведена в октябре операция, получившая название 1-я Синявинская, достаточно неуспешная. Шансы были, но использовали немножко не так и танковую бригаду, и немцы все-таки были очень сильные, подбросили вовремя резервы. Следующая попытка, она была сделана войсками Ленинградского фронта, и был образован Невский Пятачок, когда на резиновых лодках в главе с начальником штаба полка капитаном Дубиком высадились, удержали небольшой клочок и попытались, соответственно, в дальнейшем прорывать именно с его блокаду. Следующий шаг, это 2-я Синявинская операция, когда попытались снова наносить удар с запада и с востока с Пятачка. Другое дело, что Ленинградский фронт был не готов, и поэтому опять вышло не так, как хотели бы. Сначала наступают с запада, немцы отбиваются, потом. Не с востока, если я сейчас скажу. Переговорить. Да. Вторая попытка снятия блокады города, уже с использованием Пятачка, это операция, когда с востока начинают наступать войска Маши Лакулика, навстречу ему пытаются пробиться войска генерала Жукова, но из-за что Ленинградский фронт был не готов, потому как ресурсы были потрачены на отражение удара, на попытку прорыва с Пятачка до этого, потом десанты и прочее, поэтому сначала начал кулик. У Кулика ничего не получилось, хотя опять-таки шанс был. И вот тут становится ясно, что, в общем-то, Пятачок это последняя надежда. Из него начинаются яростные атаки, туда вводят танки, в ответ немцы перебрасывают десантную дивизию, которая поучаствовала на Крите, понесла большие потери, и, в общем-то, в этот момент отдыхала. Поднимают, из тепла у нем-то перебрасывают в очень негостеприимную сторону, где, в общем-то, у них появляется фраза в документах, она ее видит лично в трофейных документах о том, что лучше несколько раз прыгнуть с парашютом на остров Крит, чем один день провести в боях у Ленинградской пяточки. То есть она звучит немножко не так, не мысль, она такая. При этом пленные немцы, которых мы берем, они говорят, что, ребята, у вас почти получилось, просто ваша пехота плохо действует наступлении.
+      📝 ПОЛНЫЙ ТЕКСТ СЕГМЕНТА (3308 символов):
+      8 сентября 1941 года немцы врываются в Лиссельбург и не просто перерезают связь Ленинграда с Большой землей, но и связь, по которой шла уже неделю, а то и полторы, движение грузов. Это река Нева. Ленинград в полной блокаде немцы сразу же начинают накрывать авиацией базы Ладожской флотилии, потому что они, в общем-то, прекрасно понимали, что это такое, и благодаря действиям первого азата им удалось отбиться. Но в целом все было очень тяжело, и нужно было срочно блокаду снимать. Для этого была проведена в октябре операция, получившая название 1-я Синявинская, достаточно неуспешная. Шансы были, но использовали немножко не так и танковую бригаду, и немцы все-таки были очень сильные, подбросили вовремя резервы. Следующая попытка, она была сделана войсками Ленинградского фронта, и был образован Невский Пятачок, когда на резиновых лодках в главе с начальником штаба полка капитаном Дубиком высадились, удержали небольшой клочок и попытались, соответственно, в дальнейшем прорывать именно с его блокаду. Следующий шаг, это 2-я Синявинская операция, когда попытались снова наносить удар с запада и с востока с Пятачка. Другое дело, что Ленинградский фронт был не готов, и поэтому опять вышло не так, как хотели бы. Сначала наступают с запада, немцы отбиваются, потом. Не с востока, если я сейчас скажу. Переговорить. Да. Вторая попытка снятия блокады города, уже с использованием Пятачка, это операция, когда с востока начинают наступать войска Маши Лакулика, навстречу ему пытаются пробиться войска генерала Жукова, но из-за что Ленинградский фронт был не готов, потому как ресурсы были потрачены на отражение удара, на попытку прорыва с Пятачка до этого, потом десанты и прочее, поэтому сначала начал кулик. У Кулика ничего не получилось, хотя опять-таки шанс был. И вот тут становится ясно, что, в общем-то, Пятачок это последняя надежда. Из него начинаются яростные атаки, туда вводят танки, в ответ немцы перебрасывают десантную дивизию, которая поучаствовала на Крите, понесла большие потери, и, в общем-то, в этот момент отдыхала. Поднимают, из тепла у нем-то перебрасывают в очень негостеприимную сторону, где, в общем-то, у них появляется фраза в документах, она ее видит лично в трофейных документах о том, что лучше несколько раз прыгнуть с парашютом на остров Крит, чем один день провести в боях у Ленинградской пяточки. То есть она звучит немножко не так, не мысль, она такая. При этом пленные немцы, которых мы берем, они говорят, что, ребята, у вас почти получилось, просто ваша пехота плохо действует наступлении. Вы наваливаетесь, занимаете какие-то точки, но удерживать это не можете, вот еще чуть-чуть. И я думаю, что благодаря вот этой информации, которая есть сейчас в открытом доступе в архивах фронта Крит, в Ленинградской фронте, в ЦАМО можно предположить, что атаки продолжались, в том числе, когда это было уже неперспективно, когда мы понимаем, что очень-то смысла уже нет, но те, кто отдавали приказ на переброску подкрепления новой атаку, они смотрели показания пленных, которые говорили, ребята, мы почти держимся. Вот именно поэтому, в общем-то, шли тяжелые бои, где-то к концу ноября они стали затихать и переросли в небольшое оппозиционное столкновение с действием разведгрупп. И на этом такой первый этап пятачка, вот он заканчивается, начинается оппозиционка до апреля..
 
       ❌ Целевая фраза "прорыв блокады" НЕ НАЙДЕНА в тексте!
 
@@ -1574,6 +1702,7 @@ GPU: ✅ CUDA
   📌 00:00:36 (Горбунов) → inject 00:01:45 после 39.2s
   📌 00:00:36 (Горбунов) → inject 00:02:36 после 50.5s
   📌 00:00:36 (Горбунов) → inject 00:03:21 после 44.8s
+  📌 00:00:36 (Горбунов) → inject 00:04:12 после 50.9s
   📌 00:04:41 (Горбунов) → inject 00:05:15 после 34.2s
   📌 00:04:41 (Горбунов) → inject 00:05:52 после 36.5s
   📌 00:07:02 (Горбунов) → inject 00:07:50 после 47.9s
@@ -1585,56 +1714,53 @@ GPU: ✅ CUDA
   📌 00:10:51 (Горбунов) → inject 00:11:55 после 30.0s
   📌 00:12:30 (Горбунов) → inject 00:13:03 после 33.1s
   📌 00:13:15 (Горбунов) → inject 00:13:47 после 31.9s
-✅ Вставлено промежуточных timestamp: 15
+✅ Вставлено промежуточных timestamp: 16
 
-🔍 CHECKPOINT [AFTER TIMESTAMP INJECTION]: 19 сегментов
-   ✅ 00:02:26: НАЙДЕН в [00:00:36-00:03:36] (длит=179.9s, слов=389)
+🔍 CHECKPOINT [AFTER TIMESTAMP INJECTION]: 16 сегментов
+   ✅ 00:02:26: НАЙДЕН в [00:00:36-00:04:29] (длит=233.6s, слов=505)
 
-      📝 ПОЛНЫЙ ТЕКСТ СЕГМЕНТА (2576 символов):
-      8 сентября 1941 года немцы врываются в Лиссельбург и не просто перерезают связь Ленинграда с Большой землей, но и связь, по которой шла уже неделю, а то и полторы, движение грузов. Это река Нева. Ленинград в полной блокаде немцы сразу же начинают накрывать авиацией базы Ладожской флотилии, потому что они, в общем-то, прекрасно понимали, что это такое, и благодаря действиям первого азата им удалось отбиться.  00:01:06  Но в целом все было очень тяжело, и нужно было срочно блокаду снимать. Для этого была проведена в октябре операция, получившая название 1-я Синявинская, достаточно неуспешная. Шансы были, но использовали немножко не так и танковую бригаду, и немцы все-таки были очень сильные, подбросили вовремя резервы. Следующая попытка, она была сделана войсками Ленинградского фронта, и был образован Невский Пятачок, когда на резиновых лодках в главе с начальником штаба полка капитаном Дубиком высадились, удержали небольшой клочок и попытались, соответственно, в дальнейшем прорывать именно с его блокаду.  00:01:45  Следующий шаг, это 2-я Синявинская операция, когда попытались снова наносить удар с запада и с востока с Пятачка. Другое дело, что Ленинградский фронт был не готов, и поэтому опять вышло не так, как хотели бы. Сначала наступают с запада, немцы отбиваются, потом. Не с востока, если я сейчас скажу. Переговорить. Да. Вторая попытка снятия блокады города, уже с использованием Пятачка, это операция, когда с востока начинают наступать войска Маши Лакулика, навстречу ему пытаются пробиться войска генерала Жукова, но из-за что Ленинградский фронт был не готов, потому как ресурсы были потрачены на отражение удара, на попытку прорыва с Пятачка до этого, потом десанты и прочее, поэтому сначала начал кулик.  00:02:36  У Кулика ничего не получилось, хотя опять-таки шанс был. И вот тут становится ясно, что, в общем-то, Пятачок это последняя надежда. Из него начинаются яростные атаки, туда вводят танки, в ответ немцы перебрасывают десантную дивизию, которая поучаствовала на Крите, понесла большие потери, и, в общем-то, в этот момент отдыхала. Поднимают, из тепла у нем-то перебрасывают в очень негостеприимную сторону, где, в общем-то, у них появляется фраза в документах, она ее видит лично в трофейных документах о том, что лучше несколько раз прыгнуть с парашютом на остров Крит, чем один день провести в боях у Ленинградской пяточки.  00:03:21  То есть она звучит немножко не так, не мысль, она такая. При этом пленные немцы, которых мы берем, они говорят, что, ребята, у вас почти получилось, просто ваша пехота плохо действует наступлении.
+      📝 ПОЛНЫЙ ТЕКСТ СЕГМЕНТА (3363 символов):
+      8 сентября 1941 года немцы врываются в Лиссельбург и не просто перерезают связь Ленинграда с Большой землей, но и связь, по которой шла уже неделю, а то и полторы, движение грузов. Это река Нева. Ленинград в полной блокаде немцы сразу же начинают накрывать авиацией базы Ладожской флотилии, потому что они, в общем-то, прекрасно понимали, что это такое, и благодаря действиям первого азата им удалось отбиться.  00:01:06  Но в целом все было очень тяжело, и нужно было срочно блокаду снимать. Для этого была проведена в октябре операция, получившая название 1-я Синявинская, достаточно неуспешная. Шансы были, но использовали немножко не так и танковую бригаду, и немцы все-таки были очень сильные, подбросили вовремя резервы. Следующая попытка, она была сделана войсками Ленинградского фронта, и был образован Невский Пятачок, когда на резиновых лодках в главе с начальником штаба полка капитаном Дубиком высадились, удержали небольшой клочок и попытались, соответственно, в дальнейшем прорывать именно с его блокаду.  00:01:45  Следующий шаг, это 2-я Синявинская операция, когда попытались снова наносить удар с запада и с востока с Пятачка. Другое дело, что Ленинградский фронт был не готов, и поэтому опять вышло не так, как хотели бы. Сначала наступают с запада, немцы отбиваются, потом. Не с востока, если я сейчас скажу. Переговорить. Да. Вторая попытка снятия блокады города, уже с использованием Пятачка, это операция, когда с востока начинают наступать войска Маши Лакулика, навстречу ему пытаются пробиться войска генерала Жукова, но из-за что Ленинградский фронт был не готов, потому как ресурсы были потрачены на отражение удара, на попытку прорыва с Пятачка до этого, потом десанты и прочее, поэтому сначала начал кулик.  00:02:36  У Кулика ничего не получилось, хотя опять-таки шанс был. И вот тут становится ясно, что, в общем-то, Пятачок это последняя надежда. Из него начинаются яростные атаки, туда вводят танки, в ответ немцы перебрасывают десантную дивизию, которая поучаствовала на Крите, понесла большие потери, и, в общем-то, в этот момент отдыхала. Поднимают, из тепла у нем-то перебрасывают в очень негостеприимную сторону, где, в общем-то, у них появляется фраза в документах, она ее видит лично в трофейных документах о том, что лучше несколько раз прыгнуть с парашютом на остров Крит, чем один день провести в боях у Ленинградской пяточки.  00:03:21  То есть она звучит немножко не так, не мысль, она такая. При этом пленные немцы, которых мы берем, они говорят, что, ребята, у вас почти получилось, просто ваша пехота плохо действует наступлении. Вы наваливаетесь, занимаете какие-то точки, но удерживать это не можете, вот еще чуть-чуть. И я думаю, что благодаря вот этой информации, которая есть сейчас в открытом доступе в архивах фронта Крит, в Ленинградской фронте, в ЦАМО можно предположить, что атаки продолжались, в том числе, когда это было уже неперспективно, когда мы понимаем, что очень-то смысла уже нет, но те, кто отдавали приказ на переброску подкрепления новой атаку, они смотрели показания пленных, которые говорили, ребята, мы почти держимся.  00:04:12  Вот именно поэтому, в общем-то, шли тяжелые бои, где-то к концу ноября они стали затихать и переросли в небольшое оппозиционное столкновение с действием разведгрупп. И на этом такой первый этап пятачка, вот он заканчивается, начинается оппозиционка до апреля..
 
       ❌ Целевая фраза "прорыв блокады" НЕ НАЙДЕНА в тексте!
 
 🔍 Text-based correction (v16.4)...
-  🛡️ ЗАЩИТА: 00:00:36 внутри монолога 179.9s
+  🛡️ ЗАЩИТА: 00:00:36 внутри монолога 233.6s
   🛡️ ЗАЩИТА: 00:04:41 внутри монолога 95.1s
-  🛡️ ЗАЩИТА: 00:06:28 внутри монолога 346.4s
-  🛡️ ЗАЩИТА: 00:07:02 внутри монолога 346.4s
-  🛡️ ЗАЩИТА: 00:10:51 внутри монолога 346.4s
+  🛡️ ЗАЩИТА: 00:06:28 внутри монолога 351.0s
+  🛡️ ЗАЩИТА: 00:07:02 внутри монолога 351.0s
 ✅ Text-based corrections: 0 (все верно)
 
-🔍 CHECKPOINT [AFTER TEXT CORRECTION]: 19 сегментов
-   ✅ 00:02:26: НАЙДЕН в [00:00:36-00:03:36] (длит=179.9s, слов=389)
+🔍 CHECKPOINT [AFTER TEXT CORRECTION]: 16 сегментов
+   ✅ 00:02:26: НАЙДЕН в [00:00:36-00:04:29] (длит=233.6s, слов=505)
 
-      📝 ПОЛНЫЙ ТЕКСТ СЕГМЕНТА (2576 символов):
-      8 сентября 1941 года немцы врываются в Лиссельбург и не просто перерезают связь Ленинграда с Большой землей, но и связь, по которой шла уже неделю, а то и полторы, движение грузов. Это река Нева. Ленинград в полной блокаде немцы сразу же начинают накрывать авиацией базы Ладожской флотилии, потому что они, в общем-то, прекрасно понимали, что это такое, и благодаря действиям первого азата им удалось отбиться.  00:01:06  Но в целом все было очень тяжело, и нужно было срочно блокаду снимать. Для этого была проведена в октябре операция, получившая название 1-я Синявинская, достаточно неуспешная. Шансы были, но использовали немножко не так и танковую бригаду, и немцы все-таки были очень сильные, подбросили вовремя резервы. Следующая попытка, она была сделана войсками Ленинградского фронта, и был образован Невский Пятачок, когда на резиновых лодках в главе с начальником штаба полка капитаном Дубиком высадились, удержали небольшой клочок и попытались, соответственно, в дальнейшем прорывать именно с его блокаду.  00:01:45  Следующий шаг, это 2-я Синявинская операция, когда попытались снова наносить удар с запада и с востока с Пятачка. Другое дело, что Ленинградский фронт был не готов, и поэтому опять вышло не так, как хотели бы. Сначала наступают с запада, немцы отбиваются, потом. Не с востока, если я сейчас скажу. Переговорить. Да. Вторая попытка снятия блокады города, уже с использованием Пятачка, это операция, когда с востока начинают наступать войска Маши Лакулика, навстречу ему пытаются пробиться войска генерала Жукова, но из-за что Ленинградский фронт был не готов, потому как ресурсы были потрачены на отражение удара, на попытку прорыва с Пятачка до этого, потом десанты и прочее, поэтому сначала начал кулик.  00:02:36  У Кулика ничего не получилось, хотя опять-таки шанс был. И вот тут становится ясно, что, в общем-то, Пятачок это последняя надежда. Из него начинаются яростные атаки, туда вводят танки, в ответ немцы перебрасывают десантную дивизию, которая поучаствовала на Крите, понесла большие потери, и, в общем-то, в этот момент отдыхала. Поднимают, из тепла у нем-то перебрасывают в очень негостеприимную сторону, где, в общем-то, у них появляется фраза в документах, она ее видит лично в трофейных документах о том, что лучше несколько раз прыгнуть с парашютом на остров Крит, чем один день провести в боях у Ленинградской пяточки.  00:03:21  То есть она звучит немножко не так, не мысль, она такая. При этом пленные немцы, которых мы берем, они говорят, что, ребята, у вас почти получилось, просто ваша пехота плохо действует наступлении.
+      📝 ПОЛНЫЙ ТЕКСТ СЕГМЕНТА (3363 символов):
+      8 сентября 1941 года немцы врываются в Лиссельбург и не просто перерезают связь Ленинграда с Большой землей, но и связь, по которой шла уже неделю, а то и полторы, движение грузов. Это река Нева. Ленинград в полной блокаде немцы сразу же начинают накрывать авиацией базы Ладожской флотилии, потому что они, в общем-то, прекрасно понимали, что это такое, и благодаря действиям первого азата им удалось отбиться.  00:01:06  Но в целом все было очень тяжело, и нужно было срочно блокаду снимать. Для этого была проведена в октябре операция, получившая название 1-я Синявинская, достаточно неуспешная. Шансы были, но использовали немножко не так и танковую бригаду, и немцы все-таки были очень сильные, подбросили вовремя резервы. Следующая попытка, она была сделана войсками Ленинградского фронта, и был образован Невский Пятачок, когда на резиновых лодках в главе с начальником штаба полка капитаном Дубиком высадились, удержали небольшой клочок и попытались, соответственно, в дальнейшем прорывать именно с его блокаду.  00:01:45  Следующий шаг, это 2-я Синявинская операция, когда попытались снова наносить удар с запада и с востока с Пятачка. Другое дело, что Ленинградский фронт был не готов, и поэтому опять вышло не так, как хотели бы. Сначала наступают с запада, немцы отбиваются, потом. Не с востока, если я сейчас скажу. Переговорить. Да. Вторая попытка снятия блокады города, уже с использованием Пятачка, это операция, когда с востока начинают наступать войска Маши Лакулика, навстречу ему пытаются пробиться войска генерала Жукова, но из-за что Ленинградский фронт был не готов, потому как ресурсы были потрачены на отражение удара, на попытку прорыва с Пятачка до этого, потом десанты и прочее, поэтому сначала начал кулик.  00:02:36  У Кулика ничего не получилось, хотя опять-таки шанс был. И вот тут становится ясно, что, в общем-то, Пятачок это последняя надежда. Из него начинаются яростные атаки, туда вводят танки, в ответ немцы перебрасывают десантную дивизию, которая поучаствовала на Крите, понесла большие потери, и, в общем-то, в этот момент отдыхала. Поднимают, из тепла у нем-то перебрасывают в очень негостеприимную сторону, где, в общем-то, у них появляется фраза в документах, она ее видит лично в трофейных документах о том, что лучше несколько раз прыгнуть с парашютом на остров Крит, чем один день провести в боях у Ленинградской пяточки.  00:03:21  То есть она звучит немножко не так, не мысль, она такая. При этом пленные немцы, которых мы берем, они говорят, что, ребята, у вас почти получилось, просто ваша пехота плохо действует наступлении. Вы наваливаетесь, занимаете какие-то точки, но удерживать это не можете, вот еще чуть-чуть. И я думаю, что благодаря вот этой информации, которая есть сейчас в открытом доступе в архивах фронта Крит, в Ленинградской фронте, в ЦАМО можно предположить, что атаки продолжались, в том числе, когда это было уже неперспективно, когда мы понимаем, что очень-то смысла уже нет, но те, кто отдавали приказ на переброску подкрепления новой атаку, они смотрели показания пленных, которые говорили, ребята, мы почти держимся.  00:04:12  Вот именно поэтому, в общем-то, шли тяжелые бои, где-то к концу ноября они стали затихать и переросли в небольшое оппозиционное столкновение с действием разведгрупп. И на этом такой первый этап пятачка, вот он заканчивается, начинается оппозиционка до апреля..
 
       ❌ Целевая фраза "прорыв блокады" НЕ НАЙДЕНА в тексте!
 
-🧹 Очистка hallucinations из 19 сегментов...
+🧹 Очистка hallucinations из 16 сегментов...
   ✅ Очищено: 146 → 145 символов
   ✅ Очищено: 81 → 80 символов
   ✅ Очищено: 166 → 165 символов
-  ✅ Очищено: 2576 → 2568 символов
-  ✅ Очищено: 683 → 682 символов
+  ✅ Очищено: 3363 → 3352 символов
   ✅ Очищено: 126 → 125 символов
   ✅ Очищено: 1422 → 1417 символов
   ✅ Очищено: 126 → 125 символов
   ✅ Очищено: 353 → 352 символов
   ✅ Очищено: 3423 → 3412 символов
-  ✅ Очищено: 1241 → 1237 символов
-  ✅ Очищено: 54 → 53 символов
+  ✅ Очищено: 1296 → 1291 символов
   ✅ Очищено: 89 → 88 символов
   ✅ Очищено: 549 → 546 символов
   ✅ Очищено: 144 → 143 символов
   ✅ Очищено: 580 → 577 символов
-✅ Очистка завершена: 19 сегментов (удалено 0)
+✅ Очистка завершена: 16 сегментов (удалено 0)
 
-🔍 CHECKPOINT [AFTER HALLUCINATION REMOVAL]: 19 сегментов
-   ✅ 00:02:26: НАЙДЕН в [00:00:36-00:03:36] (длит=179.9s, слов=389)
+🔍 CHECKPOINT [AFTER HALLUCINATION REMOVAL]: 16 сегментов
+   ✅ 00:02:26: НАЙДЕН в [00:00:36-00:04:29] (длит=233.6s, слов=505)
 
-      📝 ПОЛНЫЙ ТЕКСТ СЕГМЕНТА (2568 символов):
-      8 сентября 1941 года немцы врываются в Лиссельбург и не просто перерезают связь Ленинграда с Большой землей, но и связь, по которой шла уже неделю, а то и полторы, движение грузов. Это река Нева. Ленинград в полной блокаде немцы сразу же начинают накрывать авиацией базы Ладожской флотилии, потому что они, в общем-то, прекрасно понимали, что это такое, и благодаря действиям первого азата им удалось отбиться. 00:01:06 Но в целом все было очень тяжело, и нужно было срочно блокаду снимать. Для этого была проведена в октябре операция, получившая название 1-я Синявинская, достаточно неуспешная. Шансы были, но использовали немножко не так и танковую бригаду, и немцы все-таки были очень сильные, подбросили вовремя резервы. Следующая попытка, она была сделана войсками Ленинградского фронта, и был образован Невский Пятачок, когда на резиновых лодках в главе с начальником штаба полка капитаном Дубиком высадились, удержали небольшой клочок и попытались, соответственно, в дальнейшем прорывать именно с его блокаду. 00:01:45 Следующий шаг, это 2-я Синявинская операция, когда попытались снова наносить удар с запада и с востока с Пятачка. Другое дело, что Ленинградский фронт был не готов, и поэтому опять вышло не так, как хотели бы. Сначала наступают с запада, немцы отбиваются, потом. Не с востока, если я сейчас скажу. Переговорить. Да. Вторая попытка снятия блокады города, уже с использованием Пятачка, это операция, когда с востока начинают наступать войска Маши Лакулика, навстречу ему пытаются пробиться войска генерала Жукова, но из-за что Ленинградский фронт был не готов, потому как ресурсы были потрачены на отражение удара, на попытку прорыва с Пятачка до этого, потом десанты и прочее, поэтому сначала начал кулик. 00:02:36 У Кулика ничего не получилось, хотя опять-таки шанс был. И вот тут становится ясно, что, в общем-то, Пятачок это последняя надежда. Из него начинаются яростные атаки, туда вводят танки, в ответ немцы перебрасывают десантную дивизию, которая поучаствовала на Крите, понесла большие потери, и, в общем-то, в этот момент отдыхала. Поднимают, из тепла у нем-то перебрасывают в очень негостеприимную сторону, где, в общем-то, у них появляется фраза в документах, она ее видит лично в трофейных документах о том, что лучше несколько раз прыгнуть с парашютом на остров Крит, чем один день провести в боях у Ленинградской пяточки. 00:03:21 То есть она звучит немножко не так, не мысль, она такая. При этом пленные немцы, которых мы берем, они говорят, что, ребята, у вас почти получилось, просто ваша пехота плохо действует наступлении.
+      📝 ПОЛНЫЙ ТЕКСТ СЕГМЕНТА (3352 символов):
+      8 сентября 1941 года немцы врываются в Лиссельбург и не просто перерезают связь Ленинграда с Большой землей, но и связь, по которой шла уже неделю, а то и полторы, движение грузов. Это река Нева. Ленинград в полной блокаде немцы сразу же начинают накрывать авиацией базы Ладожской флотилии, потому что они, в общем-то, прекрасно понимали, что это такое, и благодаря действиям первого азата им удалось отбиться. 00:01:06 Но в целом все было очень тяжело, и нужно было срочно блокаду снимать. Для этого была проведена в октябре операция, получившая название 1-я Синявинская, достаточно неуспешная. Шансы были, но использовали немножко не так и танковую бригаду, и немцы все-таки были очень сильные, подбросили вовремя резервы. Следующая попытка, она была сделана войсками Ленинградского фронта, и был образован Невский Пятачок, когда на резиновых лодках в главе с начальником штаба полка капитаном Дубиком высадились, удержали небольшой клочок и попытались, соответственно, в дальнейшем прорывать именно с его блокаду. 00:01:45 Следующий шаг, это 2-я Синявинская операция, когда попытались снова наносить удар с запада и с востока с Пятачка. Другое дело, что Ленинградский фронт был не готов, и поэтому опять вышло не так, как хотели бы. Сначала наступают с запада, немцы отбиваются, потом. Не с востока, если я сейчас скажу. Переговорить. Да. Вторая попытка снятия блокады города, уже с использованием Пятачка, это операция, когда с востока начинают наступать войска Маши Лакулика, навстречу ему пытаются пробиться войска генерала Жукова, но из-за что Ленинградский фронт был не готов, потому как ресурсы были потрачены на отражение удара, на попытку прорыва с Пятачка до этого, потом десанты и прочее, поэтому сначала начал кулик. 00:02:36 У Кулика ничего не получилось, хотя опять-таки шанс был. И вот тут становится ясно, что, в общем-то, Пятачок это последняя надежда. Из него начинаются яростные атаки, туда вводят танки, в ответ немцы перебрасывают десантную дивизию, которая поучаствовала на Крите, понесла большие потери, и, в общем-то, в этот момент отдыхала. Поднимают, из тепла у нем-то перебрасывают в очень негостеприимную сторону, где, в общем-то, у них появляется фраза в документах, она ее видит лично в трофейных документах о том, что лучше несколько раз прыгнуть с парашютом на остров Крит, чем один день провести в боях у Ленинградской пяточки. 00:03:21 То есть она звучит немножко не так, не мысль, она такая. При этом пленные немцы, которых мы берем, они говорят, что, ребята, у вас почти получилось, просто ваша пехота плохо действует наступлении. Вы наваливаетесь, занимаете какие-то точки, но удерживать это не можете, вот еще чуть-чуть. И я думаю, что благодаря вот этой информации, которая есть сейчас в открытом доступе в архивах фронта Крит, в Ленинградской фронте, в ЦАМО можно предположить, что атаки продолжались, в том числе, когда это было уже неперспективно, когда мы понимаем, что очень-то смысла уже нет, но те, кто отдавали приказ на переброску подкрепления новой атаку, они смотрели показания пленных, которые говорили, ребята, мы почти держимся. 00:04:12 Вот именно поэтому, в общем-то, шли тяжелые бои, где-то к концу ноября они стали затихать и переросли в небольшое оппозиционное столкновение с действием разведгрупп. И на этом такой первый этап пятачка, вот он заканчивается, начинается оппозиционка до апреля.
 
       ❌ Целевая фраза "прорыв блокады" НЕ НАЙДЕНА в тексте!
 
@@ -1649,64 +1775,33 @@ GPU: ✅ CUDA
 
 🔧 Auto-merge adjacent same speaker (SAFE)...
   🔧 [00:06:28] Слито 3 сегментов Горбунов
-  🔧 [00:12:14] Слито 2 сегментов Журналист
-  ✅ Auto-merge: 3 сегментов объединено
+  ✅ Auto-merge: 2 сегментов объединено
 
 🔍 Validation: Adjacent same speaker...
   ✅ Соседних реплик не найдено
 
-🔍 CHECKPOINT [AFTER AUTO-MERGE]: 16 сегментов
-   ✅ 00:02:26: НАЙДЕН в [00:00:36-00:03:36] (длит=179.9s, слов=389)
+🔍 CHECKPOINT [AFTER AUTO-MERGE]: 14 сегментов
+   ✅ 00:02:26: НАЙДЕН в [00:00:36-00:04:29] (длит=233.6s, слов=505)
 
-      📝 ПОЛНЫЙ ТЕКСТ СЕГМЕНТА (2568 символов):
-      8 сентября 1941 года немцы врываются в Лиссельбург и не просто перерезают связь Ленинграда с Большой землей, но и связь, по которой шла уже неделю, а то и полторы, движение грузов. Это река Нева. Ленинград в полной блокаде немцы сразу же начинают накрывать авиацией базы Ладожской флотилии, потому что они, в общем-то, прекрасно понимали, что это такое, и благодаря действиям первого азата им удалось отбиться. 00:01:06 Но в целом все было очень тяжело, и нужно было срочно блокаду снимать. Для этого была проведена в октябре операция, получившая название 1-я Синявинская, достаточно неуспешная. Шансы были, но использовали немножко не так и танковую бригаду, и немцы все-таки были очень сильные, подбросили вовремя резервы. Следующая попытка, она была сделана войсками Ленинградского фронта, и был образован Невский Пятачок, когда на резиновых лодках в главе с начальником штаба полка капитаном Дубиком высадились, удержали небольшой клочок и попытались, соответственно, в дальнейшем прорывать именно с его блокаду. 00:01:45 Следующий шаг, это 2-я Синявинская операция, когда попытались снова наносить удар с запада и с востока с Пятачка. Другое дело, что Ленинградский фронт был не готов, и поэтому опять вышло не так, как хотели бы. Сначала наступают с запада, немцы отбиваются, потом. Не с востока, если я сейчас скажу. Переговорить. Да. Вторая попытка снятия блокады города, уже с использованием Пятачка, это операция, когда с востока начинают наступать войска Маши Лакулика, навстречу ему пытаются пробиться войска генерала Жукова, но из-за что Ленинградский фронт был не готов, потому как ресурсы были потрачены на отражение удара, на попытку прорыва с Пятачка до этого, потом десанты и прочее, поэтому сначала начал кулик. 00:02:36 У Кулика ничего не получилось, хотя опять-таки шанс был. И вот тут становится ясно, что, в общем-то, Пятачок это последняя надежда. Из него начинаются яростные атаки, туда вводят танки, в ответ немцы перебрасывают десантную дивизию, которая поучаствовала на Крите, понесла большие потери, и, в общем-то, в этот момент отдыхала. Поднимают, из тепла у нем-то перебрасывают в очень негостеприимную сторону, где, в общем-то, у них появляется фраза в документах, она ее видит лично в трофейных документах о том, что лучше несколько раз прыгнуть с парашютом на остров Крит, чем один день провести в боях у Ленинградской пяточки. 00:03:21 То есть она звучит немножко не так, не мысль, она такая. При этом пленные немцы, которых мы берем, они говорят, что, ребята, у вас почти получилось, просто ваша пехота плохо действует наступлении.
-
-      ❌ Целевая фраза "прорыв блокады" НЕ НАЙДЕНА в тексте!
-
-🔍 CHECKPOINT [BEFORE EXPORT (FINAL)]: 16 сегментов
-   ✅ 00:02:26: НАЙДЕН в [00:00:36-00:03:36] (длит=179.9s, слов=389)
-
-      📝 ПОЛНЫЙ ТЕКСТ СЕГМЕНТА (2568 символов):
-      8 сентября 1941 года немцы врываются в Лиссельбург и не просто перерезают связь Ленинграда с Большой землей, но и связь, по которой шла уже неделю, а то и полторы, движение грузов. Это река Нева. Ленинград в полной блокаде немцы сразу же начинают накрывать авиацией базы Ладожской флотилии, потому что они, в общем-то, прекрасно понимали, что это такое, и благодаря действиям первого азата им удалось отбиться. 00:01:06 Но в целом все было очень тяжело, и нужно было срочно блокаду снимать. Для этого была проведена в октябре операция, получившая название 1-я Синявинская, достаточно неуспешная. Шансы были, но использовали немножко не так и танковую бригаду, и немцы все-таки были очень сильные, подбросили вовремя резервы. Следующая попытка, она была сделана войсками Ленинградского фронта, и был образован Невский Пятачок, когда на резиновых лодках в главе с начальником штаба полка капитаном Дубиком высадились, удержали небольшой клочок и попытались, соответственно, в дальнейшем прорывать именно с его блокаду. 00:01:45 Следующий шаг, это 2-я Синявинская операция, когда попытались снова наносить удар с запада и с востока с Пятачка. Другое дело, что Ленинградский фронт был не готов, и поэтому опять вышло не так, как хотели бы. Сначала наступают с запада, немцы отбиваются, потом. Не с востока, если я сейчас скажу. Переговорить. Да. Вторая попытка снятия блокады города, уже с использованием Пятачка, это операция, когда с востока начинают наступать войска Маши Лакулика, навстречу ему пытаются пробиться войска генерала Жукова, но из-за что Ленинградский фронт был не готов, потому как ресурсы были потрачены на отражение удара, на попытку прорыва с Пятачка до этого, потом десанты и прочее, поэтому сначала начал кулик. 00:02:36 У Кулика ничего не получилось, хотя опять-таки шанс был. И вот тут становится ясно, что, в общем-то, Пятачок это последняя надежда. Из него начинаются яростные атаки, туда вводят танки, в ответ немцы перебрасывают десантную дивизию, которая поучаствовала на Крите, понесла большие потери, и, в общем-то, в этот момент отдыхала. Поднимают, из тепла у нем-то перебрасывают в очень негостеприимную сторону, где, в общем-то, у них появляется фраза в документах, она ее видит лично в трофейных документах о том, что лучше несколько раз прыгнуть с парашютом на остров Крит, чем один день провести в боях у Ленинградской пяточки. 00:03:21 То есть она звучит немножко не так, не мысль, она такая. При этом пленные немцы, которых мы берем, они говорят, что, ребята, у вас почти получилось, просто ваша пехота плохо действует наступлении.
+      📝 ПОЛНЫЙ ТЕКСТ СЕГМЕНТА (3352 символов):
+      8 сентября 1941 года немцы врываются в Лиссельбург и не просто перерезают связь Ленинграда с Большой землей, но и связь, по которой шла уже неделю, а то и полторы, движение грузов. Это река Нева. Ленинград в полной блокаде немцы сразу же начинают накрывать авиацией базы Ладожской флотилии, потому что они, в общем-то, прекрасно понимали, что это такое, и благодаря действиям первого азата им удалось отбиться. 00:01:06 Но в целом все было очень тяжело, и нужно было срочно блокаду снимать. Для этого была проведена в октябре операция, получившая название 1-я Синявинская, достаточно неуспешная. Шансы были, но использовали немножко не так и танковую бригаду, и немцы все-таки были очень сильные, подбросили вовремя резервы. Следующая попытка, она была сделана войсками Ленинградского фронта, и был образован Невский Пятачок, когда на резиновых лодках в главе с начальником штаба полка капитаном Дубиком высадились, удержали небольшой клочок и попытались, соответственно, в дальнейшем прорывать именно с его блокаду. 00:01:45 Следующий шаг, это 2-я Синявинская операция, когда попытались снова наносить удар с запада и с востока с Пятачка. Другое дело, что Ленинградский фронт был не готов, и поэтому опять вышло не так, как хотели бы. Сначала наступают с запада, немцы отбиваются, потом. Не с востока, если я сейчас скажу. Переговорить. Да. Вторая попытка снятия блокады города, уже с использованием Пятачка, это операция, когда с востока начинают наступать войска Маши Лакулика, навстречу ему пытаются пробиться войска генерала Жукова, но из-за что Ленинградский фронт был не готов, потому как ресурсы были потрачены на отражение удара, на попытку прорыва с Пятачка до этого, потом десанты и прочее, поэтому сначала начал кулик. 00:02:36 У Кулика ничего не получилось, хотя опять-таки шанс был. И вот тут становится ясно, что, в общем-то, Пятачок это последняя надежда. Из него начинаются яростные атаки, туда вводят танки, в ответ немцы перебрасывают десантную дивизию, которая поучаствовала на Крите, понесла большие потери, и, в общем-то, в этот момент отдыхала. Поднимают, из тепла у нем-то перебрасывают в очень негостеприимную сторону, где, в общем-то, у них появляется фраза в документах, она ее видит лично в трофейных документах о том, что лучше несколько раз прыгнуть с парашютом на остров Крит, чем один день провести в боях у Ленинградской пяточки. 00:03:21 То есть она звучит немножко не так, не мысль, она такая. При этом пленные немцы, которых мы берем, они говорят, что, ребята, у вас почти получилось, просто ваша пехота плохо действует наступлении. Вы наваливаетесь, занимаете какие-то точки, но удерживать это не можете, вот еще чуть-чуть. И я думаю, что благодаря вот этой информации, которая есть сейчас в открытом доступе в архивах фронта Крит, в Ленинградской фронте, в ЦАМО можно предположить, что атаки продолжались, в том числе, когда это было уже неперспективно, когда мы понимаем, что очень-то смысла уже нет, но те, кто отдавали приказ на переброску подкрепления новой атаку, они смотрели показания пленных, которые говорили, ребята, мы почти держимся. 00:04:12 Вот именно поэтому, в общем-то, шли тяжелые бои, где-то к концу ноября они стали затихать и переросли в небольшое оппозиционное столкновение с действием разведгрупп. И на этом такой первый этап пятачка, вот он заканчивается, начинается оппозиционка до апреля.
 
       ❌ Целевая фраза "прорыв блокады" НЕ НАЙДЕНА в тексте!
- ✅ WW Finl.0024_01.json (v17.1-debug, roles={'SPEAKER_01': 'Спикер', 'SPEAKER_00': 'Журналист'})
+
+🔍 CHECKPOINT [BEFORE EXPORT (FINAL)]: 14 сегментов
+   ✅ 00:02:26: НАЙДЕН в [00:00:36-00:04:29] (длит=233.6s, слов=505)
+
+      📝 ПОЛНЫЙ ТЕКСТ СЕГМЕНТА (3352 символов):
+      8 сентября 1941 года немцы врываются в Лиссельбург и не просто перерезают связь Ленинграда с Большой землей, но и связь, по которой шла уже неделю, а то и полторы, движение грузов. Это река Нева. Ленинград в полной блокаде немцы сразу же начинают накрывать авиацией базы Ладожской флотилии, потому что они, в общем-то, прекрасно понимали, что это такое, и благодаря действиям первого азата им удалось отбиться. 00:01:06 Но в целом все было очень тяжело, и нужно было срочно блокаду снимать. Для этого была проведена в октябре операция, получившая название 1-я Синявинская, достаточно неуспешная. Шансы были, но использовали немножко не так и танковую бригаду, и немцы все-таки были очень сильные, подбросили вовремя резервы. Следующая попытка, она была сделана войсками Ленинградского фронта, и был образован Невский Пятачок, когда на резиновых лодках в главе с начальником штаба полка капитаном Дубиком высадились, удержали небольшой клочок и попытались, соответственно, в дальнейшем прорывать именно с его блокаду. 00:01:45 Следующий шаг, это 2-я Синявинская операция, когда попытались снова наносить удар с запада и с востока с Пятачка. Другое дело, что Ленинградский фронт был не готов, и поэтому опять вышло не так, как хотели бы. Сначала наступают с запада, немцы отбиваются, потом. Не с востока, если я сейчас скажу. Переговорить. Да. Вторая попытка снятия блокады города, уже с использованием Пятачка, это операция, когда с востока начинают наступать войска Маши Лакулика, навстречу ему пытаются пробиться войска генерала Жукова, но из-за что Ленинградский фронт был не готов, потому как ресурсы были потрачены на отражение удара, на попытку прорыва с Пятачка до этого, потом десанты и прочее, поэтому сначала начал кулик. 00:02:36 У Кулика ничего не получилось, хотя опять-таки шанс был. И вот тут становится ясно, что, в общем-то, Пятачок это последняя надежда. Из него начинаются яростные атаки, туда вводят танки, в ответ немцы перебрасывают десантную дивизию, которая поучаствовала на Крите, понесла большие потери, и, в общем-то, в этот момент отдыхала. Поднимают, из тепла у нем-то перебрасывают в очень негостеприимную сторону, где, в общем-то, у них появляется фраза в документах, она ее видит лично в трофейных документах о том, что лучше несколько раз прыгнуть с парашютом на остров Крит, чем один день провести в боях у Ленинградской пяточки. 00:03:21 То есть она звучит немножко не так, не мысль, она такая. При этом пленные немцы, которых мы берем, они говорят, что, ребята, у вас почти получилось, просто ваша пехота плохо действует наступлении. Вы наваливаетесь, занимаете какие-то точки, но удерживать это не можете, вот еще чуть-чуть. И я думаю, что благодаря вот этой информации, которая есть сейчас в открытом доступе в архивах фронта Крит, в Ленинградской фронте, в ЦАМО можно предположить, что атаки продолжались, в том числе, когда это было уже неперспективно, когда мы понимаем, что очень-то смысла уже нет, но те, кто отдавали приказ на переброску подкрепления новой атаку, они смотрели показания пленных, которые говорили, ребята, мы почти держимся. 00:04:12 Вот именно поэтому, в общем-то, шли тяжелые бои, где-то к концу ноября они стали затихать и переросли в небольшое оппозиционное столкновение с действием разведгрупп. И на этом такой первый этап пятачка, вот он заканчивается, начинается оппозиционка до апреля.
+
+      ❌ Целевая фраза "прорыв блокады" НЕ НАЙДЕНА в тексте!
+ ✅ WW Finl.0024_01.json (v17.4, roles={'SPEAKER_01': 'Спикер', 'SPEAKER_00': 'Журналист'})
 
 ✅ JSON: 1/1
 
 📄 1 JSON → Горбунов (06.06).txt
 
 📄 1 JSON → Горбунов (06.06).txt
-
-  🎯 TXT EXPORT TARGET RANGE: [00:03:36-00:03:42]
-     Длительность: 6.1s
-     📝 Исходный текст (91 символов, 13 слов):
-        Начало: "Вы наваливаетесь, занимаете какие-то точки, но удерживать это не можете, вот еще чуть-чуть...."
-        Конец:  "...Вы наваливаетесь, занимаете какие-то точки, но удерживать это не можете, вот еще чуть-чуть."
-     ❌ Целевая фраза "то есть это был такой пункт" НЕ НАЙДЕНА в исходном тексте!
-     ⏭️ Длительность ≤30s → возвращаем текст без изменений
-
-  🎯 TXT EXPORT TARGET RANGE: [00:03:42-00:04:29]
-     Длительность: 47.7s
-     📝 Исходный текст (682 символов, 102 слов):
-        Начало: "И я думаю, что благодаря вот этой информации, которая есть сейчас в открытом доступе в архивах фронт..."
-        Конец:  "...групп. И на этом такой первый этап пятачка, вот он заканчивается, начинается оппозиционка до апреля."
-     ❌ Целевая фраза "то есть это был такой пункт" НЕ НАЙДЕНА в исходном тексте!
-     🔧 Начинаем обработку (duration=47.7s > 30s)...
-     📊 Разбито на 7 частей после split
-     📊 Склеено в 4 предложений
-        #0: "И я думаю, что благодаря вот этой информации, которая есть с..."
-        #1: "Вот именно поэтому, в общем-то, шли тяжелые бои, где-то к ко..."
-        #2: "И на этом такой первый этап пятачка, вот он заканчивается, н..."
-     📊 Распределено время по 4 предложениям
-
-     ✅ ФИНАЛЬНЫЙ текст после insert_inner_timestamps:
-        Длина: 683 символов, 102 слов
-        Вставлено timestamp: 0
-        Начало: "И я думаю, что благодаря вот этой информации, которая есть сейчас в открытом доступе в архивах фронт..."
-        Конец:  "...рупп. И на этом такой первый этап пятачка, вот он заканчивается, начинается оппозиционка до апреля. "
-     ❌ Целевая фраза "то есть это был такой пункт" ПОТЕРЯНА после обработки!
-     🔍 Проверка где именно пропала фраза...
 
   🎯 TXT EXPORT TARGET RANGE: [00:04:31-00:04:39]
      Длительность: 7.8s
@@ -1716,9 +1811,9 @@ GPU: ✅ CUDA
      ❌ Целевая фраза "то есть это был такой пункт" НЕ НАЙДЕНА в исходном тексте!
      ⏭️ Длительность ≤30s → возвращаем текст без изменений
  ✅ TXT: Горбунов (06.06).txt (v16.26 - no duplicate timestamps)
-✅ TXT: ..\interview\2025\Неизвестные сражения\1 серия (Операция Искра)\Горбунов (06.06) 1\txt\Горбунов (06.06).txt (v17.1-debug)
+✅ TXT: ..\interview\2025\Неизвестные сражения\1 серия (Операция Искра)\Горбунов (06.06) 1\txt\Горбунов (06.06).txt (v17.4)
 
-✅ Готово! 🚀 (v17.1-debug)
+✅ Готово! 🚀 (v17.4)
 
 📂 Результаты:
    JSON: ..\interview\2025\Неизвестные сражения\1 серия (Операция Искра)\Горбунов (06.06) 1\json

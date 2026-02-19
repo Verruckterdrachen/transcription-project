@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """
-corrections/boundary_fixer.py - Boundary correction v16.23
+corrections/boundary_fixer.py - Boundary correction v17.4
+
+🔥 v17.4: КРИТИЧЕСКИЙ FIX БАГ #21, #24 - False positive is_journalist_phrase
+- Добавлена защита от ложных срабатываний в цитируемой/косвенной речи
+- Контекстная проверка: если накоплено >100 слов в монологе → игнорируем «вы»/«давайте»
+- Исправлены случаи: "Вы наваливаетесь..." (слова немцев), "давайте мы так больше..." (пересказ штаба)
 
 🆕 v16.23: КРИТИЧЕСКИЙ FIX БАГ #4 - Raw speaker ID маппинг в split
 🆕 v16.19: КРИТИЧЕСКИЙ FIX БАГ #3 - Повышен порог similarity с 80% до 90%
@@ -12,28 +17,52 @@ from difflib import SequenceMatcher
 from core.utils import seconds_to_hms
 
 
-def is_journalist_phrase(text):
+def is_journalist_phrase(text, context_words=0):
     """
-    v16.16: Проверяет, является ли фраза журналистской
+    🔥 v17.4: Проверяет, является ли фраза журналистской
     
-    🔥 v16.16: Добавлен \\b (word boundary) для точного поиска целых слов
+    **FIX БАГ #21, #24: Добавлена защита от false positive в монологах**
+    
+    Если context_words > 100, то паттерны «вы» и «давайте» игнорируются,
+    так как они могут быть частью цитируемой речи или косвенного пересказа.
+    
+    Args:
+        text: Текст для проверки
+        context_words: Количество слов, накопленных в текущем монологе
+    
+    Returns:
+        True если это журналистская фраза
     """
     text_lower = text.lower()
     
-    journalist_markers = [
-        r'\bвы\s+(можете|могли|должны)?',
+    # 🔥 v17.4: Сильные паттерны - всегда срабатывают
+    strong_journalist_markers = [
         r'\bрасскажите\b',
         r'\bобъясните\b',
         r'\bкак\s+вы\b',
         r'\bпочему\s+вы\b',
         r'\bчто\s+вы\b',
-        r'\bдавайте\b',
         r'\bсмотрим\b',
     ]
     
-    for marker in journalist_markers:
+    for marker in strong_journalist_markers:
         if re.search(marker, text_lower):
             return True
+    
+    # 🔥 v17.4: Слабые паттерны - игнорируются в длинных монологах
+    weak_journalist_markers = [
+        r'\bвы\s+(можете|могли|должны)?',
+        r'\bдавайте\b',
+    ]
+    
+    # Если контекст длинный (>100 слов) - не триггерим на слабые паттерны
+    if context_words > 100:
+        return False
+    
+    for marker in weak_journalist_markers:
+        if re.search(marker, text_lower):
+            return True
+    
     return False
 
 
@@ -238,21 +267,22 @@ def boundary_correction_raw(segments_raw, speaker_surname, speaker_roles):
 
 def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles, debug=True):
     """
-    🆕 v16.24.1: FIX #2 - Neutral фразы возвращаются к original speaker
-    🆕 v16.23: КРИТИЧЕСКИЙ FIX БАГ #4 - Правильный raw_speaker_id маппинг!
+    🔥 v17.4: КРИТИЧЕСКИЙ FIX БАГ #21, #24 - False positive is_journalist_phrase
     
     **ПРОБЛЕМА v16.23:**
-    При split neutral фраза наследовала current_speaker вместо original_speaker.
+    is_journalist_phrase срабатывал на «вы» и «давайте» внутри длинных монологов,
+    где спикер цитирует других людей или пересказывает косвенную речь.
     
-    Пример:
-    Сегмент: speaker="Исаев"
-    1. "Первое предложение" → Исаев
-    2. "Расскажите" → Журналист (split)
-    3. "Третье предложение" (neutral) → наследовало "Журналист" ❌
+    Примеры false positive:
+    - БАГ #21: "Вы наваливаетесь, занимаете какие-то точки..." — цитата немецких пленных
+    - БАГ #24: "давайте мы так больше делать не будем" — пересказ решения штаба
     
-    **РЕШЕНИЕ v16.24.1:**
-    Запоминаем original_speaker = speaker в начале обработки сегмента.
-    Neutral фразы используют original_speaker вместо current_speaker.
+    **РЕШЕНИЕ v17.4:**
+    Передаём context_words в is_journalist_phrase().
+    Если накоплено >100 слов в монологе → слабые паттерны («вы», «давайте») игнорируются.
+    
+    🆕 v16.24.1: FIX #2 - Neutral фразы возвращаются к original speaker
+    🆕 v16.23: КРИТИЧЕСКИЙ FIX БАГ #4 - Правильный raw_speaker_id маппинг!
     
     Args:
         segments_merged: Список merged сегментов
@@ -263,7 +293,7 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
     Returns:
         Список сегментов с разделенными mixed-speaker блоками
     """
-    print("\n✂️ Разделение mixed-speaker сегментов...")
+    print("\n✂️ Разделение mixed-speaker сегментов (v17.4)...")
     
     # v16.23: УЛУЧШЕННЫЙ МАППИНГ - имена + роли → raw_speaker_id
     reverse_roles = {}
@@ -289,6 +319,7 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
     result = []
     splitcount = 0
     continuation_fixed = 0
+    protected_from_false_positive = 0  # 🆕 v17.4: счётчик защиты
     
     for seg_idx, seg in enumerate(segments_merged):
         speaker = seg.get('speaker')
@@ -329,7 +360,11 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
             if not sentence:
                 continue
             
-            is_journalist_sent = is_journalist_phrase(sentence)
+            # 🔥 v17.4: Вычисляем контекст (количество слов накопленных в current_group)
+            context_words = sum(len(s.split()) for s in current_group)
+            
+            # 🔥 v17.4: Передаём context_words в is_journalist_phrase
+            is_journalist_sent = is_journalist_phrase(sentence, context_words)
             is_expert_sent = is_expert_phrase(sentence, speaker_surname)
             is_continuation = is_continuation_phrase(sentence)
             
@@ -337,6 +372,9 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
             if debug:
                 print(f"    [{sent_idx+1}] \"{sentence[:60]}...\"")
                 print(f"        Journalist={is_journalist_sent} | Expert={is_expert_sent} | Continuation={is_continuation}")
+                # 🆕 v17.4: Показываем context_words
+                if context_words > 0:
+                    print(f"        Context: {context_words} слов накоплено")
             
             # ПРАВИЛЬНАЯ ЛОГИКА ОПРЕДЕЛЕНИЯ СПИКЕРА
             sentence_speaker = None
@@ -365,6 +403,13 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
                 # 🆕 v16.24.1: Нейтральная фраза - возвращаемся к ИСХОДНОМУ спикеру
                 sentence_speaker = original_speaker
                 reason = "neutral (return to original)"
+            
+            # 🆕 v17.4: Если был применён контекст >100 слов, логируем
+            if context_words > 100 and not is_journalist_sent:
+                if re.search(r'\b(вы\s+|давайте\b)', sentence.lower()):
+                    protected_from_false_positive += 1
+                    if debug:
+                        print(f"        🛡️ ЗАЩИТА: контекст {context_words} слов → игнорируем слабые паттерны")
             
             # DEBUG - показываем определённого спикера
             if debug:
@@ -433,5 +478,9 @@ def split_mixed_speaker_segments(segments_merged, speaker_surname, speaker_roles
     
     if continuation_fixed > 0:
         print(f"✅ Continuation phrases исправлено: {continuation_fixed}")
+    
+    # 🆕 v17.4: Статистика защиты от false positive
+    if protected_from_false_positive > 0:
+        print(f"🛡️ Защита от false positive: {protected_from_false_positive} фраз")
     
     return result
