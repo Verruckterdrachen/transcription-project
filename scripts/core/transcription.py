@@ -2,6 +2,7 @@
 """
 core/transcription.py - Транскрибация аудио с Whisper
 
+🔥 v17.7: FIX БАГ #25 - GAP pyannote overlap attribution
 🔥 v17.2: FIX БАГ #15 - GAP текст overlap с next segment
 🆕 v16.5: Smart GAP Attribution - умная атрибуция GAP_FILLED по семантическому сходству
 🆕 v16.3.2: Gap speaker detection - определение спикера по окружению
@@ -219,8 +220,54 @@ def _looks_like_restart(gap_text, next_text, min_shared_ratio=0.50):
         return True
     return False
 
-def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker_surname=None):
+def _find_dominant_speaker_in_pyannote(seg_start, seg_end, diarization, speaker_roles):
     """
+    🆕 v17.7: FIX БАГ #25 - Находит доминирующего спикера в pyannote для GAP интервала
+    
+    Args:
+        seg_start: Начало GAP сегмента (секунды)
+        seg_end: Конец GAP сегмента (секунды)
+        diarization: Объект pyannote.core.Annotation
+        speaker_roles: Маппинг SPEAKER_XX → 'Спикер'/'Журналист'
+    
+    Returns:
+        (speaker_name, overlap_duration) или (None, 0.0)
+    """
+    if not diarization or not speaker_roles:
+        return None, 0.0
+    
+    overlaps = {}
+    
+    for turn, _, label in diarization.itertracks(yield_label=True):
+        # Проверяем пересечение
+        overlap_start = max(seg_start, turn.start)
+        overlap_end = min(seg_end, turn.end)
+        
+        if overlap_start < overlap_end:
+            overlap_duration = overlap_end - overlap_start
+            
+            if label not in overlaps:
+                overlaps[label] = 0.0
+            overlaps[label] += overlap_duration
+    
+    if not overlaps:
+        return None, 0.0
+    
+    # Находим спикера с максимальным overlap
+    dominant_label = max(overlaps, key=overlaps.get)
+    dominant_duration = overlaps[dominant_label]
+    
+    # Конвертируем SPEAKER_XX → имя
+    speaker_name = speaker_roles.get(dominant_label, dominant_label)
+    
+    return speaker_name, dominant_duration
+
+def force_transcribe_diar_gaps(
+    model, wav_path, gaps, existing_segments, speaker_surname=None,
+    diarization=None, speaker_roles=None  # 🆕 v17.7: FIX БАГ #25
+):
+    """
+    🆕 v17.7: FIX БАГ #25 - GAP pyannote overlap attribution
     🔧 v17.5: убрано ограничение (seg_end - seg_start) <= 7.0 в restart check
     🔥 v17.4: FIX БАГ #18/#20 - prev overlap removal + restart detection
     🔥 v17.4: FIX БАГ #19 - [нрзб] маркировка низкоуверенных слов
@@ -360,6 +407,18 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
                         next_text_restart = next_existing.get('text', '')
                         if _looks_like_restart(text, next_text_restart):
                             continue
+
+                    # ═══════════════════════════════════════════════════════
+                    # 🆕 v17.7: FIX БАГ #25 - GAP pyannote overlap attribution
+                    # ═══════════════════════════════════════════════════════
+                    
+                    pyannote_speaker, overlap_duration = _find_dominant_speaker_in_pyannote(
+                        seg_start, seg_end, diarization, speaker_roles
+                    )
+                    
+                    if pyannote_speaker and overlap_duration > 1.0:
+                        print(f"    🎙️ Pyannote overlap: {pyannote_speaker} ({overlap_duration:.1f}s)")
+                        detected_speaker = pyannote_speaker
 
                     # ═══════════════════════════════════════════════════════
                     # 🆕 v16.5: УМНАЯ АТРИБУЦИЯ GAP_FILLED
