@@ -46,7 +46,6 @@ def transcribe_audio(model, wav_path, language="ru", temperature=0.0, beam_size=
     print("  ❌ Whisper: транскрибация не удалась")
     return None
 
-
 def detect_speaker_for_gap(existing_segments, gap_start, gap_end, speaker_surname):
     """
     🆕 v16.3.2: Определяет спикера для gap сегмента по окружению
@@ -101,7 +100,6 @@ def detect_speaker_for_gap(existing_segments, gap_start, gap_end, speaker_surnam
 
     # Не можем определить
     return 'Неизвестно'
-
 
 def _remove_gap_overlap_with_next(gap_text, next_text, max_check_words=5):
     """
@@ -190,17 +188,24 @@ def _remove_gap_overlap_with_prev(gap_text, prev_text, max_check_words=6):
 
     return gap_text
 
-def _looks_like_restart(gap_text, next_text, min_shared_ratio=0.6):
+def _looks_like_restart(gap_text, next_text, min_shared_ratio=0.50):
     """
+    🔧 v17.5: порог 0.60 → 0.50, min_len 5 → 4
+
     Эвристика: если значимая лексика GAP сильно пересекается с next,
     то GAP вероятно содержит повтор/переформулировку → можно пропустить.
+
+    Порог снижен с 0.60 до 0.50, потому что русские флексии уменьшают
+    пересечение: "которые"/"который", "была"/"было" считаются разными словами.
+    min_len снижен с 5 до 4 символов, чтобы охватить русские контентные слова
+    ("было", "была", "надо", "даже", "этим").
     """
     if not gap_text or not next_text:
         return False
 
     def sig_words(t):
         ws = [w.lower().strip('.,!?;:«»"()-–—') for w in t.split()]
-        ws = [w for w in ws if len(w) >= 5]  # отсекаем короткий мусор
+        ws = [w for w in ws if len(w) >= 4]  # было 5 → теперь 4
         return set(ws)
 
     g = sig_words(gap_text)
@@ -209,13 +214,14 @@ def _looks_like_restart(gap_text, next_text, min_shared_ratio=0.6):
         return False
 
     ratio = len(g & n) / len(g)
-    if ratio >= min_shared_ratio:
+    if ratio >= min_shared_ratio:  # было 0.60 → теперь 0.50
         print(f"     🔁 Restart-like GAP: shared-with-next={ratio:.0%} → skipping")
         return True
     return False
 
 def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker_surname=None):
     """
+    🔧 v17.5: убрано ограничение (seg_end - seg_start) <= 7.0 в restart check
     🔥 v17.4: FIX БАГ #18/#20 - prev overlap removal + restart detection
     🔥 v17.4: FIX БАГ #19 - [нрзб] маркировка низкоуверенных слов
     🔥 v17.2: FIX БАГ #15 - Удаление overlap GAP текста с next segment
@@ -229,8 +235,8 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
     added_segments = []
 
     for gap in gaps:
-        gap_start = gap['gap_start']
-        gap_end   = gap['gap_end']
+        gap_start    = gap['gap_start']
+        gap_end      = gap['gap_end']
         gap_duration = gap['duration']
 
         print(f"  🚨 GAP {gap['gap_hms_start']}–{gap['gap_hms_end']} ({gap_duration}s)")
@@ -256,7 +262,7 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
                 beam_size=5,
                 no_speech_threshold=0.2,
                 compression_ratio_threshold=1.2,
-                word_timestamps=True,   # 🆕 v17.4: FIX БАГ #19 — нужны word-level probability
+                word_timestamps=True,  # 🆕 v17.4: FIX БАГ #19 — нужны word-level probability
             )
 
             if result and 'segments' in result:
@@ -345,9 +351,12 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
                             print(f"     ⚠️ GAP полностью дублирует хвост prev → skipping")
                             continue
 
-                    # FIX БАГ #18: речевой рестарт (спикер остановился и повторил)
-                    # Проверяем только для adjusted (коротких) GAP
-                    if next_existing and seg_end != original_end and (seg_end - seg_start) <= 7.0:
+                    # ═══════════════════════════════════════════════════════
+                    # 🔧 v17.5: FIX речевой рестарт — убрано ограничение <= 7.0
+                    # Было: only if (seg_end - seg_start) <= 7.0
+                    # Стало: для любого adjusted GAP, независимо от длительности
+                    # ═══════════════════════════════════════════════════════
+                    if next_existing and seg_end != original_end:
                         next_text_restart = next_existing.get('text', '')
                         if _looks_like_restart(text, next_text_restart):
                             continue

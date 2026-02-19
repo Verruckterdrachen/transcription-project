@@ -51,75 +51,97 @@ def is_hallucination(text):
     
     return False
 
-
 def is_duplicate_phrase(text, debug=False):
     """
     🆕 v16.19: Определяет дублированные фразы
-    
+    🔧 v17.5: Добавлен suffix-match для хвостовых дублей
+
     Примеры дублей:
-    - "ничего не знали. ничего не знали."
-    - "логичным Логичным решением"
-    - "начинает наступать начинает наступать"
-    
+    - "ничего не знали. ничего не знали."    ← suffix-match (NEW)
+    - "логичным Логичным решением"            ← similarity
+    - "начинает наступать начинает наступать" ← similarity
+
     Args:
-        text: Текст для проверки
+        text:  Текст для проверки
         debug: Показывать debug output
-    
+
     Returns:
         (has_duplicate, cleaned_text)
     """
     # Разбиваем на предложения
     sentences = re.split(r'([.!?]+)\s*', text)
     sentences = [s.strip() for s in sentences if s.strip() and s not in '.!?']
-    
+
     if len(sentences) < 2:
         return False, text
-    
-    # Ищем смежные дубли
+
     cleaned_sentences = []
     skip_next = False
     duplicates_found = 0
-    
+
     for i in range(len(sentences)):
         if skip_next:
             skip_next = False
             continue
-        
+
         current = sentences[i]
-        
-        # Проверяем следующее предложение
+
         if i < len(sentences) - 1:
             next_sent = sentences[i + 1]
-            
+
+            # ── 🔧 v17.5: SUFFIX-MATCH ──────────────────────────────────
+            # Случай: "А на момент начала Искра о нем просто ничего не знали.
+            #          ничего не знали."
+            # next_sent — хвост current, similarity низкая (~30%),
+            # но это всё равно дубль.
+            cur_words = current.lower().split()
+            nxt_words = next_sent.lower().split()
+
+            if (len(nxt_words) >= 2 and
+                    len(nxt_words) < len(cur_words) and
+                    cur_words[-len(nxt_words):] == nxt_words):
+
+                if debug:
+                    print(
+                        f"  🔍 SUFFIX-ДУБЛЬ: \"{next_sent}\" "
+                        f"— хвост \"{current}\""
+                    )
+                cleaned_sentences.append(current)  # берём полную версию
+                skip_next = True
+                duplicates_found += 1
+                continue
+            # ────────────────────────────────────────────────────────────
+
             # Similarity (игнорируя регистр)
             similarity = SequenceMatcher(
-                None, 
-                current.lower().strip(), 
+                None,
+                current.lower().strip(),
                 next_sent.lower().strip()
             ).ratio()
-            
-            if similarity > 0.95:  # 95% similarity = дубль!
+
+            if similarity > 0.95:
                 if debug:
-                    print(f"  🔍 ДУБЛЬ (similarity={similarity:.2%}): \"{current}\" ≈ \"{next_sent}\"")
-                
-                # Берём более длинный вариант
+                    print(
+                        f"  🔍 ДУБЛЬ (similarity={similarity:.2%}): "
+                        f"\"{current}\" ≈ \"{next_sent}\""
+                    )
+
                 if len(next_sent) > len(current):
                     cleaned_sentences.append(next_sent)
                 else:
                     cleaned_sentences.append(current)
-                
+
                 skip_next = True
                 duplicates_found += 1
                 continue
-        
+
         cleaned_sentences.append(current)
-    
+
     if duplicates_found > 0:
         cleaned_text = '. '.join(cleaned_sentences) + '.'
         return True, cleaned_text
-    
-    return False, text
 
+    return False, text
 
 def remove_ending_hallucinations(text, debug=False):
     """
@@ -160,45 +182,48 @@ def remove_ending_hallucinations(text, debug=False):
     
     return text
 
-
 def clean_hallucinations_from_text(text, speaker=None, debug=False):
     """
     🆕 v16.19: Комплексная очистка текста от галлюцинаций
-    
+    🔧 v17.5: suffix-match дубли через is_duplicate_phrase
+
     Выполняет:
-    1. Удаление дублированных фраз
+    1. Удаление дублированных фраз (sentence-level + suffix-match)
     2. Удаление ending hallucinations
     3. Очистка multiple пробелов и пунктуации
-    
+
+    ВАЖНО: clean_intra_loops здесь НЕ вызывается.
+    В разговорной речи повтор 3-граммы — норма, не баг.
+    Внутри-loop детекция применяется только к GAP-тексту в transcription.py.
+
     Args:
-        text: Текст для очистки
+        text:    Текст для очистки
         speaker: Спикер (для контекста)
-        debug: Показывать debug output
-    
+        debug:   Показывать debug output
+
     Returns:
         Очищенный текст
     """
     if not text or not text.strip():
         return text
-    
+
     original_text = text
-    
-    # 1. Удаление дублей
+
+    # 1. Удаление дублей (sentence-level + suffix-match)
     has_dupl, text = is_duplicate_phrase(text, debug=debug)
-    
+
     # 2. Удаление ending hallucinations
     text = remove_ending_hallucinations(text, debug=debug)
-    
+
     # 3. Очистка пробелов и пунктуации
-    text = re.sub(r'\s+', ' ', text)  # Multiple spaces → one
-    text = re.sub(r'([.!?]){2,}', r'\1', text)  # Multiple punctuation → one
+    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r'([.!?]){2,}', r'\1', text)
     text = text.strip()
-    
+
     if debug and text != original_text:
         print(f"  ✅ Очищено: {len(original_text)} → {len(text)} символов")
-    
-    return text
 
+    return text
 
 def filter_hallucination_segments(segments, debug=True):
     """
