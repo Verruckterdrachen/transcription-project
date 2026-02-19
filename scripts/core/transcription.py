@@ -13,6 +13,7 @@ import whisper
 from core.utils import seconds_to_hms, gap_detector, extract_gap_audio, text_similarity
 from core.diarization import align_segment_to_diarization
 from corrections.hallucinations import is_hallucination, mark_low_confidence_words
+from corrections.boundary_fixer import is_journalist_phrase  # 🆕 v17.7: FIX БАГ #25
 
 
 def transcribe_audio(model, wav_path, language="ru", temperature=0.0, beam_size=5, vad_threshold=0.7):
@@ -267,7 +268,7 @@ def force_transcribe_diar_gaps(
     diarization=None, speaker_roles=None  # 🆕 v17.7: FIX БАГ #25
 ):
     """
-    🆕 v17.7: FIX БАГ #25 - GAP pyannote overlap attribution
+    🆕 v17.7: FIX БАГ #25 - GAP pyannote overlap attribution + text-based override
     🔧 v17.5: убрано ограничение (seg_end - seg_start) <= 7.0 в restart check
     🔥 v17.4: FIX БАГ #18/#20 - prev overlap removal + restart detection
     🔥 v17.4: FIX БАГ #19 - [нрзб] маркировка низкоуверенных слов
@@ -417,8 +418,19 @@ def force_transcribe_diar_gaps(
                     )
                     
                     if pyannote_speaker and overlap_duration > 1.0:
-                        print(f"    🎙️ Pyannote overlap: {pyannote_speaker} ({overlap_duration:.1f}s)")
+                        print(f"     🎙️ Pyannote overlap: {pyannote_speaker} ({overlap_duration:.1f}s)")
                         detected_speaker = pyannote_speaker
+                    
+                    # ═══════════════════════════════════════════════════════
+                    # 🆕 v17.7: TEXT-BASED OVERRIDE - детекция Журналиста
+                    # ═══════════════════════════════════════════════════════
+                    
+                    # Проверяем текст GAP на журналистские паттерны
+                    if is_journalist_phrase(text, context_words=0):
+                        # Override pyannote decision
+                        if detected_speaker != 'Журналист':
+                            print(f"     🔄 TEXT OVERRIDE: {detected_speaker} → Журналист (паттерн обнаружен)")
+                            detected_speaker = 'Журналист'
 
                     # ═══════════════════════════════════════════════════════
                     # 🆕 v16.5: УМНАЯ АТРИБУЦИЯ GAP_FILLED
@@ -440,13 +452,13 @@ def force_transcribe_diar_gaps(
                         if next_speaker and next_speaker != detected_speaker:
                             similarity = text_similarity(text, next_text)
 
-                            print(f"    🔍 Сходство с next [{next_speaker}]: {similarity:.1%}")
+                            print(f"     🔍 Сходство с next [{next_speaker}]: {similarity:.1%}")
 
                             if similarity > 0.70:
                                 final_speaker = next_speaker
-                                print(f"    🔄 GAP_FILLED → {next_speaker} (сходство {similarity:.1%})")
+                                print(f"     🔄 GAP_FILLED → {next_speaker} (сходство {similarity:.1%})")
                             else:
-                                print(f"    ✅ GAP_FILLED → {detected_speaker} (по умолчанию)")
+                                print(f"     ✅ GAP_FILLED → {detected_speaker} (по умолчанию)")
 
                     new_segment = {
                         'start':          seg_start,
@@ -461,7 +473,7 @@ def force_transcribe_diar_gaps(
                     }
 
                     added_segments.append(new_segment)
-                    print(f"    ✅ [{seconds_to_hms(seg_start)}] {text[:50]}...")
+                    print(f"     ✅ [{seconds_to_hms(seg_start)}] {text[:50]}...")
 
         except Exception as e:
             print(f"  ❌ Gap транскрибация не удалась: {e}")

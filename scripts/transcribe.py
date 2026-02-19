@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-transcribe_v16.py - Главный файл пайплайна транскрибации v17.0
+transcribe_v16.py - Главный файл пайплайна транскрибации v17.7
 
+🔥 v17.7: FIX БАГ #25 - GAP pyannote overlap attribution + text-based override
 🔴 v17.1: DEBUG БАГ #15 - Пропуск "прорыв блокады" на 00:02:26
 - Добавлен target timestamp 00:02:26 во все checkpoints
 - Поиск фразы "прорыв блокады" в тексте сегментов
@@ -225,8 +226,8 @@ class TeeOutput:
 # ВЕРСИЯ
 # ═══════════════════════════════════════════════════════════════════════════
 
-VERSION = "17.4"
-VERSION_NAME = "FIX БАГ #21, #24 - False positive is_journalist_phrase"
+VERSION = "17.7"
+VERSION_NAME = "FIX БАГ #25 - GAP pyannote overlap attribution + text override"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ PIPELINE
@@ -462,6 +463,7 @@ def process_audio_file(
 
     # ═══════════════════════════════════════════════════════════════════════
     # ЭТАП 5: GAPS (если есть)
+    # 🆕 v17.7: FIX БАГ #25 - передача diarization/speaker_roles в force_transcribe_diar_gaps
     # 🆕 v16.5: Умная атрибуция GAP_FILLED по семантическому сходству
     # ═══════════════════════════════════════════════════════════════════════
     gaps = gap_detector(segments_raw, threshold=3.0)
@@ -472,9 +474,11 @@ def process_audio_file(
         for gap in gaps:
             print(f"   🚨 GAP {gap['gap_hms_start']}–{gap['gap_hms_end']} ({gap['duration']}s)")
 
-        # Force transcribe gaps (v16.5: умная атрибуция)
+        # Force transcribe gaps (v17.7: FIX БАГ #25 - pyannote overlap attribution + text override)
         gap_segments = force_transcribe_diar_gaps(
-            whisper_model, wav_path, gaps, segments_raw, speaker_surname
+            whisper_model, wav_path, gaps, segments_raw, speaker_surname,
+            diarization=diarization,      # 🆕 v17.7: FIX БАГ #25
+            speaker_roles=speaker_roles   # 🆕 v17.7: FIX БАГ #25
         )
 
         if gap_segments:
