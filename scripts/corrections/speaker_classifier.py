@@ -1,41 +1,31 @@
 #!/usr/bin/env python3
 """
-corrections/speaker_classifier.py - Весовая классификация спикеров v15 для v16.13
+corrections/speaker_classifier.py - Весовая классификация спикеров v15 для v17.5
+
+🆕 v17.5: РАСШИРЕННЫЙ DEBUG - детальная трассировка паттернов
+- Показывает КАКИЕ паттерны сработали
+- Показывает КАКОЙ текст совпал (matched_text)
+- Показывает итоговый счёт и решение
+- Специальная трассировка для проблемных реплик
 
 🔥 v16.13: КРИТИЧЕСКИЙ FIX RAW_SPEAKER_ID SYNC В CLASSIFICATION
 - При изменении speaker ТАКЖЕ обновляется raw_speaker_id
 - Создан обратный маппинг speaker_roles для синхронизации
-- Исправлен баг: TXT выводил старый speaker из-за несинхронизации
-- Аналогичный фикс v16.12, но для этапа классификации
-
-🆕 v16.9: FIX CONTINUATION PHRASE ATTRIBUTION
-- Исправлена логика проверки continuation phrases после длинных монологов
-- Теперь проверяется монолог ПРЕДЫДУЩЕГО спикера, а не текущего
-- "В частности", "То есть" корректно атрибутируются предыдущему спикеру
 """
 
-# Version: v16.13
-# Last updated: 2026-02-11
-# 🔥 v16.13: КРИТИЧЕСКИЙ FIX - синхронизация raw_speaker_id при classification
+# Version: v17.5
+# Last updated: 2026-02-19
+# 🆕 v17.5: Расширенный DEBUG для диагностики паттернов
 
 import re
 from core.config import SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD, SPEAKER_CLASSIFICATION_MIN_WORDS
 
 # ═══════════════════════════════════════════════════════════════════════════
-# ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+# ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (без изменений)
 # ═══════════════════════════════════════════════════════════════════════════
 
 def is_journalist_addressing_speaker(text, word_count):
-    """
-    Проверяет, является ли текст обращением Журналиста к Спикеру
-
-    Args:
-        text: Текст для проверки
-        word_count: Количество слов в тексте
-
-    Returns:
-        bool: True если это обращение Журналиста
-    """
+    """Проверяет, является ли текст обращением Журналиста к Спикеру"""
     text_lower = text.lower()
 
     journalist_addressing_patterns = [
@@ -66,15 +56,7 @@ def is_journalist_addressing_speaker(text, word_count):
             not has_speaker_monologue)
 
 def has_speaker_monologue_markers(text):
-    """
-    Проверяет наличие маркеров монолога Спикера
-
-    Args:
-        text: Текст для проверки
-
-    Returns:
-        bool: True если есть маркеры монолога Спикера
-    """
+    """Проверяет наличие маркеров монолога Спикера"""
     text_lower = text.lower()
 
     speaker_monologue_patterns = [
@@ -92,14 +74,6 @@ def has_speaker_monologue_markers(text):
 def get_monologue_duration_at_index(segments, end_index, speaker):
     """
     🔧 v16.9: Вычисляет длительность монолога спикера, заканчивающегося на end_index
-    
-    Args:
-        segments: Список всех сегментов
-        end_index: Индекс последнего сегмента монолога
-        speaker: Спикер для проверки
-    
-    Returns:
-        Длительность монолога в секундах (0 если нет монолога)
     """
     if end_index < 0 or end_index >= len(segments):
         return 0
@@ -124,15 +98,6 @@ def get_monologue_duration_at_index(segments, end_index, speaker):
 def is_continuation_phrase(text):
     """
     🆕 v16.8: Проверяет, является ли фраза продолжением монолога
-    
-    Фразы типа "То есть", "В частности", "Кроме того" обычно продолжают
-    предыдущую мысль, а не начинают новую тему журналиста.
-    
-    Args:
-        text: Текст для проверки
-    
-    Returns:
-        True если это фраза-продолжение
     """
     text_lower = text.lower().strip()
     
@@ -154,44 +119,28 @@ def is_continuation_phrase(text):
     return any(re.match(p, text_lower) for p in continuation_patterns)
 
 # ═══════════════════════════════════════════════════════════════════════════
-# ВЕСОВАЯ КЛАССИФИКАЦИЯ v15 + v16.13 FIX
+# 🆕 v17.5: РАСШИРЕННЫЙ DEBUG
 # ═══════════════════════════════════════════════════════════════════════════
 
-def apply_speaker_classification_v15(segments, speaker_surname, speaker_roles, debug=False):
+def calculate_speaker_score_v17_5(text, current_speaker, debug_mode=False):
     """
-    v16.13: Весовая классификация спикеров с СИНХРОНИЗАЦИЕЙ raw_speaker_id
+    🆕 v17.5: Рассчитывает веса с ДЕТАЛЬНЫМ DEBUG
     
-    🔥 v16.13 КРИТИЧЕСКИЙ FIX:
-    - При изменении speaker ТАКЖЕ обновляется raw_speaker_id
-    - Создан обратный маппинг speaker_roles (Исаев → SPEAKER_01)
-    - Исправлен баг: TXT выводил старый speaker из-за несинхронизации
-    - Синхронизация во всех 3 местах изменения speaker
-    
-    🔧 v16.9 ФИКС:
-    - Continuation phrases теперь проверяются относительно ПРЕДЫДУЩЕГО спикера
-    - "В частности" после длинного монолога Исаева → атрибутируется Исаеву
-    - Исправлена логика get_monologue_duration_at_index()
-
-    Args:
-        segments: Список сегментов после merge_replicas()
-        speaker_surname: Фамилия основного спикера
-        speaker_roles: Dict SPEAKER_XX → роль (для обратной конвертации)
-        debug: Если True, выводит детальную информацию
-
-    Returns:
-        (segments, stats) - модифицированные сегменты и статистика
+    Возвращает:
+        (j_score, s_score, details, matched_patterns)
+        
+    matched_patterns = [
+        {
+            'type': 'Журналист' | 'Спикер' | 'ЗАЩИТА',
+            'category': 'addressing' | 'monologue' | ...,
+            'pattern': regex,
+            'weight': int,
+            'matched_text': str  # 🆕 ЧТО именно совпало
+        },
+        ...
+    ]
     """
     
-    # 🆕 v16.13: Создаём обратный маппинг speaker → raw_speaker_id
-    reverse_roles = {}
-    for raw_id, role in speaker_roles.items():
-        reverse_roles[role] = raw_id
-    
-    if debug:
-        print(f"\n🔄 v16.13: Обратный маппинг создан:")
-        for role, raw_id in reverse_roles.items():
-            print(f"   {role} → {raw_id}")
-
     # Паттерны для определения Журналиста
     JOURNALIST_PATTERNS = {
         'addressing': [
@@ -232,35 +181,98 @@ def apply_speaker_classification_v15(segments, speaker_surname, speaker_roles, d
             (r'\bвы\s+(?:представьтесь|расскажите|объясните)\b', -5),
         ],
     }
+    
+    text_lower = text.lower()
+    journalist_score = 0
+    speaker_score = 0
+    details = []
+    matched_patterns = []  # 🆕 Детали совпадений
 
-    def calculate_speaker_score(text, current_speaker):
-        """Рассчитывает веса для определения правильного спикера"""
-        text_lower = text.lower()
-        journalist_score = 0
-        speaker_score = 0
-        details = []
+    # Проверяем паттерны Журналиста
+    for category, patterns in JOURNALIST_PATTERNS.items():
+        for pattern, weight in patterns:
+            match = re.search(pattern, text_lower, re.I)
+            if match:
+                journalist_score += weight
+                details.append(f"J:{category}:+{weight}")
+                matched_patterns.append({
+                    'type': 'Журналист',
+                    'category': category,
+                    'pattern': pattern,
+                    'weight': weight,
+                    'matched_text': match.group(0)  # 🆕 ЧТО именно совпало
+                })
 
-        # Проверяем паттерны Журналиста
-        for category, patterns in JOURNALIST_PATTERNS.items():
-            for pattern, weight in patterns:
-                if re.search(pattern, text_lower, re.I):
-                    journalist_score += weight
-                    details.append(f"J:{category}:+{weight}")
-
-        # Проверяем паттерны Спикера
-        for category, patterns in SPEAKER_PATTERNS.items():
-            for pattern, weight in patterns:
-                if re.search(pattern, text_lower, re.I):
-                    speaker_score += weight
-                    details.append(f"S:{category}:+{weight}")
-
-        # Применяем защиты
-        for pattern, weight in PROTECTIONS['journalist_not_speaker']:
-            if re.search(pattern, text_lower, re.I):
+    # Проверяем паттерны Спикера
+    for category, patterns in SPEAKER_PATTERNS.items():
+        for pattern, weight in patterns:
+            match = re.search(pattern, text_lower, re.I)
+            if match:
                 speaker_score += weight
-                details.append(f"PROTECT:S:{weight}")
+                details.append(f"S:{category}:+{weight}")
+                matched_patterns.append({
+                    'type': 'Спикер',
+                    'category': category,
+                    'pattern': pattern,
+                    'weight': weight,
+                    'matched_text': match.group(0)  # 🆕 ЧТО именно совпало
+                })
 
-        return journalist_score, speaker_score, details
+    # Применяем защиты
+    for pattern, weight in PROTECTIONS['journalist_not_speaker']:
+        match = re.search(pattern, text_lower, re.I)
+        if match:
+            speaker_score += weight
+            details.append(f"PROTECT:S:{weight}")
+            matched_patterns.append({
+                'type': 'ЗАЩИТА',
+                'category': 'protection',
+                'pattern': pattern,
+                'weight': weight,
+                'matched_text': match.group(0)
+            })
+
+    return journalist_score, speaker_score, details, matched_patterns
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ВЕСОВАЯ КЛАССИФИКАЦИЯ v17.5
+# ═══════════════════════════════════════════════════════════════════════════
+
+def apply_speaker_classification_v15(segments, speaker_surname, speaker_roles, debug=False):
+    """
+    v17.5: Весовая классификация спикеров с РАСШИРЕННЫМ DEBUG
+    
+    🆕 v17.5 РАСШИРЕННЫЙ DEBUG:
+    - Показывает детальную информацию о каждом сработавшем паттерне
+    - Выводит matched_text для каждого совпадения
+    - Специальная трассировка для проблемных реплик
+    
+    🔥 v16.13 КРИТИЧЕСКИЙ FIX:
+    - При изменении speaker ТАКЖЕ обновляется raw_speaker_id
+    - Создан обратный маппинг speaker_roles (Исаев → SPEAKER_01)
+    
+    🔧 v16.9 ФИКС:
+    - Continuation phrases теперь проверяются относительно ПРЕДЫДУЩЕГО спикера
+
+    Args:
+        segments: Список сегментов после merge_replicas()
+        speaker_surname: Фамилия основного спикера
+        speaker_roles: Dict SPEAKER_XX → роль (для обратной конвертации)
+        debug: Если True, выводит детальную информацию
+
+    Returns:
+        (segments, stats) - модифицированные сегменты и статистика
+    """
+    
+    # 🆕 v16.13: Создаём обратный маппинг speaker → raw_speaker_id
+    reverse_roles = {}
+    for raw_id, role in speaker_roles.items():
+        reverse_roles[role] = raw_id
+    
+    if debug:
+        print(f"\n🔄 v17.5: Обратный маппинг создан:")
+        for role, raw_id in reverse_roles.items():
+            print(f"   {role} → {raw_id}")
 
     # Статистика
     stats = {
@@ -270,13 +282,13 @@ def apply_speaker_classification_v15(segments, speaker_surname, speaker_roles, d
         'skipped_protections': 0,
         'skipped_monologue_context': 0,
         'continuation_phrases_fixed': 0,
-        'raw_speaker_id_synced': 0,  # 🆕 v16.13
+        'raw_speaker_id_synced': 0,
         'details': []
     }
 
     if debug:
         print("\n" + "="*80)
-        print("🎯 v16.13: ВЕСОВАЯ КЛАССИФИКАЦИЯ + RAW_SPEAKER_ID SYNC")
+        print("🎯 v17.5: ВЕСОВАЯ КЛАССИФИКАЦИЯ + РАСШИРЕННЫЙ DEBUG")
         print("="*80)
 
     for i, seg in enumerate(segments):
@@ -292,17 +304,13 @@ def apply_speaker_classification_v15(segments, speaker_surname, speaker_roles, d
         stats['total_checked'] += 1
 
         # 🔧 v16.9: FIXED CONTINUATION PHRASE LOGIC
-        # Проверяем, начинается ли текущий сегмент с continuation phrase
         if i > 0 and is_continuation_phrase(text):
             prev_seg = segments[i - 1]
             prev_speaker = prev_seg.get('speaker')
             
-            # Проверяем длительность предыдущего монолога
             prev_monologue_duration = get_monologue_duration_at_index(segments, i - 1, prev_speaker)
             
-            # Если предыдущий монолог длинный (>30s) или очень длинный (>60s)
             if prev_monologue_duration > 30:
-                # Это продолжение ПРЕДЫДУЩЕГО спикера!
                 if current_speaker != prev_speaker:
                     if debug:
                         print(f"\n  🔧 [{time}] CONTINUATION PHRASE FIX")
@@ -310,41 +318,71 @@ def apply_speaker_classification_v15(segments, speaker_surname, speaker_roles, d
                         print(f"     Текст: {text[:80]}...")
                     
                     seg['speaker'] = prev_speaker
-                    # 🆕 v16.13: ОБНОВЛЯЕМ raw_speaker_id через обратный маппинг
                     seg['raw_speaker_id'] = reverse_roles.get(prev_speaker, seg.get('raw_speaker_id'))
                     
                     stats['continuation_phrases_fixed'] += 1
-                    stats['raw_speaker_id_synced'] += 1  # 🆕 v16.13
+                    stats['raw_speaker_id_synced'] += 1
                     stats['changed_to_speaker'] += 1 if prev_speaker != 'Журналист' else 0
                     stats['changed_to_journalist'] += 1 if prev_speaker == 'Журналист' else 0
                     continue
                 else:
-                    # Уже правильный спикер, просто защищаем
                     if debug:
                         print(f"\n  🛡️ [{time}] CONTINUATION PHRASE (уже верно)")
                         print(f"     Спикер: {current_speaker} (после монолога {prev_monologue_duration:.1f}s)")
                     stats['skipped_monologue_context'] += 1
                     continue
 
-        j_score, s_score, details = calculate_speaker_score(text, current_speaker)
+        # 🆕 v17.5: Используем новую функцию с детальным DEBUG
+        j_score, s_score, details, matched_patterns = calculate_speaker_score_v17_5(
+            text, current_speaker, debug_mode=debug
+        )
+
+        # 🆕 v17.5: РАСШИРЕННЫЙ DEBUG для всех изменений ИЛИ проблемных реплик
+        show_detailed_debug = (
+            debug and (
+                j_score > s_score + SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD or
+                s_score > j_score + SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD
+            )
+        ) or "товарищ так и сказал" in text.lower()
+        
+        if show_detailed_debug:
+            print(f"\n  🔍 [{time}] ДЕТАЛЬНЫЙ АНАЛИЗ")
+            print(f"     Текущий спикер: {current_speaker}")
+            print(f"     Текст: {text[:100]}...")
+            
+            if matched_patterns:
+                print(f"     \n     Совпавшие паттерны:")
+                for p in matched_patterns:
+                    print(f"       • {p['type']:10s} | {p['category']:12s} | {p['weight']:+2d} | '{p['matched_text']}'")
+            else:
+                print(f"     \n     Совпавшие паттерны: НЕТ")
+            
+            print(f"     \n     ИТОГО: J={j_score}, S={s_score} (порог={SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD})")
+            print(f"     РЕШЕНИЕ: ", end="")
+            
+            if current_speaker == 'Журналист' and s_score > j_score + SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD:
+                print(f"Журналист → {speaker_surname} (S > J + {SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD})")
+            elif current_speaker == speaker_surname and j_score > s_score + SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD:
+                print(f"{speaker_surname} → Журналист (J > S + {SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD})")
+            else:
+                print(f"БЕЗ ИЗМЕНЕНИЙ (разница < {SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD})")
 
         # Определяем порог для изменения
         CONFIDENCE_THRESHOLD = SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD
 
         # Журналист → Спикер
         if current_speaker == 'Журналист' and s_score > j_score + CONFIDENCE_THRESHOLD:
-            if debug:
+            if not show_detailed_debug and debug:
                 print(f"\n  🔄 [{time}] Журналист → {speaker_surname}")
                 print(f"     Веса: J={j_score}, S={s_score}")
                 print(f"     Паттерны: {', '.join(details)}")
                 print(f"     Текст: {text[:80]}...")
 
             seg['speaker'] = speaker_surname
-            # 🆕 v16.13: ОБНОВЛЯЕМ raw_speaker_id через обратный маппинг
             seg['raw_speaker_id'] = reverse_roles.get(speaker_surname, seg.get('raw_speaker_id'))
             
             stats['changed_to_speaker'] += 1
-            stats['raw_speaker_id_synced'] += 1  # 🆕 v16.13
+            stats['raw_speaker_id_synced'] += 1
             stats['details'].append({
                 'time': time,
                 'from': 'Журналист',
@@ -356,18 +394,17 @@ def apply_speaker_classification_v15(segments, speaker_surname, speaker_roles, d
 
         # Спикер → Журналист
         elif current_speaker == speaker_surname and j_score > s_score + CONFIDENCE_THRESHOLD:
-            if debug:
+            if not show_detailed_debug and debug:
                 print(f"\n  🔄 [{time}] {speaker_surname} → Журналист")
                 print(f"     Веса: J={j_score}, S={s_score}")
                 print(f"     Паттерны: {', '.join(details)}")
                 print(f"     Текст: {text[:80]}...")
 
             seg['speaker'] = 'Журналист'
-            # 🆕 v16.13: ОБНОВЛЯЕМ raw_speaker_id через обратный маппинг
             seg['raw_speaker_id'] = reverse_roles.get('Журналист', seg.get('raw_speaker_id'))
             
             stats['changed_to_journalist'] += 1
-            stats['raw_speaker_id_synced'] += 1  # 🆕 v16.13
+            stats['raw_speaker_id_synced'] += 1
             stats['details'].append({
                 'time': time,
                 'from': speaker_surname,
@@ -379,7 +416,7 @@ def apply_speaker_classification_v15(segments, speaker_surname, speaker_roles, d
 
     if debug:
         print("="*80)
-        print(f"✅ v16.13: Классификация завершена")
+        print(f"✅ v17.5: Классификация завершена")
         print(f"   Всего проверено: {stats['total_checked']}")
         print(f"   Исправлено: {stats['changed_to_journalist'] + stats['changed_to_speaker']}")
         print(f"   • Журналист → Спикер: {stats['changed_to_speaker']}")
