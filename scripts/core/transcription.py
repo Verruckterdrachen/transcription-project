@@ -11,7 +11,7 @@ core/transcription.py - Транскрибация аудио с Whisper
 import whisper
 from core.utils import seconds_to_hms, gap_detector, extract_gap_audio, text_similarity
 from core.diarization import align_segment_to_diarization
-from corrections.hallucinations import is_hallucination
+from corrections.hallucinations import is_hallucination, mark_low_confidence_words
 
 
 def transcribe_audio(model, wav_path, language="ru", temperature=0.0, beam_size=5, vad_threshold=0.7):
@@ -163,42 +163,66 @@ def _remove_gap_overlap_with_next(gap_text, next_text, max_check_words=5):
     
     return gap_text
 
+def _remove_gap_overlap_with_prev(gap_text, prev_text, max_check_words=6):
+    """
+    FIX БАГ #18/#20: удаляем leading overlap (начало GAP == хвост prev).
+    Если после удаления стало пусто — значит GAP был целиком дублем.
+    """
+    if not gap_text or not prev_text:
+        return gap_text
+
+    gap_words = gap_text.strip().split()
+    prev_words = prev_text.strip().split()
+    if not gap_words or not prev_words:
+        return gap_text
+
+    def norm(w):
+        return w.lower().strip('.,!?;:«»"()-–—')
+
+    gap_n = [norm(w) for w in gap_words]
+    prev_n = [norm(w) for w in prev_words]
+
+    # точное совпадение n слов: head(GAP) == tail(PREV)
+    for n in range(min(max_check_words, len(gap_words), len(prev_words)), 0, -1):
+        if gap_n[:n] == prev_n[-n:]:
+            print(f"     🔧 Removed {n} leading overlap words vs prev: {' '.join(gap_words[:n])}")
+            return " ".join(gap_words[n:]).strip()
+
+    return gap_text
+
+def _looks_like_restart(gap_text, next_text, min_shared_ratio=0.6):
+    """
+    Эвристика: если значимая лексика GAP сильно пересекается с next,
+    то GAP вероятно содержит повтор/переформулировку → можно пропустить.
+    """
+    if not gap_text or not next_text:
+        return False
+
+    def sig_words(t):
+        ws = [w.lower().strip('.,!?;:«»"()-–—') for w in t.split()]
+        ws = [w for w in ws if len(w) >= 5]  # отсекаем короткий мусор
+        return set(ws)
+
+    g = sig_words(gap_text)
+    n = sig_words(next_text)
+    if not g:
+        return False
+
+    ratio = len(g & n) / len(g)
+    if ratio >= min_shared_ratio:
+        print(f"     🔁 Restart-like GAP: shared-with-next={ratio:.0%} → skipping")
+        return True
+    return False
 
 def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker_surname=None):
     """
+    🔥 v17.4: FIX БАГ #18/#20 - prev overlap removal + restart detection
+    🔥 v17.4: FIX БАГ #19 - [нрзб] маркировка низкоуверенных слов
     🔥 v17.2: FIX БАГ #15 - Удаление overlap GAP текста с next segment
     🆕 v16.8: GAP Overlap Protection - обрезка при пересечении с соседними
     🆕 v16.5: Smart GAP Attribution - умная атрибуция по семантическому сходству
     🆕 v16.3.2: Gap speaker detection добавлен
     🔧 v16.2: Force-transcribe gaps с исправленным itertracks
-
-    Повторно транскрибирует пропущенные участки (gaps) используя
-    данные диаризации. Использует более мягкие параметры Whisper.
-    
-    🔥 v17.2 ИЗМЕНЕНИЯ (БАГ #15):
-    - После заполнения GAP удаляем trailing overlap с next segment
-    - Фикс "достаточно шум" → удаление дубля "достаточно" и галлюцинации "шум"
-    - Фикс фрагментов ("до", "ш", "п") которые остаются после обрезки
-    
-    🆕 v16.8 ИЗМЕНЕНИЯ:
-    - GAP overlap detection с предыдущими GAP и существующими сегментами
-    - Автоматическая обрезка границ при overlap
-    - Пропуск слишком коротких GAP после обрезки (<1s)
-    
-    🆕 v16.5 ИЗМЕНЕНИЯ:
-    - После транскрибации проверяется семантическое сходство с next_segment
-    - Если сходство >70% → GAP_FILLED атрибутируется следующему спикеру
-    - Защита от ошибочной атрибуции запинок/переформулировок
-
-    Args:
-        model: Загруженная модель Whisper
-        wav_path: Path к WAV файлу
-        gaps: Список gaps из gap_detector
-        existing_segments: Существующие сегменты (для проверки overlap)
-        speaker_surname: 🆕 v16.3.2 - Фамилия эксперта для определения спикера
-
-    Returns:
-        list: Новые сегменты из gaps
     """
     print(f"\n🔄 Force-transcribe gaps...")
 
@@ -206,7 +230,7 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
 
     for gap in gaps:
         gap_start = gap['gap_start']
-        gap_end = gap['gap_end']
+        gap_end   = gap['gap_end']
         gap_duration = gap['duration']
 
         print(f"  🚨 GAP {gap['gap_hms_start']}–{gap['gap_hms_end']} ({gap_duration}s)")
@@ -215,9 +239,9 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
         detected_speaker = 'Неизвестно'
         if speaker_surname:
             detected_speaker = detect_speaker_for_gap(
-                existing_segments, 
-                gap_start, 
-                gap_end, 
+                existing_segments,
+                gap_start,
+                gap_end,
                 speaker_surname
             )
 
@@ -225,14 +249,14 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
         gap_audio_path = extract_gap_audio(wav_path, gap_start, gap_end, overlap=1.0)
 
         try:
-            # 🔧 v16.0: Понижен порог no_speech_threshold до 0.2
             result = model.transcribe(
                 str(gap_audio_path),
                 language="ru",
                 temperature=0.0,
                 beam_size=5,
-                no_speech_threshold=0.2,  # Было 0.3
-                compression_ratio_threshold=1.2
+                no_speech_threshold=0.2,
+                compression_ratio_threshold=1.2,
+                word_timestamps=True,   # 🆕 v17.4: FIX БАГ #19 — нужны word-level probability
             )
 
             if result and 'segments' in result:
@@ -243,83 +267,113 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
                     if is_hallucination(text):
                         continue
 
+                    # 🆕 v17.4: FIX БАГ #19 — [нрзб] для низкоуверенных слов
+                    if seg.get('words'):
+                        text = mark_low_confidence_words(text, seg['words'])
+
+                    # Если после маркировки остался только [нрзб] целиком — пропускаем
+                    if not text.strip() or text.strip() == '[нрзб]':
+                        print(f"     ⚠️ GAP полностью неразборчив → skipping")
+                        continue
+
                     # Adjust timing
                     seg_start = gap_start + float(seg['start'])
-                    seg_end = gap_start + float(seg['end'])
+                    seg_end   = gap_start + float(seg['end'])
 
                     # ═══════════════════════════════════════════════════════
                     # 🆕 v16.8: GAP OVERLAP PROTECTION
                     # ═══════════════════════════════════════════════════════
-                    
+
                     original_start = seg_start
-                    original_end = seg_end
-                    
+                    original_end   = seg_end
+
                     # 1. Проверяем overlap с предыдущим GAP сегментом
                     if added_segments:
                         last_gap = added_segments[-1]
                         if seg_start < last_gap["end"] + 0.5:
                             seg_start = last_gap["end"]
                             print(f"     ⚠️ GAP overlap с предыдущим GAP, adjusted start: {seg_start:.2f}s")
-                    
-                    # 2. Проверяем overlap со следующим существующим сегментом
+
+                    # 2. Находим следующий существующий сегмент
                     next_existing = None
                     for existing_seg in sorted(existing_segments, key=lambda x: x['start']):
                         if existing_seg['start'] >= gap_end:
                             next_existing = existing_seg
                             break
-                    
+
                     if next_existing and seg_end > next_existing["start"] - 0.5:
                         seg_end = next_existing["start"]
                         print(f"     ⚠️ GAP overlap с next existing, adjusted end: {seg_end:.2f}s")
-                    
+
                     # 3. Пропускаем слишком короткие GAP после обрезки
                     if seg_end - seg_start < 1.0:
                         print(f"     ⚠️ GAP too short after adjustment ({seg_end - seg_start:.2f}s), skipping")
                         continue
-                    
+
                     # 4. Показываем adjustment если был
                     if seg_start != original_start or seg_end != original_end:
                         print(f"     🔧 Adjusted: {original_start:.2f}-{original_end:.2f} → {seg_start:.2f}-{seg_end:.2f}")
 
                     # ═══════════════════════════════════════════════════════
-                    # 🔥 v17.2: FIX БАГ #15 - REMOVE GAP TEXT OVERLAP
+                    # 🔥 v17.2: FIX БАГ #15 - REMOVE GAP TEXT OVERLAP С NEXT
                     # ═══════════════════════════════════════════════════════
-                    
-                    # Если GAP был обрезан (adjusted_end) - проверяем текст на overlap
+
                     if next_existing and seg_end != original_end:
                         next_text = next_existing.get('text', '')
                         text = _remove_gap_overlap_with_next(text, next_text, max_check_words=5)
-                        
-                        # Если после удаления overlap текст стал пустым - пропускаем
+
                         if not text.strip():
-                            print(f"     ⚠️ GAP text empty after overlap removal, skipping")
+                            print(f"     ⚠️ GAP text empty after next-overlap removal → skipping")
+                            continue
+
+                    # ═══════════════════════════════════════════════════════
+                    # 🔥 v17.4: FIX БАГ #18/#20 - REMOVE GAP OVERLAP С PREV
+                    # ═══════════════════════════════════════════════════════
+
+                    # Находим предыдущий существующий сегмент
+                    prev_existing = None
+                    for existing_seg in sorted(existing_segments, key=lambda x: x['end'], reverse=True):
+                        if existing_seg['end'] <= gap_start:
+                            prev_existing = existing_seg
+                            break
+
+                    if prev_existing:
+                        prev_text = prev_existing.get('text', '')
+                        text = _remove_gap_overlap_with_prev(text, prev_text)
+
+                        if not text.strip():
+                            print(f"     ⚠️ GAP полностью дублирует хвост prev → skipping")
+                            continue
+
+                    # FIX БАГ #18: речевой рестарт (спикер остановился и повторил)
+                    # Проверяем только для adjusted (коротких) GAP
+                    if next_existing and seg_end != original_end and (seg_end - seg_start) <= 7.0:
+                        next_text_restart = next_existing.get('text', '')
+                        if _looks_like_restart(text, next_text_restart):
                             continue
 
                     # ═══════════════════════════════════════════════════════
                     # 🆕 v16.5: УМНАЯ АТРИБУЦИЯ GAP_FILLED
                     # ═══════════════════════════════════════════════════════
-                    
+
                     final_speaker = detected_speaker
-                    
+
                     # Находим следующий сегмент после gap
                     next_segment = None
                     for existing_seg in sorted(existing_segments, key=lambda x: x['start']):
                         if existing_seg['start'] >= gap_end:
                             next_segment = existing_seg
                             break
-                    
-                    # Если есть следующий сегмент и его спикер отличается
+
                     if next_segment:
                         next_speaker = next_segment.get('speaker')
-                        next_text = next_segment.get('text', '')
-                        
+                        next_text    = next_segment.get('text', '')
+
                         if next_speaker and next_speaker != detected_speaker:
-                            # Проверяем семантическое сходство
                             similarity = text_similarity(text, next_text)
-                            
+
                             print(f"    🔍 Сходство с next [{next_speaker}]: {similarity:.1%}")
-                            
-                            # Если сходство >70% → переопределяем спикера
+
                             if similarity > 0.70:
                                 final_speaker = next_speaker
                                 print(f"    🔄 GAP_FILLED → {next_speaker} (сходство {similarity:.1%})")
@@ -327,15 +381,15 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
                                 print(f"    ✅ GAP_FILLED → {detected_speaker} (по умолчанию)")
 
                     new_segment = {
-                        'start': seg_start,
-                        'end': seg_end,
-                        'start_hms': seconds_to_hms(seg_start),
-                        'end_hms': seconds_to_hms(seg_end),
-                        'text': text,
-                        'speaker': final_speaker,  # 🆕 v16.5: Используем final_speaker
+                        'start':          seg_start,
+                        'end':            seg_end,
+                        'start_hms':      seconds_to_hms(seg_start),
+                        'end_hms':        seconds_to_hms(seg_end),
+                        'text':           text,
+                        'speaker':        final_speaker,
                         'raw_speaker_id': 'GAP_FILLED',
-                        'confidence': seg.get('avg_logprob', -1.0),
-                        'from_gap': True
+                        'confidence':     seg.get('avg_logprob', -1.0),
+                        'from_gap':       True
                     }
 
                     added_segments.append(new_segment)
@@ -345,7 +399,6 @@ def force_transcribe_diar_gaps(model, wav_path, gaps, existing_segments, speaker
             print(f"  ❌ Gap транскрибация не удалась: {e}")
 
         finally:
-            # Удаляем временный файл
             if gap_audio_path.exists():
                 gap_audio_path.unlink()
 

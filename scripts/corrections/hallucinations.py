@@ -238,3 +238,36 @@ def filter_hallucination_segments(segments, debug=True):
         print(f"✅ Очистка завершена: {len(cleaned_segments)} сегментов (удалено {removed_count})")
     
     return cleaned_segments
+
+def mark_low_confidence_words(text: str, words: list, prob_threshold: float = 0.35, min_len: int = 4) -> str:
+    """
+    Заменяет низкоуверенные слова Whisper на [нрзб].
+
+    Ожидается words вида: [{'word': '...', 'probability': 0.xx, ...}, ...]
+    """
+    if not text or not words:
+        return text
+
+    out = []
+    prev_nrzb = False
+
+    for w in words:
+        wtxt = (w.get("word") or "").strip()
+        prob = w.get("probability", None)
+
+        # Нормализуем "длину слова" без пунктуации
+        core = re.sub(r"[^\wа-яА-ЯёЁ]", "", wtxt)
+
+        low_conf = (prob is not None and prob < prob_threshold and len(core) >= min_len)
+
+        if low_conf:
+            if not prev_nrzb:
+                out.append("[нрзб]")
+                prev_nrzb = True
+            # если подряд несколько low_conf — схлопываем в один [нрзб]
+        else:
+            if wtxt:
+                out.append(wtxt)
+                prev_nrzb = False
+
+    return " ".join(out).strip()
