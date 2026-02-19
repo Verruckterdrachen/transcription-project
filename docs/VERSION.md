@@ -1,4 +1,4 @@
-# Version: v17.4
+# Version: v17.6
 # Last updated: 2026-02-19
 # Status: TESTING 🧪
 
@@ -6,10 +6,11 @@
 
 **Base:** v17.0 BASELINE
 **Test audio:** Горбунов (06.06) — новый спикер
-**Последний фикс:** БАГ #21, #24 — False positive is_journalist_phrase ✅
+**Последний фикс:** БАГ #25 — Цитационные обороты (антипаттерн) ✅
 
 | Баг | Описание | Статус |
 |-----|----------|--------|
+| #25 | False positive «Товарищ так и сказал, нет, вы...» | ✅ FIXED v17.6 |
 | #21 | False positive «Вы наваливаетесь...» (цитата) | ✅ FIXED v17.4 |
 | #24 | False positive «давайте мы так...» (пересказ) | ✅ FIXED v17.4 |
 | #18 | GAP corruption на 00:21:34 | 🔴 OPEN |
