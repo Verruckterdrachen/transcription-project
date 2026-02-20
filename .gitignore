@@ -41,6 +41,7 @@ interview/
 !test-results/latest/*.txt
 !test-results/latest/*.log
 !tests/*.txt
+!tests/corpus/*.txt       
 
 # 🆕 v16.18.1: Golden Dataset - коммитить всё
 !golden-dataset/**/*.json
