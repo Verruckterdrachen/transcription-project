@@ -397,7 +397,8 @@ def merge_replicas(segments, debug=False):
             print(f"    ✅ Очистка завершена, финальный текст: {len(final_text)} символов")
 
         if final_text:
-            # 🆕 v16.14: Берём speaker и raw_speaker_id от ДОМИНИРУЮЩЕГО сегмента!
+            # 🆕 v17.10: sub_segments для точного timestamp injection (Вариант A)
+            # Сохраняем границы оригинальных Whisper-сегментов ДО clean_loops
             merged.append({
                 "speaker": dominant_segment.get('speaker', current_speaker),
                 "time": current.get('start_hms', seconds_to_hms(start_time)),
@@ -405,7 +406,15 @@ def merge_replicas(segments, debug=False):
                 "end": current_end,
                 "text": final_text,
                 "confidence": current.get('confidence', ''),
-                "raw_speaker_id": dominant_segment.get('raw_speaker_id', '')
+                "raw_speaker_id": dominant_segment.get('raw_speaker_id', ''),
+                "sub_segments": [
+                    {
+                        "start": s["start"],
+                        "end":   s["end"],
+                        "words": len(s.get("text", "").split())
+                    }
+                    for s in all_segments_in_group
+                ]
             })
 
             if len(texts) > 1:

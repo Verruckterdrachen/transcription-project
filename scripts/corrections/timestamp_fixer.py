@@ -1,239 +1,267 @@
 #!/usr/bin/env python3
 """
-corrections/timestamp_fixer.py - Исправление timestamp v16.28
+corrections/timestamp_fixer.py - Исправление timestamp
 
+🆕 v17.10: Вариант A — точные timestamp через sub_segments из merge_replicas
+           Вместо word-proportion по всему блоку используем реальные границы
+           оригинальных Whisper-сегментов. Debug: estimated vs real vs Δ.
 🆕 v16.28: FIX БАГ #3 - Потеря последнего предложения
-- range(0, len(sentences), 2) вместо range(0, len(sentences)-1, 2)
-- Обрабатываем ВСЕ элементы при парсинге предложений
-
 🆕 v16.22: FIX БАГ #1 - Дублирующиеся timestamp
-- Проверка: timestamp НЕ вставляется, если предложение уже начинается с HH:MM:SS
-- Regex check: r'^\d{2}:\d{2}:\d{2}'
-
 🆕 v16.22: FIX БАГ #2 - Timestamp назад
-- Проверка монотонности: new_start >= old_start (никогда не двигаем назад!)
-- Защита от gap filling artifacts
-
 🆕 v16.19: КРИТИЧЕСКИЙ FIX - Timestamp injection в блоки >30 сек
-- Детекция блоков без промежуточных timestamp (длительность >30s)
-- Вставка промежуточных меток каждые ~30 сек
-- Исправление сдвигов timestamp после gap filling
 """
 
 import re
 from core.utils import seconds_to_hms
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# 🆕 v17.10: Helper — реальное время через sub_segments
+# ═══════════════════════════════════════════════════════════════════════════
+
+def _get_real_time_for_word(word_idx, total_words_post, seg_start, seg_end,
+                             sub_segments, total_pre_words, debug=False):
+    """
+    🆕 v17.10: Вычисляет реальное время для позиции word_idx.
+
+    Масштабирует позицию из post-clean пространства в pre-clean,
+    затем ищет нужный sub_segment и интерполирует внутри него.
+
+    Args:
+        word_idx:           Позиция первого слова предложения (post-clean)
+        total_words_post:   Всего слов в merged тексте (post-clean)
+        seg_start:          seg['start'] — fallback начало
+        seg_end:            seg['end']   — fallback конец
+        sub_segments:       [{'start', 'end', 'words'}, ...] из merge_replicas
+        total_pre_words:    Сумма words из sub_segments (pre-clean)
+        debug:              Показывать детальный debug lookup
+
+    Returns:
+        float: Время в секундах
+    """
+    duration = seg_end - seg_start
+
+    # Fallback: нет sub_segments → старая линейная интерполяция
+    if not sub_segments or total_pre_words == 0 or total_words_post == 0:
+        return seg_start + (word_idx / total_words_post) * duration
+
+    # Масштаб: post-clean → pre-clean
+    scale = total_pre_words / total_words_post
+    scaled_idx = word_idx * scale
+
+    cumulative = 0
+    for sub in sub_segments:
+        sub_words = max(sub.get('words', 1), 1)
+        if scaled_idx <= cumulative + sub_words:
+            fraction = (scaled_idx - cumulative) / sub_words
+            real_time = sub['start'] + fraction * (sub['end'] - sub['start'])
+            if debug:
+                print(f"      🔍 word_idx={word_idx} → scaled={scaled_idx:.1f} → "
+                      f"sub [{seconds_to_hms(sub['start'])}-{seconds_to_hms(sub['end'])}] "
+                      f"words={sub_words} frac={fraction:.2f} → {seconds_to_hms(real_time)}")
+            return real_time
+        cumulative += sub_words
+
+    return sub_segments[-1]['end']
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+
 def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
     """
+    🆕 v17.10: Вариант A — точные timestamp через sub_segments
     🆕 v16.28: FIX БАГ #3 - Потеря последнего предложения
     🆕 v16.22: FIX - Защита от дублей timestamp
     🆕 v16.19: Вставляет промежуточные timestamp в блоки >30 сек
-        
-    **ПРОБЛЕМА (БАГ #3 v16.28):**
-    range(0, len(sentences)-1, 2) пропускает последний элемент массива!
-    
-    Пример:
-    sentences = ['Текст 1', '.', ' ', 'Текст 2', '.', ' ', 'Текст 3']
-    # 7 элементов (индексы 0-6)
-    
-    range(0, 6, 2) = [0, 2, 4]  ← НЕ обрабатывается индекс 6!
-    → Предложение 'Текст 3' ПОТЕРЯНО!
-    
-    **FIX v16.28:**
-    range(0, len(sentences), 2) обрабатывает ВСЕ элементы включая последний
-    
-    **ПРОБЛЕМА (БАГ #1):**
-    Функция вставляла timestamp БЕЗ проверки, что предложение
-    УЖЕ начинается с timestamp → дубль: "00:00:55 00:00:55 Текст"
-    
-    **FIX v16.22:**
-    Перед вставкой проверяем, что предложение НЕ начинается с HH:MM:SS
-    
-    **ПРОБЛЕМА (v16.19):**
-    После merge_replicas() блоки могут быть >60 сек без меток.
-    Пример: 00:06:12 → 00:10:03 (~231 сек, 500 слов) — нет промежуточных меток!
-    
-    **РЕШЕНИЕ:**
-    1. Определяем блоки длительностью > interval (30s)
-    2. Разбиваем текст на предложения
-    3. Вставляем timestamp каждые ~30 сек перед новым предложением
-    
+
+    Debug output (v17.10):
+        📌 inject [REAL ✅]      00:01:10  | estimated: 00:01:05 | Δ=+5.0s
+        📌 inject [ESTIMATED ⚠️] 00:03:43  | estimated: 00:03:43 | Δ=+0.0s  (нет sub_segments)
+
     Args:
         segments: Список сегментов после merge_replicas
         interval: Интервал вставки timestamp (по умолчанию 30s)
-        debug: Показывать debug output
-    
+        debug:    Показывать debug output
+
     Returns:
         segments с вставленными timestamp в тексте
-    
-    Example:
-        БЫЛО:
-        00:06:12 Текст 231 сек без меток...
-        
-        СТАЛО:
-        00:06:12 Текст начало... 00:06:42 Текст продолжение... 00:07:12 ...
     """
     if debug:
-        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s)...")
-    
-    injection_count = 0
-    skipped_duplicates = 0
-    
+        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s, mode=v17.10)...")
+
+    injection_count     = 0
+    skipped_duplicates  = 0
+    total_delta         = 0.0
+    delta_count         = 0
+
     for seg_idx, seg in enumerate(segments):
-        start = seg.get('start', 0)
-        end = seg.get('end', 0)
+        start    = seg.get('start', 0)
+        end      = seg.get('end',   0)
         duration = end - start
-        
+
         # Пропускаем короткие блоки
         if duration <= interval:
             continue
-        
+
         text = seg.get('text', '')
-        
+
+        # 🆕 v17.10: sub_segments для точного lookup
+        sub_segments       = seg.get('sub_segments', [])
+        total_pre_words    = sum(s.get('words', 0) for s in sub_segments)
+        has_real_data      = bool(sub_segments) and total_pre_words > 0
+
         # Разбиваем на предложения
         sentences = re.split(r'([.!?]+)\s+', text)
-        # Объединяем предложения с пунктуацией: ['Текст', '.', ' '] → ['Текст.']
-        sentences = [''.join(sentences[i:i+2]).strip() for i in range(0, len(sentences), 2)]
+        sentences = [''.join(sentences[i:i+2]).strip()
+                     for i in range(0, len(sentences), 2)]
         sentences = [s for s in sentences if s]
-        
+
         if len(sentences) < 2:
             continue
-        
-        # Вычисляем примерную длительность одного предложения
+
         words_total = len(text.split())
-        sentence_durations = []
-        
-        for sent in sentences:
-            sent_words = len(sent.split())
-            sent_duration = (sent_words / words_total) * duration if words_total > 0 else 0
-            sentence_durations.append(sent_duration)
-        
+
+        if debug:
+            mode = "🎯 REAL (sub_segments)" if has_real_data else "📐 ESTIMATED (word proportion)"
+            print(f"\n  ── Сегмент [{seg.get('time','???')}] {seg.get('speaker')} ──")
+            print(f"     длит={duration:.1f}s | слов(post)={words_total} | режим={mode}")
+            if has_real_data:
+                print(f"     sub_segments: {len(sub_segments)} шт | "
+                      f"words(pre-clean)={total_pre_words} | "
+                      f"scale={total_pre_words/words_total:.3f}")
+                for si, s in enumerate(sub_segments):
+                    print(f"       sub[{si}]: [{seconds_to_hms(s['start'])}-"
+                          f"{seconds_to_hms(s['end'])}] words={s['words']}")
+
         # Вставляем timestamp
-        new_text_parts = []
-        current_time = start
-        elapsed = 0.0
-        
-        for sent_idx, (sent, sent_dur) in enumerate(zip(sentences, sentence_durations)):
-            # Проверяем, нужна ли вставка timestamp
-            if elapsed >= interval and sent_idx < len(sentences) - 1:  # НЕ перед последним
-                
-                # 🆕 v16.22: FIX БАГ #1 - Проверяем, что предложение НЕ начинается с timestamp
+        new_text_parts  = []
+        current_word_idx = 0
+        elapsed          = 0.0
+
+        for sent_idx, sent in enumerate(sentences):
+            sent_words   = len(sent.split())
+            sent_elapsed = (sent_words / words_total) * duration if words_total > 0 else 0
+
+            if elapsed >= interval and sent_idx < len(sentences) - 1:
+
+                # 🆕 v16.22: FIX БАГ #1 — не вставлять дубль
                 if not re.match(r'^\d{2}:\d{2}:\d{2}', sent.strip()):
-                    timestamp_str = f" {seconds_to_hms(current_time)} "
+
+                    # Реальное время (v17.10 — Вариант A)
+                    real_time = _get_real_time_for_word(
+                        current_word_idx, words_total, start, end,
+                        sub_segments, total_pre_words, debug=False
+                    )
+
+                    # Estimated (старый метод) — только для debug сравнения
+                    estimated_time = (start + (current_word_idx / words_total) * duration
+                                      if words_total > 0 else start)
+
+                    timestamp_str = f" {seconds_to_hms(real_time)} "
                     new_text_parts.append(timestamp_str)
-                    
+
                     if debug:
-                        print(f"  📌 {seg.get('time', '???')} ({seg.get('speaker')}) → inject {timestamp_str.strip()} после {elapsed:.1f}s")
-                    
+                        delta  = real_time - estimated_time
+                        method = "REAL ✅    " if has_real_data else "ESTIMATED ⚠️"
+                        print(f"     📌 [{method}] inject={seconds_to_hms(real_time).strip()} "
+                              f"| estimated={seconds_to_hms(estimated_time)} "
+                              f"| Δ={delta:+.1f}s "
+                              f"| word#{current_word_idx}/{words_total} "
+                              f"| elapsed={elapsed:.1f}s")
+                        print(f"        ↳ '{sent[:60]}...'")
+
+                        if has_real_data:
+                            total_delta += abs(delta)
+                            delta_count += 1
+
                     injection_count += 1
+                    elapsed = 0.0
+
                 else:
-                    # Предложение УЖЕ начинается с timestamp → пропускаем
                     if debug:
-                        print(f"  ⏭️ Пропускаем дубль: предложение начинается с {sent[:10]}...")
+                        print(f"     ⏭️ дубль: '{sent[:40]}...'")
                     skipped_duplicates += 1
-                
-                elapsed = 0.0  # Сбрасываем счётчик
-            
+
             new_text_parts.append(sent)
-            current_time += sent_dur
-            elapsed += sent_dur
-        
-        # Обновляем текст сегмента
+            current_word_idx += sent_words
+            elapsed          += sent_elapsed
+
         seg['text'] = ' '.join(new_text_parts)
-    
+
     if debug:
-        if injection_count > 0:
-            print(f"✅ Вставлено промежуточных timestamp: {injection_count}")
-        if skipped_duplicates > 0:
-            print(f"⏭️ Пропущено дублей: {skipped_duplicates}")
+        print(f"\n{'─'*60}")
+        print(f"✅ Вставлено timestamp : {injection_count}")
+        if skipped_duplicates:
+            print(f"⏭️ Пропущено дублей   : {skipped_duplicates}")
+        if delta_count > 0:
+            print(f"📊 Средний |Δ| (REAL) : {total_delta/delta_count:.1f}s "
+                  f"по {delta_count} инжекциям")
         if injection_count == 0 and skipped_duplicates == 0:
             print(f"✅ Блоков >30s не найдено")
-    
+
     return segments
 
+
+# ═══════════════════════════════════════════════════════════════════════════
 
 def correct_timestamp_drift(segments, debug=True):
     """
     🆕 v16.22: FIX БАГ #2 - Timestamp назад
     🆕 v16.19: Исправляет сдвиг timestamp после gap filling
-    
+
     **ПРОБЛЕМА (БАГ #2):**
     Функция сдвигала timestamp НАЗАД:
     - prev_seg.end = 183.5 (00:03:03)
     - current_seg.start = 186.2 (00:03:06)
     - new_start = prev_end = 183.5  ← МЕНЬШЕ чем 186.2!
     - Результат: 00:03:06 → 00:03:03 (НАЗАД!)
-    
+
     **FIX v16.22:**
     Проверяем монотонность: new_start ДОЛЖЕН быть >= old_start
-    Если new_start < old_start → НЕ корректируем (оставляем как есть)
-    
-    **ПРОБЛЕМА (v16.19):**
-    После gap filling + overlap adjustment меняется segment.end,
-    но segment.start остаётся старым → timestamp в TXT не совпадает с аудио.
-    
-    Пример:
-    - segment.start = 551.2 (00:09:11)
-    - реальное начало речи (после adjustment) = 559.5 (00:09:19)
-    - Сдвиг: +8 сек!
-    
-    **РЕШЕНИЕ:**
-    После gap filling пересчитываем start по реальным границам:
-    - Для первого сегмента после gap: start = конец предыдущего
-    - Обновляем segment['time'] по новому start
-    - 🆕 Проверяем монотонность (НЕ двигаем назад!)
-    
-    Args:
-        segments: Список сегментов после gap filling
-        debug: Показывать debug output
-    
-    Returns:
-        segments с исправленными timestamp
     """
     if debug:
         print(f"\n🔧 Исправление сдвига timestamp после gap filling...")
-    
-    corrections = 0
+
+    corrections      = 0
     skipped_backward = 0
-    
+
     for i in range(1, len(segments)):
-        prev_seg = segments[i - 1]
+        prev_seg    = segments[i - 1]
         current_seg = segments[i]
-        
-        prev_end = prev_seg.get('end', 0)
+
+        prev_end      = prev_seg.get('end',   0)
         current_start = current_seg.get('start', 0)
-        
-        # Если есть overlap (отрицательная пауза) или маленькая пауза
+
         gap = current_start - prev_end
-        
-        if -10.0 <= gap <= 0.5:  # Overlap до 10s или микропауза
-            # Корректируем start
+
+        if -10.0 <= gap <= 0.5:
             old_start = current_start
             new_start = prev_end
-            
-            # 🆕 v16.22: FIX БАГ #2 - Проверяем монотонность
+
+            # 🆕 v16.22: FIX БАГ #2 — не двигаем назад
             if new_start >= old_start:
-                # Сдвиг ВПЕРЁД или не изменился → OK
                 current_seg['start'] = new_start
-                current_seg['time'] = seconds_to_hms(new_start)
-                
+                current_seg['time']  = seconds_to_hms(new_start)
+
                 if debug and abs(old_start - new_start) > 1.0:
-                    print(f"  ⏱️ {seconds_to_hms(old_start)} → {seconds_to_hms(new_start)} (сдвиг {new_start - old_start:+.1f}s)")
-                
+                    print(f"  ⏱️ {seconds_to_hms(old_start)} → "
+                          f"{seconds_to_hms(new_start)} "
+                          f"(сдвиг {new_start - old_start:+.1f}s)")
+
                 corrections += 1
             else:
-                # Сдвиг НАЗАД → НЕ корректируем!
                 if debug:
-                    print(f"  ⏭️ ПРОПУСКАЕМ: {seconds_to_hms(old_start)} → {seconds_to_hms(new_start)} (сдвиг назад {new_start - old_start:.1f}s)")
+                    print(f"  ⏭️ ПРОПУСКАЕМ: {seconds_to_hms(old_start)} → "
+                          f"{seconds_to_hms(new_start)} "
+                          f"(сдвиг назад {new_start - old_start:.1f}s)")
                 skipped_backward += 1
-    
+
     if debug:
-        if corrections > 0:
+        if corrections:
             print(f"✅ Исправлено timestamp: {corrections}")
-        if skipped_backward > 0:
-            print(f"⏭️ Пропущено (сдвиг назад): {skipped_backward}")
+        if skipped_backward:
+            print(f"⏭️ Пропущено (назад): {skipped_backward}")
         if corrections == 0 and skipped_backward == 0:
-            print(f"✅ Сдвигов timestamp не найдено")
-    
+            print(f"✅ Сдвигов не найдено")
+
     return segments
