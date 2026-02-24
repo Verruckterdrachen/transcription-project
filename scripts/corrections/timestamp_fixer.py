@@ -2,6 +2,11 @@
 """
 corrections/timestamp_fixer.py - Исправление timestamp
 
+🆕 v17.11: FIX BAG_F — guard против scale-аномалии после split
+           split_mixed_speaker_segments() наследует sub_segments от родителя.
+           У дочернего сегмента scale = total_pre_words/words_post >> 1.8
+           → _get_real_time_for_word() выходит за пределы seg.end → инверсия.
+           FIX: if scale > 1.8 → fallback ESTIMATED (линейная интерполяция)
 🆕 v17.10: Вариант A — точные timestamp через sub_segments из merge_replicas
            Вместо word-proportion по всему блоку используем реальные границы
            оригинальных Whisper-сегментов. Debug: estimated vs real vs Δ.
@@ -69,6 +74,7 @@ def _get_real_time_for_word(word_idx, total_words_post, seg_start, seg_end,
 
 def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
     """
+    🆕 v17.11: FIX BAG_F — guard против scale-аномалии после split
     🆕 v17.10: Вариант A — точные timestamp через sub_segments
     🆕 v16.28: FIX БАГ #3 - Потеря последнего предложения
     🆕 v16.22: FIX - Защита от дублей timestamp
@@ -134,6 +140,24 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
             continue
 
         words_total = len(text.split())
+
+        # 🆕 v17.11: FIX BAG_F — guard против scale-аномалии после split
+        # split_mixed_speaker_segments() наследует sub_segments от родителя целиком.
+        # У дочернего сегмента words_post << total_pre_words → scale >> 1.8
+        # → _get_real_time_for_word() выходит за пределы seg.end → инверсия timestamp в TXT
+        _SCALE_ANOMALY_THRESHOLD = 1.8
+        if has_real_data and words_total > 0:
+            _scale = total_pre_words / words_total
+            if _scale > _SCALE_ANOMALY_THRESHOLD:
+                if debug:
+                    print(f"  ⚠️  BAG_F GUARD [{seg.get('time', '???')}] "
+                          f"{seg.get('speaker', '?')}: "
+                          f"scale={_scale:.3f} > {_SCALE_ANOMALY_THRESHOLD} "
+                          f"(pre={total_pre_words} / post={words_total}) "
+                          f"— sub_segments от родителя после split, fallback ESTIMATED")
+                sub_segments    = []
+                total_pre_words = 0
+                has_real_data   = False
 
         if debug:
             mode = "🎯 REAL (sub_segments)" if has_real_data else "📐 ESTIMATED (word proportion)"
