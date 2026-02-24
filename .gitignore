@@ -61,13 +61,16 @@ doc/
 # ═══════════════════════════════════════════════════════════════
 # Временные файлы
 temp_*.wav
-*.log
+# *.log
 
-# 🆕 v16.8: Исключения для debug логов (ПОСЛЕ общего *.log!)
-!transcription_debug.log
-!scripts/transcription_debug.log
-!test-results/latest/*.log
+# 🆕 v17.10: исключения для логов
+!test-results/latest/*.log          # главный _debug.log — нужен compare_snapshot.py
+!test-results/latest/log/*.log      # сплит-логи — читает AI
+!test-results/latest/**/*.log      # сплит-логи — читает AI
+!test-results/snapshots/**/*.log    # снапшоты — нужны compare_snapshot.py
 
+!golden-dataset/**/*.log
+# scripts/transcription_debug.log — НЕ отслеживаем (879 KB артефакт)
 
 # ═══════════════════════════════════════════════════════════════
 # IDE
@@ -86,13 +89,11 @@ Thumbs.db
 desktop.ini
 
 !golden-dataset/**/*.log
-scripts/transcription_debug.log
 
 # ═══════════════════════════════════════════════════════════════
 # Git
 # ═══════════════════════════════════════════════════════════════
 .git/
 
-!test-results/snapshots/**/*.log
-!test-results/snapshots/**/*.json
-!test-results/snapshots/**/*.txt
+scripts/transcription_debug.log
+scripts/log/

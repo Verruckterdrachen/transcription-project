@@ -202,25 +202,52 @@ def debug_checkpoint(segments, stage_name, target_timestamps=None):
 # ═══════════════════════════════════════════════════════════════════════════
 
 class TeeOutput:
-	"""
-	Класс для дублирования stdout в файл и консоль одновременно
-	(аналог Unix команды 'tee')
-	"""
-	def __init__(self, filename):
-			self.terminal = sys.stdout
-			self.log = open(filename, 'w', encoding='utf-8')
-	
-	def write(self, message):
-			self.terminal.write(message)
-			self.log.write(message)
-	
-	def flush(self):
-			self.terminal.flush()
-			self.log.flush()
-	
-	def close(self):
-			if self.log:
-					self.log.close()
+    """
+    🆕 v17.10: Поддержка split-логов по фазам пайплайна
+    Основной _debug.log сохраняется ПОЛНОСТЬЮ.
+    Дополнительно пишутся 4 файла в log/ по фазам.
+    """
+    def __init__(self, main_log_path):
+        self.terminal = sys.stdout
+        self.main_log = open(main_log_path, 'w', encoding='utf-8')
+        self.phase_log = None
+        self._phase_path = None
+
+    def switch_phase(self, phase_path: Path):
+        """Переключить фазовый файл (основной лог продолжает писаться)."""
+        if self.phase_log:
+            self.phase_log.close()
+        phase_path.parent.mkdir(exist_ok=True)
+        self.phase_log = open(phase_path, 'w', encoding='utf-8')
+        self._phase_path = phase_path
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.main_log.write(message)
+        if self.phase_log:
+            self.phase_log.write(message)
+
+    def flush(self):
+        self.terminal.flush()
+        self.main_log.flush()
+        if self.phase_log:
+            self.phase_log.flush()
+
+    def close(self):
+        if self.phase_log:
+            self.phase_log.close()
+        self.main_log.close()
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 🆕 v17.10: SPLIT-ЛОГ ПО ФАЗАМ
+# ═══════════════════════════════════════════════════════════════════════════
+
+_tee: "TeeOutput | None" = None
+
+def switch_log_phase(phase_path):
+    """Переключить фазовый лог-файл. Вызывать перед каждым этапом."""
+    if _tee is not None:
+        _tee.switch_phase(phase_path)
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ВЕРСИЯ
@@ -305,8 +332,21 @@ def copy_to_test_results(json_files, txt_path, speaker_surname, log_path=None):
 			if old_file.is_file() and old_file.name != ".gitkeep":
 					old_file.unlink()
 					print(f"   🗑️ Удалён: {old_file.name}")
-	
-	# 🆕 v16.18.1: Копируем JSON файлы БЕЗ переименования
+
+	# 🆕 v17.10: Очищаем log/ от предыдущего прогона  ← СЮДА
+	log_subdir = test_results_dir / "log"
+	if log_subdir.exists():
+	    shutil.rmtree(log_subdir)
+	    print(f"   🗑️ Очищена папка log/")
+
+	# 🆕 v17.10: Копируем свежую log/ из рабочей директории
+	local_log_dir = Path.cwd() / "log"
+	if local_log_dir.exists():
+	    shutil.copytree(local_log_dir, log_subdir)
+	    count = len(list(log_subdir.glob("*.log")))
+	    print(f"   ✅ log/: {count} файлов")
+
+		# 🆕 v16.18.1: Копируем JSON файлы БЕЗ переименования
 	copied_json = []
 	for json_path in json_files:
 			# Сохраняем оригинальное имя (например: NW_Uckpa0001_01.json)
@@ -376,6 +416,11 @@ def process_audio_file(
     # Получаем pipeline
     pipeline = get_pipeline()
 
+		# 🆕 v17.10: Фаза 1 — диаризация
+    log_base = Path.cwd() / "log"
+    stem = wav_path.stem  # например: NW_Uckpa0001_01
+    switch_log_phase(log_base / f"{stem}_01_diarization.log")
+
     # ═══════════════════════════════════════════════════════════════════════
     # ЭТАП 1: ДИАРИЗАЦИЯ
     # ═══════════════════════════════════════════════════════════════════════
@@ -424,6 +469,9 @@ def process_audio_file(
     
     # 🔴 v17.1: CHECKPOINT
     debug_checkpoint(segments_raw, "AFTER ALIGNMENT")
+
+    # 🆕 v17.10: Фаза 2 — коррекции + gaps
+    switch_log_phase(log_base / f"{stem}_02_alignment.log")
 
     # ═══════════════════════════════════════════════════════════════════════
     # ЭТАП 4: КОРРЕКЦИИ
@@ -497,6 +545,9 @@ def process_audio_file(
     # 🔴 v17.1: CHECKPOINT
     debug_checkpoint(segments_raw, "AFTER TIMESTAMP CORRECTION")
 
+    # 🆕 v17.10: Фаза 3 — merge replicas
+    switch_log_phase(log_base / f"{stem}_03_merges.log")
+
     # ═══════════════════════════════════════════════════════════════════════
     # ЭТАП 6: MERGE REPLICAS
     # ═══════════════════════════════════════════════════════════════════════
@@ -504,6 +555,9 @@ def process_audio_file(
     
     # 🔴 v17.1: CHECKPOINT
     debug_checkpoint(segments_merged, "AFTER MERGE")
+
+    # 🆕 v17.10: Фаза 4 — постобработка
+    switch_log_phase(log_base / f"{stem}_04_postprocess.log")
 
     # ═══════════════════════════════════════════════════════════════════════
     # ЭТАП 7: SPEAKER CLASSIFICATION v15
@@ -725,30 +779,33 @@ def main():
 	return json_files, txt_path, speaker_surname
 
 if __name__ == "__main__":
-	# 🆕 v16.8: Захват console output в файл
-	log_file = Path.cwd() / "transcription_debug.log"
-	
-	# Создаём tee для stdout
-	tee = TeeOutput(log_file)
-	original_stdout = sys.stdout
-	sys.stdout = tee
-	
-	json_files = None
-	txt_path = None
-	speaker_surname = None
-	
-	try:
-			# Запускаем main и получаем результаты
-			json_files, txt_path, speaker_surname = main()
-	finally:
-			# Восстанавливаем stdout и закрываем файл
-			sys.stdout = original_stdout
-			tee.close()
-			
-			# ✅ v16.8.1: Копирование ПОСЛЕ закрытия файла
-			if json_files and txt_path and log_file.exists():
-					print(f"\n💾 DEBUG log сохранён: {log_file}")
-					copy_to_test_results(json_files, txt_path, speaker_surname, log_file)
-			else:
-					print(f"\n💾 DEBUG log сохранён: {log_file}")
-					print("   TEST: Копирование в test-results пропущено")
+    # 🆕 v16.8: Захват console output в файл
+    log_file = Path.cwd() / "transcription_debug.log"
+    tee = TeeOutput(log_file)
+
+    # 🆕 v17.10: регистрируем глобально для switch_log_phase()
+    _tee = tee
+
+    original_stdout = sys.stdout
+    sys.stdout = tee
+
+    json_files = None
+    txt_path = None
+    speaker_surname = None
+
+    try:
+        # Запускаем main и получаем результаты
+        json_files, txt_path, speaker_surname = main()
+    finally:
+        # Восстанавливаем stdout и закрываем файл
+        sys.stdout = original_stdout
+        tee.close()
+
+        # ✅ v16.8.1: Копирование ПОСЛЕ закрытия файла
+        if json_files and txt_path and log_file.exists():
+            print(f"\n💾 DEBUG log сохранён: {log_file}")
+            copy_to_test_results(json_files, txt_path, speaker_surname, log_file)
+        else:
+            print(f"\n💾 DEBUG log сохранён: {log_file}")
+            print("   TEST: Копирование в test-results пропущено")
+

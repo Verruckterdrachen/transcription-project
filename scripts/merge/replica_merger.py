@@ -134,19 +134,39 @@ def clean_loops(text, debug=False):
 
         if is_loop:
             if debug:
-                left_context = ' '.join(cleaned[-3:]) if len(cleaned) >= 3 else ' '.join(cleaned)
+                left_context  = ' '.join(cleaned[-3:]) if len(cleaned) >= 3 else ' '.join(cleaned)
                 last_cleaned  = cleaned[-1] if cleaned else "(начало)"
-                last_word     = last_cleaned.lower().rstrip('.,!?')
-                print(f"      ⚠️ УДАЛЯЕМ: '{phrase}'")
-                print(f"         Причина: совпадение с '{prev_phrase}' (sim={similarity:.2f})")
-                print(f"         Контекст слева: '...{left_context}'")
-                print(f"         Слово перед удалением: '{last_cleaned}'")
+                last_word     = last_cleaned.lower().rstrip('.,!?«»')
                 HANGING_PREPOSITIONS = {
                     'на', 'в', 'во', 'с', 'со', 'к', 'по', 'из', 'за', 'до',
                     'при', 'через', 'о', 'об', 'у', 'для', 'от', 'под', 'над'
                 }
+                print(f"      ⚠️ УДАЛЯЕМ: '{phrase}'")
+                print(f"         Причина: совпадение с '{prev_phrase}' (sim={similarity:.2f})")
+                print(f"         Контекст слева: '...{left_context}'")
+                print(f"         Слово перед удалением: '{last_cleaned}'")
                 if last_word in HANGING_PREPOSITIONS:
                     print(f"         🔴 РИСК ОБРУБКА! '{last_cleaned}' — предлог без продолжения!")
+
+            # ── v17.10 FIX БАГ #15 РЕГРЕССИЯ ──────────────────────────────
+            last_word_check = cleaned[-1].lower().rstrip('.,!?«»') if cleaned else ""
+            HANGING_PREPOSITIONS = {
+                'на', 'в', 'во', 'с', 'со', 'к', 'по', 'из', 'за', 'до',
+                'при', 'через', 'о', 'об', 'у', 'для', 'от', 'под', 'над'
+            }
+            if last_word_check in HANGING_PREPOSITIONS:
+                # Не удаляем — предлог останется без объекта
+                # Добавляем в cleaned и seen[], второй дубль поймаем позже
+                if debug:
+                    print(f"         🛡️ ЗАЩИТА: предлог '{last_word_check}' → пропускаем удаление, сохраняем '{phrase}'")
+                seen.append(phrase_lower)
+                if len(seen) > LOOP_WINDOW:
+                    seen.pop(0)
+                cleaned.extend(words[i:i+3])
+                i += 3
+                continue
+            # ── конец FIX ──────────────────────────────────────────────────
+
             i += 1
             continue
 
