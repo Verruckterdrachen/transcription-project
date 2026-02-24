@@ -64,10 +64,12 @@ temp_*.wav
 # *.log
 
 # 🆕 v17.10: исключения для логов
-!test-results/latest/*.log          # главный _debug.log — нужен compare_snapshot.py
-!test-results/latest/log/*.log      # сплит-логи — читает AI
-!test-results/latest/**/*.log      # сплит-логи — читает AI
-!test-results/snapshots/**/*.log    # снапшоты — нужны compare_snapshot.py
+!test-results/latest/*.log
+!test-results/latest/log/*.log
+!test-results/latest/**/*.log
+!test-results/snapshots/**/*.log   # уже было
+!test-results/snapshots/**/*.txt   # ← добавить
+!test-results/snapshots/**/*.json  # ← добавить
 
 !golden-dataset/**/*.log
 # scripts/transcription_debug.log — НЕ отслеживаем (879 KB артефакт)
