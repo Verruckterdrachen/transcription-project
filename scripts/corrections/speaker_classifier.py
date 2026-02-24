@@ -341,7 +341,9 @@ def apply_speaker_classification_v15(segments, speaker_surname, speaker_roles, d
         show_detailed_debug = (
             debug and (
                 j_score > s_score + SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD or
-                s_score > j_score + SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD
+                s_score > j_score + SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD or
+                # 🆕 DEBUG BAG_F: показывать случаи где счёт J>0 но без изменения
+                (current_speaker == speaker_surname and j_score > 0 and j_score <= s_score + SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD)
             )
         ) or "товарищ так и сказал" in text.lower()
         
@@ -369,6 +371,19 @@ def apply_speaker_classification_v15(segments, speaker_surname, speaker_roles, d
 
         # Определяем порог для изменения
         CONFIDENCE_THRESHOLD = SPEAKER_CLASSIFICATION_CONFIDENCE_THRESHOLD
+
+        # 🆕 DEBUG BAG_E: микро-фрагменты которые пропускаем
+        if word_count < SPEAKER_CLASSIFICATION_MIN_WORDS:
+            if debug:
+                print(f"\n  🔕 [{time}] MICRO-FRAGMENT SKIP (слов={word_count} < {SPEAKER_CLASSIFICATION_MIN_WORDS})")
+                print(f"     Спикер: {current_speaker} | Текст: '{text}'")
+                # Показываем соседей — подозреваем island error
+                if i > 0 and i < len(segments) - 1:
+                    prev_spk = segments[i-1].get('speaker', '?')
+                    next_spk = segments[i+1].get('speaker', '?') if i+1 < len(segments) else '?'
+                    if prev_spk == next_spk and prev_spk != current_speaker:
+                        print(f"     🔴 ISLAND SUSPICION: {prev_spk} → [{current_speaker}] → {next_spk}")
+            continue
 
         # Журналист → Спикер
         if current_speaker == 'Журналист' and s_score > j_score + CONFIDENCE_THRESHOLD:

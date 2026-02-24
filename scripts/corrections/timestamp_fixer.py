@@ -101,7 +101,10 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
 
         # Пропускаем короткие блоки
         if duration <= interval:
+            if debug and duration > 25:   # показывать пограничные случаи
+                print(f"  ℹ️  SHORT SKIP: [{seg.get('time','???')}] длит={duration:.0f}s ≤ {interval}s")
             continue
+
 
         text = seg.get('text', '')
 
@@ -117,6 +120,17 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
         sentences = [s for s in sentences if s]
 
         if len(sentences) < 2:
+            if debug:
+                # 🆕 DEBUG BAG_D: показать ПОЧЕМУ таймкод не вставлен
+                snippet = text[:120].replace('\n', ' ')
+                print(f"  ⚠️  BAG_D SKIP: блок [{seg.get('time','???')}–{seconds_to_hms(end)}] "
+                      f"длит={duration:.0f}s — sentences<2, таймкод НЕ вставлен")
+                print(f"      Текст (начало): '{snippet}...'")
+                # Проверяем: есть ли вообще знаки препинания?
+                punct_count = len(re.findall(r'[.!?]', text))
+                print(f"      Знаков пунктуации [.!?]: {punct_count} | "
+                      f"Слов: {len(text.split())} | "
+                      f"Символов: {len(text)}")
             continue
 
         words_total = len(text.split())
