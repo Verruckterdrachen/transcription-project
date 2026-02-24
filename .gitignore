@@ -92,3 +92,7 @@ scripts/transcription_debug.log
 # Git
 # ═══════════════════════════════════════════════════════════════
 .git/
+
+!test-results/snapshots/**/*.log
+!test-results/snapshots/**/*.json
+!test-results/snapshots/**/*.txt
