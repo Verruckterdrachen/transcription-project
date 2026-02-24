@@ -16,7 +16,9 @@
 - **Этап пайплайна:** MERGE #4 → clean_loops
 - **Симуляция:** tests/simulations/sim_bug28_clean_loops_fp.py
 - **Фикс:** инвариантный guard в clean_loops (не удалять, если после удаления образуется грамматический обрубок или уникальный токен пропадает)
-- **Исправлено в версии:** —
+- **Статус:** ✅ FIXED v17.10
+- **Исправлено в версии:** v17.10
+- **Симуляция:** tests/simulations/sim_bug15r_clean_loops_preposition.py (4/4 GREEN)
 
 ---
 

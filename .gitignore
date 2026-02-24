@@ -34,7 +34,7 @@ interview/
 *.wav
 *.mp3
 *.json
-*.txt
+# *.txt
 
 # 🆕 v16.18.1: ИСКЛЮЧЕНИЯ - что коммитить в Git
 !test-results/latest/*.json
