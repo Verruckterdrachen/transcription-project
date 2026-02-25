@@ -165,13 +165,16 @@ def _remove_gap_overlap_with_next(gap_text, next_text, max_check_words=5):
 
 def _remove_gap_overlap_with_prev(gap_text, prev_text, max_check_words=6):
     """
-    FIX БАГ #18/#20: удаляем leading overlap (начало GAP == хвост prev).
-    Если после удаления стало пусто — значит GAP был целиком дублем.
+    🔥 v17.12: FIX BAG_C / #18 — расширенное matching:
+    1. Точное совпадение head(GAP) == tail(PREV) — как раньше
+    2. Fuzzy: если ≥ n-1 слов из n совпадают точно (1 ASR-ошибка допустима)
+    3. Substring: если весь gap_text целиком содержится в prev_text (BAG_C_4)
+    Если после удаления стало пусто — GAP был целиком дублем.
     """
     if not gap_text or not prev_text:
         return gap_text
 
-    gap_words = gap_text.strip().split()
+    gap_words  = gap_text.strip().split()
     prev_words = prev_text.strip().split()
     if not gap_words or not prev_words:
         return gap_text
@@ -179,14 +182,36 @@ def _remove_gap_overlap_with_prev(gap_text, prev_text, max_check_words=6):
     def norm(w):
         return w.lower().strip('.,!?;:«»"()-–—')
 
-    gap_n = [norm(w) for w in gap_words]
+    gap_n  = [norm(w) for w in gap_words]
     prev_n = [norm(w) for w in prev_words]
 
-    # точное совпадение n слов: head(GAP) == tail(PREV)
+    # ── 1. Точное совпадение head(GAP) == tail(PREV) ──────────────────────
     for n in range(min(max_check_words, len(gap_words), len(prev_words)), 0, -1):
-        if gap_n[:n] == prev_n[-n:]:
-            print(f"     🔧 Removed {n} leading overlap words vs prev: {' '.join(gap_words[:n])}")
+        tail_prev = prev_n[-n:]
+        head_gap  = gap_n[:n]
+        if head_gap == tail_prev:
+            print(f"     🔧 [v17.12] Removed {n} leading overlap words vs prev "
+                  f"(exact): {' '.join(gap_words[:n])}")
             return " ".join(gap_words[n:]).strip()
+
+    # ── 2. Допуск одной ASR-ошибки: n-1 из n слов совпадают точно ─────────
+    for n in range(min(max_check_words, len(gap_words), len(prev_words)), 2, -1):
+        tail_prev = prev_n[-n:]
+        head_gap  = gap_n[:n]
+        mismatches = sum(1 for a, b in zip(head_gap, tail_prev) if a != b)
+        if mismatches == 1:
+            print(f"     🔧 [v17.12] Removed {n} leading overlap words vs prev "
+                  f"(1 ASR mismatch): {' '.join(gap_words[:n])}")
+            return " ".join(gap_words[n:]).strip()
+
+    # ── 3. Substring: весь gap начинается внутри prev (BAG_C_4) ───────────
+    check_len = min(max_check_words, len(gap_n))
+    head_gap  = gap_n[:check_len]
+    for start in range(len(prev_n) - check_len + 1):
+        if prev_n[start:start + check_len] == head_gap:
+            print(f"     🔧 [v17.12] Removed {check_len} leading overlap words vs prev "
+                  f"(substring match at pos {start}): {' '.join(gap_words[:check_len])}")
+            return " ".join(gap_words[check_len:]).strip()
 
     return gap_text
 
@@ -268,6 +293,7 @@ def force_transcribe_diar_gaps(
     diarization=None, speaker_roles=None  # 🆕 v17.7: FIX БАГ #25
 ):
     """
+    🔥 v17.12: FIX BAG_C/#18 - overlap removal вызывается ВСЕГДА (не только при adjusted boundary)
     🆕 v17.7: FIX БАГ #25 - GAP pyannote overlap attribution + text-based override
     🔧 v17.5: убрано ограничение (seg_end - seg_start) <= 7.0 в restart check
     🔥 v17.4: FIX БАГ #18/#20 - prev overlap removal + restart detection
@@ -369,42 +395,49 @@ def force_transcribe_diar_gaps(
                         print(f"     🔧 Adjusted: {original_start:.2f}-{original_end:.2f} → {seg_start:.2f}-{seg_end:.2f}")
 
                     # ═══════════════════════════════════════════════════════
-                    # 🔥 v17.2: FIX БАГ #15 - REMOVE GAP TEXT OVERLAP С NEXT
+                    # 🔥 v17.12: FIX BAG_C — NEXT overlap removal ВСЕГДА
+                    # Было: if next_existing and seg_end != original_end
+                    # Стало: if next_existing (убрано условие на изменение границы)
                     # ═══════════════════════════════════════════════════════
 
-                    if next_existing and seg_end != original_end:
+                    if next_existing:
                         next_text = next_existing.get('text', '')
-                        text = _remove_gap_overlap_with_next(text, next_text, max_check_words=5)
-
+                        text = _remove_gap_overlap_with_next(text, next_text,
+                                                             max_check_words=7)
                         if not text.strip():
                             print(f"     ⚠️ GAP text empty after next-overlap removal → skipping")
                             continue
 
                     # ═══════════════════════════════════════════════════════
-                    # 🔥 v17.4: FIX БАГ #18/#20 - REMOVE GAP OVERLAP С PREV
+                    # Находим предыдущий существующий сегмент
                     # ═══════════════════════════════════════════════════════
 
-                    # Находим предыдущий существующий сегмент
                     prev_existing = None
                     for existing_seg in sorted(existing_segments, key=lambda x: x['end'], reverse=True):
                         if existing_seg['end'] <= gap_start:
                             prev_existing = existing_seg
                             break
 
+                    # ═══════════════════════════════════════════════════════
+                    # 🔥 v17.12: FIX BAG_C/#18 — PREV overlap removal ВСЕГДА
+                    # Было: if prev_existing (уже было unconditional, но ==)
+                    # Стало: fuzzy matching в _remove_gap_overlap_with_prev()
+                    # ═══════════════════════════════════════════════════════
+
                     if prev_existing:
                         prev_text = prev_existing.get('text', '')
                         text = _remove_gap_overlap_with_prev(text, prev_text)
-
                         if not text.strip():
                             print(f"     ⚠️ GAP полностью дублирует хвост prev → skipping")
                             continue
 
                     # ═══════════════════════════════════════════════════════
-                    # 🔧 v17.5: FIX речевой рестарт — убрано ограничение <= 7.0
-                    # Было: only if (seg_end - seg_start) <= 7.0
-                    # Стало: для любого adjusted GAP, независимо от длительности
+                    # 🔥 v17.12: FIX BAG_C — restart check ВСЕГДА
+                    # Было: if next_existing and seg_end != original_end
+                    # Стало: if next_existing (убрано условие на изменение границы)
                     # ═══════════════════════════════════════════════════════
-                    if next_existing and seg_end != original_end:
+
+                    if next_existing:
                         next_text_restart = next_existing.get('text', '')
                         if _looks_like_restart(text, next_text_restart):
                             continue
@@ -412,22 +445,20 @@ def force_transcribe_diar_gaps(
                     # ═══════════════════════════════════════════════════════
                     # 🆕 v17.7: FIX БАГ #25 - GAP pyannote overlap attribution
                     # ═══════════════════════════════════════════════════════
-                    
+
                     pyannote_speaker, overlap_duration = _find_dominant_speaker_in_pyannote(
                         seg_start, seg_end, diarization, speaker_roles
                     )
-                    
+
                     if pyannote_speaker and overlap_duration > 1.0:
                         print(f"     🎙️ Pyannote overlap: {pyannote_speaker} ({overlap_duration:.1f}s)")
                         detected_speaker = pyannote_speaker
-                    
+
                     # ═══════════════════════════════════════════════════════
                     # 🆕 v17.7: TEXT-BASED OVERRIDE - детекция Журналиста
                     # ═══════════════════════════════════════════════════════
-                    
-                    # Проверяем текст GAP на журналистские паттерны
+
                     if is_journalist_phrase(text, context_words=0):
-                        # Override pyannote decision
                         if detected_speaker != 'Журналист':
                             print(f"     🔄 TEXT OVERRIDE: {detected_speaker} → Журналист (паттерн обнаружен)")
                             detected_speaker = 'Журналист'
@@ -438,7 +469,6 @@ def force_transcribe_diar_gaps(
 
                     final_speaker = detected_speaker
 
-                    # Находим следующий сегмент после gap
                     next_segment = None
                     for existing_seg in sorted(existing_segments, key=lambda x: x['start']):
                         if existing_seg['start'] >= gap_end:
@@ -488,3 +518,4 @@ def force_transcribe_diar_gaps(
         print(f"  ⚠️ Gaps не дали новых сегментов")
 
     return added_segments
+
