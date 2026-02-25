@@ -49,19 +49,18 @@
 
 🔄 Force-transcribe gaps...
   🚨 GAP 00:02:33–00:02:43 (10.2s)
-     🎙️ Pyannote overlap: Исаев (7.4s)
-     ✅ [00:02:35] Невский пятачок, хотя он располагался в достаточно...
+     🔁 Restart-like GAP: shared-with-next=80% → skipping
   🚨 GAP 00:10:03–00:10:08 (4.9s)
      ⚠️ GAP overlap с next existing, adjusted end: 608.64s
      🔧 Adjusted: 603.76-609.86 → 603.76-608.64
      🔧 Removed fragment from GAP end: 'шум.' (likely cut-off or hallucination)
-     🔧 Removed 3 leading overlap words vs prev: Ситуация была прежней,
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (exact): Ситуация была прежней,
      🎙️ Pyannote overlap: Исаев (4.9s)
      ✅ [00:10:03] то есть кольцо блокады не прорвано, и снабжение Ле...
   🚨 GAP 00:21:34–00:21:39 (5.0s)
      ⚠️ GAP overlap с next existing, adjusted end: 1299.28s
      🔧 Adjusted: 1294.30-1301.12 → 1294.30-1299.28
-     🔧 Removed 1 leading overlap words vs prev: учитывать
+     🔧 [v17.12] Removed 1 leading overlap words vs prev (exact): учитывать
      🎙️ Pyannote overlap: Исаев (5.0s)
      ✅ [00:21:34] была немецкая артиллерия вправь до еще одним факто...
   🚨 GAP 00:26:29–00:26:33 (3.8s)
@@ -72,13 +71,13 @@
      ⚠️ GAP overlap с next existing, adjusted end: 2105.58s
      🔧 Adjusted: 2097.58-2107.24 → 2097.58-2105.58
      🔧 Removed 1 overlapping words from GAP: патрулями.
-     🔧 Removed 1 leading overlap words vs prev: Командирские
+     🔧 [v17.12] Removed 1 leading overlap words vs prev (exact): Командирские
      🎙️ Pyannote overlap: Исаев (8.0s)
      ✅ [00:34:57] патрули, когда прибывающая артиллерия распределяла...
-  ✅ Добавлено из gaps: 5 сегментов
-  ✅ Добавлено из gaps: 5 сегментов
+  ✅ Добавлено из gaps: 4 сегментов
+  ✅ Добавлено из gaps: 4 сегментов
 
-🔍 CHECKPOINT [AFTER GAP FILLING]: 1143 сегментов
+🔍 CHECKPOINT [AFTER GAP FILLING]: 1142 сегментов
    ✅ 00:02:26: НАЙДЕН в [00:02:18-00:02:26] (длит=8.4s, слов=16)
 
       📝 ПОЛНЫЙ ТЕКСТ СЕГМЕНТА (116 символов):
@@ -437,7 +436,7 @@
 ✅ Исправлено timestamp: 664
 ⏭️ Пропущено (назад): 345
 
-🔍 CHECKPOINT [AFTER TIMESTAMP CORRECTION]: 1143 сегментов
+🔍 CHECKPOINT [AFTER TIMESTAMP CORRECTION]: 1142 сегментов
    ✅ 00:02:26: НАЙДЕН в [00:02:18-00:02:26] (длит=8.4s, слов=16)
 
       📝 ПОЛНЫЙ ТЕКСТ СЕГМЕНТА (116 символов):

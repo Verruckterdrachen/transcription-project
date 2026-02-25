@@ -56,7 +56,7 @@
      ⚠️ GAP overlap с next existing, adjusted end: 978.55s
      🔧 Adjusted: 974.57-980.33 → 974.57-978.55
      🔧 Removed 3 overlapping words from GAP: на другой стороне.
-     🔧 Removed 2 leading overlap words vs prev: И противник
+     🔧 [v17.12] Removed 2 leading overlap words vs prev (exact): И противник
      🎙️ Pyannote overlap: Исаев (3.1s)
      ✅ [00:16:14] на другой стороне был, конечно, менее противник...
   🚨 GAP 00:25:00–00:25:03 (3.1s)
@@ -65,7 +65,7 @@
   🚨 GAP 00:27:36–00:27:43 (7.6s)
      ⚠️ GAP overlap с next existing, adjusted end: 1663.63s
      🔧 Adjusted: 1656.07-1665.61 → 1656.07-1663.63
-     🔧 Removed 1 leading overlap words vs prev: стрелковых
+     🔧 [v17.12] Removed 1 leading overlap words vs prev (exact): стрелковых
      🎙️ Pyannote overlap: Исаев (7.6s)
      ✅ [00:27:36] бригад, как раз в центре построения советской 67 -...
   🚨 GAP 00:29:29–00:29:33 (4.1s)
@@ -78,7 +78,7 @@
      ⚠️ GAP overlap с next existing, adjusted end: 1843.79s
      🔧 Adjusted: 1840.17-1845.29 → 1840.17-1843.79
      🔧 Removed 1 overlapping words from GAP: орудий.
-     🔧 Removed 2 leading overlap words vs prev: 20 штурмовых
+     🔧 [v17.12] Removed 2 leading overlap words vs prev (exact): 20 штурмовых
      🎙️ Pyannote overlap: Исаев (3.5s)
      ✅ [00:30:40] орудий в дивизионе штурмовых...
   ✅ Добавлено из gaps: 4 сегментов

@@ -53,7 +53,7 @@
      ⚠️ GAP overlap с next existing, adjusted end: 470.58s
      🔧 Adjusted: 466.94-472.50 → 466.94-470.58
      🔧 Removed 2 overlapping words from GAP: также был
-     🔧 Removed 3 leading overlap words vs prev: в лице тигров,
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (exact): в лице тигров,
      ⚠️ GAP полностью дублирует хвост prev → skipping
   ⚠️ Gaps не дали новых сегментов
 
