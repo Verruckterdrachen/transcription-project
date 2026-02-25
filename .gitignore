@@ -77,6 +77,7 @@ temp_*.wav
 # LOG — игнорировать runtime-артефакты...
 # ═══════════════════════════════════════════════════════════════
 *.log
+*_debug.log    
 scripts/transcription_debug.log
 scripts/log/
 
