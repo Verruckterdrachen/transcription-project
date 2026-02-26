@@ -72,79 +72,97 @@ def _get_real_time_for_word(word_idx, total_words_post, seg_start, seg_end,
 
 # ═══════════════════════════════════════════════════════════════════════════
 
+def find_existing_timestamps(text):
+    """
+    🆕 v17.13: Находит все уже вставленные timestamp в тексте.
+    Возвращает список {'ts': '00:32:59', 'sec': 1979, 'pos': 42}
+    """
+    pattern = r'\b(\d{2}:\d{2}:\d{2})\b'
+    found = []
+    for m in re.finditer(pattern, text):
+        h, mn, s = m.group(1).split(':')
+        found.append({
+            'ts':  m.group(1),
+            'sec': int(h) * 3600 + int(mn) * 60 + int(s),
+            'pos': m.start()
+        })
+    return found
+
+# ═══════════════════════════════════════════════════════════════════════════
+
 def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
     """
+    🆕 v17.13: FIX БАГ — повторный вызов после auto_merge.
+               SKIP блоков у которых хвост (end - last_existing_ts) ≤ interval*1.5.
+               Трогаем только блоки с реально необработанным хвостом > 45s.
+               existing ts в тексте не пересчитываем и не восстанавливаем.
+    🆕 v17.12: FIX БАГ — fallback inject перед последним предложением
     🆕 v17.11: FIX BAG_F — guard против scale-аномалии после split
-    🆕 v17.10: Вариант A — точные timestamp через sub_segments
+    🆕 v17.10: Вариант A — точные timestamp через sub_segments из merge_replicas
     🆕 v16.28: FIX БАГ #3 - Потеря последнего предложения
-    🆕 v16.22: FIX - Защита от дублей timestamp
-    🆕 v16.19: Вставляет промежуточные timestamp в блоки >30 сек
-
-    Debug output (v17.10):
-        📌 inject [REAL ✅]      00:01:10  | estimated: 00:01:05 | Δ=+5.0s
-        📌 inject [ESTIMATED ⚠️] 00:03:43  | estimated: 00:03:43 | Δ=+0.0s  (нет sub_segments)
-
-    Args:
-        segments: Список сегментов после merge_replicas
-        interval: Интервал вставки timestamp (по умолчанию 30s)
-        debug:    Показывать debug output
-
-    Returns:
-        segments с вставленными timestamp в тексте
+    🆕 v16.22: FIX БАГ #1 - Дублирующиеся timestamp
+    🆕 v16.22: FIX БАГ #2 - Timestamp назад
+    🆕 v16.19: КРИТИЧЕСКИЙ FIX - Timestamp injection в блоки >30 сек
     """
     if debug:
-        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s, mode=v17.10)...")
+        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s, mode=v17.13)...")
 
-    injection_count     = 0
-    skipped_duplicates  = 0
-    total_delta         = 0.0
-    delta_count         = 0
+    injection_count    = 0
+    skipped_duplicates = 0
+    total_delta        = 0.0
+    delta_count        = 0
 
     for seg_idx, seg in enumerate(segments):
         start    = seg.get('start', 0)
         end      = seg.get('end',   0)
         duration = end - start
 
-        # Пропускаем короткие блоки
         if duration <= interval:
-            if debug and duration > 25:   # показывать пограничные случаи
+            if debug and duration > 25:
                 print(f"  ℹ️  SHORT SKIP: [{seg.get('time','???')}] длит={duration:.0f}s ≤ {interval}s")
             continue
 
-
         text = seg.get('text', '')
 
-        # 🆕 v17.10: sub_segments для точного lookup
-        sub_segments       = seg.get('sub_segments', [])
-        total_pre_words    = sum(s.get('words', 0) for s in sub_segments)
-        has_real_data      = bool(sub_segments) and total_pre_words > 0
+        # 🆕 v17.13: Находим existing timestamp от предыдущего прохода
+        existing_ts   = find_existing_timestamps(text)
+        existing_secs = [e['sec'] for e in existing_ts]
 
-        # Разбиваем на предложения
-        sentences = re.split(r'([.!?]+)\s+', text)
+        # 🆕 v17.13: SKIP если хвост уже покрыт — не трогаем блок вообще
+        if existing_secs:
+            tail = end - max(existing_secs)
+            if tail <= interval * 1.5:
+                if debug:
+                    print(f"  ✅ SKIP (covered): [{seg.get('time','???')}] "
+                          f"хвост={tail:.0f}s ≤ {interval * 1.5:.0f}s")
+                continue
+
+        # Для подсчёта слов и split — убираем existing ts из текста
+        clean_text = re.sub(r'\s*\b\d{2}:\d{2}:\d{2}\b\s*', ' ', text).strip()
+
+        sub_segments    = seg.get('sub_segments', [])
+        total_pre_words = sum(s.get('words', 0) for s in sub_segments)
+        has_real_data   = bool(sub_segments) and total_pre_words > 0
+
+        sentences = re.split(r'([.!?]+)\s+', clean_text)
         sentences = [''.join(sentences[i:i+2]).strip()
                      for i in range(0, len(sentences), 2)]
         sentences = [s for s in sentences if s]
 
         if len(sentences) < 2:
             if debug:
-                # 🆕 DEBUG BAG_D: показать ПОЧЕМУ таймкод не вставлен
-                snippet = text[:120].replace('\n', ' ')
+                snippet = clean_text[:120].replace('\n', ' ')
                 print(f"  ⚠️  BAG_D SKIP: блок [{seg.get('time','???')}–{seconds_to_hms(end)}] "
                       f"длит={duration:.0f}s — sentences<2, таймкод НЕ вставлен")
                 print(f"      Текст (начало): '{snippet}...'")
-                # Проверяем: есть ли вообще знаки препинания?
-                punct_count = len(re.findall(r'[.!?]', text))
+                punct_count = len(re.findall(r'[.!?]', clean_text))
                 print(f"      Знаков пунктуации [.!?]: {punct_count} | "
-                      f"Слов: {len(text.split())} | "
-                      f"Символов: {len(text)}")
+                      f"Слов: {len(clean_text.split())} | "
+                      f"Символов: {len(clean_text)}")
             continue
 
-        words_total = len(text.split())
+        words_total = len(clean_text.split())
 
-        # 🆕 v17.11: FIX BAG_F — guard против scale-аномалии после split
-        # split_mixed_speaker_segments() наследует sub_segments от родителя целиком.
-        # У дочернего сегмента words_post << total_pre_words → scale >> 1.8
-        # → _get_real_time_for_word() выходит за пределы seg.end → инверсия timestamp в TXT
         _SCALE_ANOMALY_THRESHOLD = 1.8
         if has_real_data and words_total > 0:
             _scale = total_pre_words / words_total
@@ -170,59 +188,81 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
                 for si, s in enumerate(sub_segments):
                     print(f"       sub[{si}]: [{seconds_to_hms(s['start'])}-"
                           f"{seconds_to_hms(s['end'])}] words={s['words']}")
+            if existing_secs:
+                print(f"     existing ts: {[e['ts'] for e in existing_ts]} "
+                      f"(повторный проход, хвост > {interval * 1.5:.0f}s)")
 
-        # Вставляем timestamp
-        new_text_parts  = []
+        new_text_parts   = []
         current_word_idx = 0
-        elapsed          = 0.0
+
+        # 🆕 v17.13: стартуем от последнего existing ts
+        last_inject_time  = max(existing_secs) if existing_secs else start
+        all_inject_times  = list(existing_secs)
+        injected_this_seg = len(existing_secs) > 0
+
+        def _already_covered(t, window=8.0):
+            return any(abs(ts - t) <= window for ts in all_inject_times)
 
         for sent_idx, sent in enumerate(sentences):
-            sent_words   = len(sent.split())
-            sent_elapsed = (sent_words / words_total) * duration if words_total > 0 else 0
+            sent_words = len(sent.split())
+            is_last    = (sent_idx == len(sentences) - 1)
 
-            if elapsed >= interval and sent_idx < len(sentences) - 1:
+            current_time   = (start + (current_word_idx / words_total) * duration
+                               if words_total > 0 else start)
+            gap_since_last = current_time - last_inject_time
 
-                # 🆕 v16.22: FIX БАГ #1 — не вставлять дубль
-                if not re.match(r'^\d{2}:\d{2}:\d{2}', sent.strip()):
+            should_inject_main = (
+                gap_since_last >= interval
+                and not is_last
+            )
+            # Fallback: последнее предложение, хвост > interval/2
+            should_inject_fallback = (
+                is_last
+                and gap_since_last >= interval / 2
+            )
 
-                    # Реальное время (v17.10 — Вариант A)
+            if should_inject_main or should_inject_fallback:
+                if _already_covered(current_time):
+                    if debug:
+                        nearest = min(all_inject_times, key=lambda t: abs(t - current_time))
+                        print(f"     ⏭️ дубль: {seconds_to_hms(current_time)} "
+                              f"(Δ={abs(nearest - current_time):.1f}s от {seconds_to_hms(nearest)})")
+                    skipped_duplicates += 1
+                else:
                     real_time = _get_real_time_for_word(
                         current_word_idx, words_total, start, end,
                         sub_segments, total_pre_words, debug=False
                     )
-
-                    # Estimated (старый метод) — только для debug сравнения
-                    estimated_time = (start + (current_word_idx / words_total) * duration
-                                      if words_total > 0 else start)
-
                     timestamp_str = f" {seconds_to_hms(real_time)} "
                     new_text_parts.append(timestamp_str)
 
+                    all_inject_times.append(real_time)
+                    last_inject_time  = real_time
+                    injected_this_seg = True
+                    injection_count  += 1
+
                     if debug:
-                        delta  = real_time - estimated_time
+                        delta  = real_time - current_time
                         method = "REAL ✅    " if has_real_data else "ESTIMATED ⚠️"
-                        print(f"     📌 [{method}] inject={seconds_to_hms(real_time).strip()} "
-                              f"| estimated={seconds_to_hms(estimated_time)} "
+                        tag    = " [FALLBACK]" if should_inject_fallback else ""
+                        print(f"     📌 [{method}]{tag} inject={seconds_to_hms(real_time).strip()} "
                               f"| Δ={delta:+.1f}s "
                               f"| word#{current_word_idx}/{words_total} "
-                              f"| elapsed={elapsed:.1f}s")
+                              f"| gap={gap_since_last:.1f}s")
                         print(f"        ↳ '{sent[:60]}...'")
-
                         if has_real_data:
                             total_delta += abs(delta)
                             delta_count += 1
 
-                    injection_count += 1
-                    elapsed = 0.0
-
-                else:
-                    if debug:
-                        print(f"     ⏭️ дубль: '{sent[:40]}...'")
-                    skipped_duplicates += 1
-
             new_text_parts.append(sent)
             current_word_idx += sent_words
-            elapsed          += sent_elapsed
+
+        # 🆕 v17.13: existing ts в хвосте (после всех предложений) — сохраняем
+        final_word_time = (start + (current_word_idx / words_total) * duration
+                           if words_total > 0 else end)
+        for ets in sorted(existing_ts, key=lambda x: x['sec']):
+            if ets['sec'] > final_word_time:
+                new_text_parts.append(f" {ets['ts']} ")
 
         seg['text'] = ' '.join(new_text_parts)
 
@@ -238,7 +278,6 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
             print(f"✅ Блоков >30s не найдено")
 
     return segments
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 

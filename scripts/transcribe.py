@@ -623,6 +623,9 @@ def process_audio_file(
     if errors:
         segments_merged = auto_merge_adjacent_same_speaker(segments_merged)
         validate_adjacent_same_speaker(segments_merged)
+
+        # 🆕 v17.13: повторный inject для блоков, выросших после auto-merge
+        segments_merged = insert_intermediate_timestamps(segments_merged, interval=30.0, debug=True)
         
         # 🔴 v17.1: CHECKPOINT
         debug_checkpoint(segments_merged, "AFTER AUTO-MERGE")
