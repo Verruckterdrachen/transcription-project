@@ -219,6 +219,7 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
             should_inject_fallback = (
                 is_last
                 and gap_since_last >= interval / 2
+								and (end - current_time) > 15.0  # 🆕 guard: не ставить TS в хвост <15s
             )
 
             if should_inject_main or should_inject_fallback:
