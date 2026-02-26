@@ -1,11 +1,13 @@
 """
 merge/replica_merger.py - Склейка реплик одного спикера
 
+🆕 v17.12: FIX BAG_B — LOOKAHEAD GUARD в clean_loops против ложного удаления рефразов
+           clean_loops: при is_loop проверяем продолжение после якоря в cleaned[]
+           Если продолжения различаются (sim < 0.70) → рефраз спикера → KEEP
 🆕 v17.10: FIX БАГ #32 - GAP_FILLED corruption + time-overlap duplicates
            GUARD A: инвертированный timestamp (end < start) → DROP
            GUARD B: start < last_gap_end (перекрывает GAP диапазон) → DROP
-           GUARD C: GAP с ≥2 общими значимыми словами с lookBEHIND → DROP (corrupted)
-                    GAP с 0-1 общих слов → KEEP (легитимный)
+           GUARD C: N-грамм sim≥0.85 из ≥3 значимых слов с lookBEHIND → DROP
 🆕 v17.9: FIX БАГ #27 - Ложное удаление слов с low-meaningful N-граммами
 🆕 v17.4: FIX БАГ #17 - Дубли слов на стыках при склейке
 🆕 v16.22: FIX БАГ #3 - Loop artifacts с вариациями слов
@@ -63,13 +65,20 @@ GAP_LOOKBEHIND_SEGS      = 5     # глубина lookBEHIND (последние
 GAP_CORRUPTION_NGRAM_MIN = 3     # минимум значимых слов в N-грамме
 GAP_CORRUPTION_SIM       = 0.85  # порог фразового совпадения
 
+# ═══════════════════════════════════════════════════════════════════════════
+# 🆕 v17.12: LOOKAHEAD GUARD — порог для различения рефраза и loop artifact
+# ═══════════════════════════════════════════════════════════════════════════
+
+LOOKAHEAD_SIM_THRESHOLD  = 0.70  # ниже → продолжения различаются → рефраз → KEEP
+
+
 def _count_meaningful(phrase: str) -> int:
     """
     Считает количество знаменательных слов в N-грамме.
     Очищает пунктуацию, приводит к нижнему регистру.
     Знаменательное слово = не входит в RUSSIAN_STOP_WORDS.
     """
-    clean = re.sub(r'[.,!?;:«»"\'()\[\]]', '', phrase.lower())
+    clean = re.sub(r'[.,!?;:«»"\'\(\)\[\]]', '', phrase.lower())
     words = clean.split()
     return sum(1 for w in words if w not in RUSSIAN_STOP_WORDS)
 
@@ -79,8 +88,28 @@ def _meaningful_words(text: str) -> list:
     🆕 v17.10: Возвращает список значимых слов (len>3, не стоп-слово).
     Используется GUARD C для lookBEHIND анализа.
     """
-    clean = re.sub(r'[.,!?;:«»"\'()\[\]]', '', text.lower())
+    clean = re.sub(r'[.,!?;:«»"\'\(\)\[\]]', '', text.lower())
     return [w for w in clean.split() if w not in RUSSIAN_STOP_WORDS and len(w) > 3]
+
+
+def _find_after_anchor_in_cleaned(cleaned: list, anchor_phrase: str) -> list:
+    """
+    🆕 v17.12: FIX BAG_B — LOOKAHEAD GUARD.
+    Находит последнее вхождение anchor_phrase в cleaned[] и возвращает
+    следующие 3 слова после него. Используется для различения рефраза
+    от loop artifact: если продолжения после якоря и кандидата различаются
+    (sim < LOOKAHEAD_SIM_THRESHOLD) — это рефраз, удалять нельзя.
+    """
+    anchor_words = re.sub(r'[.,!?;:«»"\'\(\)\[\]]', '', anchor_phrase.lower()).split()
+    if not anchor_words:
+        return []
+    cleaned_lower = [re.sub(r'[.,!?;:«»"\'\(\)\[\]]', '', w.lower()) for w in cleaned]
+    first = anchor_words[0]
+    for i in range(len(cleaned_lower) - 1, -1, -1):
+        if cleaned_lower[i] == first:
+            return cleaned[i + len(anchor_words): i + len(anchor_words) + 3]
+    return []
+
 
 def _gap_is_corrupted(gap_text: str, preceding_texts: list, debug: bool = False) -> bool:
     gap_words    = _meaningful_words(gap_text)
@@ -107,8 +136,13 @@ def _gap_is_corrupted(gap_text: str, preceding_texts: list, debug: bool = False)
               f"'{best_ngram[0]}' ≈ '{best_ngram[1]}'")
     return best_sim >= GAP_CORRUPTION_SIM
 
+
 def clean_loops(text, debug=False):
     """
+    🆕 v17.12: FIX BAG_B — LOOKAHEAD GUARD против ложного удаления рефразов.
+               При is_loop: сравниваем 3 слова после якоря в cleaned[]
+               с 3 словами после кандидата в words[].
+               Если sim < LOOKAHEAD_SIM_THRESHOLD → рефраз → KEEP.
     🆕 v17.9: FIX БАГ #27 - Пропуск N-грамм без знаменательных слов
     🆕 v17.3: FIX БАГ #16 (v17.2) - Увеличение LOOP_WINDOW до 30
     🆕 v17.2: FIX БАГ #16 - Ограничение окна seen[] для loop detection
@@ -138,10 +172,12 @@ def clean_loops(text, debug=False):
             continue
 
         is_loop = False
+        matched_anchor = None
         for prev_phrase in seen:
             similarity = SequenceMatcher(None, phrase_lower, prev_phrase).ratio()
             if similarity >= 0.75:
                 is_loop = True
+                matched_anchor = prev_phrase
                 removed_count += 1
                 if debug:
                     print(f"      🔁 LOOP (similarity={similarity:.2f}): '{phrase}' ≈ '{prev_phrase}'")
@@ -157,11 +193,34 @@ def clean_loops(text, debug=False):
                     'при', 'через', 'о', 'об', 'у', 'для', 'от', 'под', 'над'
                 }
                 print(f"      ⚠️ УДАЛЯЕМ: '{phrase}'")
-                print(f"         Причина: совпадение с '{prev_phrase}' (sim={similarity:.2f})")
+                print(f"         Причина: совпадение с '{matched_anchor}' (sim={similarity:.2f})")
                 print(f"         Контекст слева: '...{left_context}'")
                 print(f"         Слово перед удалением: '{last_cleaned}'")
                 if last_word in HANGING_PREPOSITIONS:
                     print(f"         🔴 РИСК ОБРУБКА! '{last_cleaned}' — предлог без продолжения!")
+
+            # ── 🆕 v17.12: LOOKAHEAD GUARD ────────────────────────────────
+            after_anchor    = _find_after_anchor_in_cleaned(cleaned, matched_anchor)
+            after_candidate = words[i+3:i+6]
+            if after_anchor and after_candidate:
+                sim_after = SequenceMatcher(
+                    None,
+                    ' '.join(after_anchor).lower(),
+                    ' '.join(after_candidate).lower()
+                ).ratio()
+                if sim_after < LOOKAHEAD_SIM_THRESHOLD:
+                    if debug:
+                        print(f"         🔄 LOOKAHEAD: after_anchor={after_anchor} "
+                              f"vs after_cand={after_candidate} "
+                              f"sim={sim_after:.2f} < {LOOKAHEAD_SIM_THRESHOLD} → РЕФРАЗ → KEEP")
+                    removed_count -= 1  # откатываем счётчик
+                    seen.append(phrase_lower)
+                    if len(seen) > LOOP_WINDOW:
+                        seen.pop(0)
+                    cleaned.extend(words[i:i+3])
+                    i += 3
+                    continue
+            # ── конец LOOKAHEAD GUARD ──────────────────────────────────────
 
             # ── v17.10 FIX БАГ #15 РЕГРЕССИЯ ──────────────────────────────
             last_word_check = cleaned[-1].lower().rstrip('.,!?«»') if cleaned else ""
