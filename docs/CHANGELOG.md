@@ -6,6 +6,60 @@
 
 ---
 
+## [v17.13] - 2026-02-26
+
+### Fixed
+- **BAG_B**: `clean_loops` ложно удалял рефраз спикера («Искры»)
+  - ROOT CAUSE: LOOKAHEAD guard отсутствовал — `clean_loops` не отличал
+    осознанный рефраз (смена рода «которого/которой») от петли Whisper;
+    N-граммы «Искры, отцом которого» ≈ «искры, отцом которой» давали sim=0.90 ≥ 0.75
+  - FIX: LOOKAHEAD guard в `clean_loops()` — сравнение 3 слов после anchor
+    и 3 слов после candidate (sim порог 0.7):
+    sim < 0.7 → рефраз → KEEP; sim ≥ 0.7 → петля → DELETE
+  - Файл: `scripts/merge/replica_merger.py`
+  - Проверено: NW_Uckpa0001_01 — «Искры» сохранён на 00:12:58 ✅;
+    11 срабатываний LOOKAHEAD — все корректные KEEP ✅; регрессий нет ✅
+
+---
+
+## [v17.12] - 2026-02-26
+
+### Fixed
+- **БАГ #32 / BAG_C**: `GAP_FILLED` corruption + дубли (C3 патрули, C5 артиллерия) + регрессия 00:10:00
+  - ROOT CAUSE: GAP fill re-транскрибировал контент из предыдущего сегмента;
+    overlap detection убирал только 1 слово; GUARD C с word-overlap ложно дропал связный текст
+  - FIX: GUARD A (инвертированный timestamp → DROP), GUARD B (временное перекрытие → DROP),
+    GUARD C (N-грамм sim ≥ 0.85 из ≥3 значимых слов с lookBEHIND → DROP)
+  - Файл: `scripts/merge/replica_merger.py`
+  - Проверено: NW_Uckpa0001_01 — C3 ✅, C5 ✅, 00:10:00 ✅
+
+---
+
+## [v17.11] - 2026-02-25
+
+### Fixed
+- **BAG_F**: `timestamp_fixer` инверсия timestamp после split (scale=2.287)
+  - ROOT CAUSE: `insert_intermediate_timestamps()` не проверяла валидность scale;
+    `sub_segments` унаследованы от родителя (199 слов) при 87 словах после split
+  - FIX: scale guard — порог 1.8; при превышении fallback на ESTIMATED (линейная интерполяция)
+  - Файл: `scripts/corrections/timestamp_fixer.py`
+  - Симуляция: `tests/simulations/sim_bug30_timestamp_scale.py` (4/4 GREEN)
+  - Проверено: NW_Uckpa0003_01 ✅
+
+---
+
+## [v17.10] - 2026-02-25
+
+### Fixed
+- **#15r / BAG_A**: `clean_loops` удалял фразу при висячем предлоге (gap overlap)
+  - ROOT CAUSE: детекция висячего предлога декоративна — флаг логировался, но не останавливал удаление
+  - FIX: в `clean_loops()` при `is_loop=True` проверка `cleaned[-1]` на предлог → skip удаления
+  - Файл: `scripts/merge/replica_merger.py`
+  - Симуляция: `tests/simulations/sim_bug15r_clean_loops_preposition.py` (4/4 GREEN)
+  - Проверено: NW_Uckpa0001_01 ✅
+
+---
+
 ## [v17.9] - 2026-02-20
 
 ### Fixed
@@ -225,5 +279,5 @@ Base Release — модульная архитектура (`core/`, `correction
 
 ---
 
-**Последнее обновление:** 2026-02-20
+**Последнее обновление:** 2026-02-26
 **Актуальная версия:** → см. VERSION.md
