@@ -96,6 +96,7 @@ transcribe_v16.py - Главный файл пайплайна транскри�
 		txt/          ← TXT сохраняется сюда
 """
 
+import re
 import os
 import sys
 import whisper
@@ -624,9 +625,14 @@ def process_audio_file(
         segments_merged = auto_merge_adjacent_same_speaker(segments_merged)
         validate_adjacent_same_speaker(segments_merged)
 
-        # 🆕 v17.13: повторный inject для блоков, выросших после auto-merge
+        # 🆕 v17.18: FIX — очищаем ts из текстов перед повторным inject
+        # ROOT CAUSE: после auto_merge SKIP срабатывал из-за хвоста ≤ 45s
+        for seg in segments_merged:
+            seg['text'] = re.sub(r'\s*\b\d{2}:\d{2}:\d{2}\b\s*', ' ', seg['text']).strip()
+
+        # повторный inject для блоков, выросших после auto-merge
         segments_merged = insert_intermediate_timestamps(segments_merged, interval=30.0, debug=True)
-        
+
         # 🔴 v17.1: CHECKPOINT
         debug_checkpoint(segments_merged, "AFTER AUTO-MERGE")
 
