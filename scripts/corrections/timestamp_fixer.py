@@ -2,14 +2,12 @@
 """
 corrections/timestamp_fixer.py - Исправление timestamp
 
+🆕 v17.14: FIX BAG_D — gap_fixer_v2: пост-проход по готовому тексту сегмента.
+           При gaps > 45s (длинное предложение, нет точки в нужном месте)
+           вставляет inject через word-level walk + _get_real_time_for_word().
+           Идемпотентен: повторный вызов → 0 inject если gaps уже ≤ 45s.
 🆕 v17.11: FIX BAG_F — guard против scale-аномалии после split
-           split_mixed_speaker_segments() наследует sub_segments от родителя.
-           У дочернего сегмента scale = total_pre_words/words_post >> 1.8
-           → _get_real_time_for_word() выходит за пределы seg.end → инверсия.
-           FIX: if scale > 1.8 → fallback ESTIMATED (линейная интерполяция)
 🆕 v17.10: Вариант A — точные timestamp через sub_segments из merge_replicas
-           Вместо word-proportion по всему блоку используем реальные границы
-           оригинальных Whisper-сегментов. Debug: estimated vs real vs Δ.
 🆕 v16.28: FIX БАГ #3 - Потеря последнего предложения
 🆕 v16.22: FIX БАГ #1 - Дублирующиеся timestamp
 🆕 v16.22: FIX БАГ #2 - Timestamp назад
@@ -71,6 +69,162 @@ def _get_real_time_for_word(word_idx, total_words_post, seg_start, seg_end,
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+# 🆕 v17.14: gap_fixer_v2 — пост-проход для BAG_D
+# ═══════════════════════════════════════════════════════════════════════════
+
+def gap_fixer_v2(seg_text, seg_start, seg_end, sub_segments, total_pre,
+                 interval=30.0, threshold=45.0, lookahead=12, debug=True):
+    """
+    🆕 v17.14: FIX BAG_D — пост-проход по тексту сегмента.
+
+    Проблема: длинные предложения (>30s, нет промежуточных точек) полностью
+    поглощают временной интервал — основной проход inject не вставляет.
+    Решение: после основного прохода — доп. проход по токенам текста,
+    поиск gaps > threshold, word-level walk с lookahead до точки.
+
+    Идемпотентен: повторный вызов при gaps ≤ threshold → 0 inject.
+
+    Args:
+        seg_text:     текст сегмента после основного прохода (уже с ts)
+        seg_start:    float — начало сегмента (сек)
+        seg_end:      float — конец сегмента (сек)
+        sub_segments: list[{start,end,words}] из merge_replicas
+        total_pre:    int — сумма words из sub_segments
+        interval:     порог вставки внутри gap (сек), default 30.0
+        threshold:    минимальный gap для обработки (сек), default 45.0
+        lookahead:    макс. слов вперёд в поиске конца предложения, default 12
+        debug:        вывод отладки
+
+    Returns:
+        new_text: str — текст с добавленными ts
+        log:      list[dict] — детали каждого inject
+    """
+    duration = seg_end - seg_start
+
+    # ── Токенизация: слова + ts-метки ─────────────────────────────────────
+    token_pattern = re.compile(r'(\b\d{2}:\d{2}:\d{2}\b|\S+)')
+    raw_tokens = token_pattern.findall(seg_text)
+
+    tokens      = []
+    word_to_tok = []   # word_idx → token_idx
+    tok_is_ts   = []
+
+    for tok in raw_tokens:
+        is_ts = bool(re.match(r'^\d{2}:\d{2}:\d{2}$', tok))
+        tokens.append(tok)
+        tok_is_ts.append(is_ts)
+        if not is_ts:
+            word_to_tok.append(len(tokens) - 1)
+
+    words_total = len(word_to_tok)
+
+    if debug:
+        print(f"     🔧 gap_fixer_v2 [{seconds_to_hms(seg_start)}–{seconds_to_hms(seg_end)}] "
+              f"dur={duration:.0f}s words={words_total} threshold={threshold}s")
+
+    # ── Находим existing ts → anchors ────────────────────────────────────
+    all_ts_sec = sorted(set(
+        int(tok.split(':')[0]) * 3600 + int(tok.split(':')[1]) * 60 + int(tok.split(':')[2])
+        for tok, is_t in zip(tokens, tok_is_ts) if is_t
+    ))
+    anchors = sorted(set(all_ts_sec + [int(seg_start)]))
+
+    gaps_to_fix = []
+    for i in range(1, len(anchors)):
+        gap_sec = anchors[i] - anchors[i - 1]
+        if gap_sec > threshold:
+            gaps_to_fix.append((anchors[i - 1], anchors[i], gap_sec))
+            if debug:
+                print(f"       GAP: {seconds_to_hms(anchors[i-1])} → "
+                      f"{seconds_to_hms(anchors[i])} = {gap_sec}s ❌")
+
+    if not gaps_to_fix:
+        if debug:
+            print(f"       gaps > {threshold}s не найдено ✅")
+        return seg_text, []
+
+    # ── Обрабатываем каждый gap ───────────────────────────────────────────
+    inserts = []  # (token_idx, ts_str) — применяем после всех gaps
+    log     = []
+
+    for gap_start_sec, gap_end_sec, gap_dur in gaps_to_fix:
+        w_start = round((gap_start_sec - seg_start) / duration * words_total)
+        w_end   = round((gap_end_sec   - seg_start) / duration * words_total)
+        w_start = max(0, min(w_start, words_total - 1))
+        w_end   = max(0, min(w_end,   words_total))
+        gap_len = w_end - w_start
+
+        if gap_len <= 0:
+            continue
+
+        last_t = float(gap_start_sec)
+        i      = 0
+
+        while i < gap_len:
+            est_t = gap_start_sec + (i / gap_len) * gap_dur
+
+            if est_t - last_t >= interval:
+                inject_at      = i
+                found_sent_end = False
+                for look in range(min(lookahead, gap_len - i)):
+                    w_abs = w_start + i + look
+                    if w_abs < words_total:
+                        tok = tokens[word_to_tok[w_abs]]
+                        if re.search(r'[.!?]$', tok):
+                            inject_at      = i + look + 1
+                            found_sent_end = True
+                            break
+
+                inject_at    = min(inject_at, gap_len - 1)
+                abs_word_idx = min(w_start + inject_at, words_total - 1)
+                tok_idx      = word_to_tok[abs_word_idx]
+
+                est_inj_t = gap_start_sec + (inject_at / gap_len) * gap_dur
+                real_t    = _get_real_time_for_word(
+                    abs_word_idx, words_total,
+                    seg_start, seg_end,
+                    sub_segments, total_pre, debug=False
+                )
+                delta    = real_t - est_inj_t
+                gap_from = real_t - last_t
+
+                ctx_lo  = max(0, abs_word_idx - 2)
+                ctx_hi  = min(words_total, abs_word_idx + 3)
+                ctx     = ' '.join(tokens[word_to_tok[j]] for j in range(ctx_lo, ctx_hi))
+
+                warn = "✅" if gap_from <= 35 else ("⚠️" if gap_from <= 45 else "❌")
+                method = "REAL" if sub_segments else "ESTIMATED"
+                if debug:
+                    print(f"       inject={seconds_to_hms(real_t)} Δ={delta:+.1f}s "
+                          f"gap_from={gap_from:.0f}s {warn} [{method}] "
+                          f"sent_end={found_sent_end}")
+                    print(f"       «...{ctx}...»")
+
+                inserts.append((tok_idx, seconds_to_hms(real_t)))
+                log.append({
+                    "real_t":   real_t,
+                    "delta":    round(delta, 1),
+                    "gap_from": round(gap_from, 1),
+                    "ctx":      ctx,
+                    "method":   method,
+                })
+                last_t = real_t
+                i = inject_at + 1
+                continue
+            i += 1
+
+    if not inserts:
+        return seg_text, log
+
+    # ── Вставляем ts в токены (справа налево → не сдвигаем индексы) ──────
+    result = list(tokens)
+    for tok_idx, ts_str in sorted(inserts, key=lambda x: -x[0]):
+        result.insert(tok_idx + 1, ts_str)
+
+    return ' '.join(result), log
+
+
+# ═══════════════════════════════════════════════════════════════════════════
 
 def find_existing_timestamps(text):
     """
@@ -92,6 +246,7 @@ def find_existing_timestamps(text):
 
 def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
     """
+    🆕 v17.14: FIX BAG_D — gap_fixer_v2 пост-проход после основного inject.
     🆕 v17.13: FIX БАГ — повторный вызов после auto_merge.
                SKIP блоков у которых хвост (end - last_existing_ts) ≤ interval*1.5.
                Трогаем только блоки с реально необработанным хвостом > 45s.
@@ -102,10 +257,10 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
     🆕 v16.28: FIX БАГ #3 - Потеря последнего предложения
     🆕 v16.22: FIX БАГ #1 - Дублирующиеся timestamp
     🆕 v16.22: FIX БАГ #2 - Timestamp назад
-    🆕 v16.19: КРИТИЧЕСКИЙ FIX - Timestamp injection в блоки >30 сек
+    🆕 v16.19: КРИТИЧЕСКИЙ FИX - Timestamp injection в блоки >30 сек
     """
     if debug:
-        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s, mode=v17.13)...")
+        print(f"\n🕒 Вставка промежуточных timestamp (interval={interval}s, mode=v17.14)...")
 
     injection_count    = 0
     skipped_duplicates = 0
@@ -159,6 +314,17 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
                 print(f"      Знаков пунктуации [.!?]: {punct_count} | "
                       f"Слов: {len(clean_text.split())} | "
                       f"Символов: {len(clean_text)}")
+            # 🆕 v17.14: sentences<2 — всё равно запускаем gap_fixer_v2
+            seg['text'], _gap_log = gap_fixer_v2(
+                text, start, end,
+                sub_segments, total_pre_words,
+                interval=interval, threshold=45.0,
+                lookahead=12, debug=debug
+            )
+            if _gap_log:
+                injection_count += len(_gap_log)
+                if debug:
+                    print(f"     🔧 gap_fixer_v2 (sentences<2): +{len(_gap_log)} inject(s)")
             continue
 
         words_total = len(clean_text.split())
@@ -185,9 +351,9 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
                 print(f"     sub_segments: {len(sub_segments)} шт | "
                       f"words(pre-clean)={total_pre_words} | "
                       f"scale={total_pre_words/words_total:.3f}")
-                for si, s in enumerate(sub_segments):
-                    print(f"       sub[{si}]: [{seconds_to_hms(s['start'])}-"
-                          f"{seconds_to_hms(s['end'])}] words={s['words']}")
+                for si, sub in enumerate(sub_segments):
+                    print(f"       sub[{si}]: [{seconds_to_hms(sub['start'])}-"
+                          f"{seconds_to_hms(sub['end'])}] words={sub['words']}")
             if existing_secs:
                 print(f"     existing ts: {[e['ts'] for e in existing_ts]} "
                       f"(повторный проход, хвост > {interval * 1.5:.0f}s)")
@@ -219,7 +385,7 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
             should_inject_fallback = (
                 is_last
                 and gap_since_last >= interval / 2
-								and (end - current_time) > 15.0  # 🆕 guard: не ставить TS в хвост <15s
+                and (end - current_time) > 15.0  # guard: не ставить TS в хвост <15s
             )
 
             if should_inject_main or should_inject_fallback:
@@ -267,6 +433,18 @@ def insert_intermediate_timestamps(segments, interval=30.0, debug=True):
 
         seg['text'] = ' '.join(new_text_parts)
 
+        # 🆕 v17.14: FIX BAG_D — gap_fixer_v2 пост-проход
+        seg['text'], _gap_log = gap_fixer_v2(
+            seg['text'], start, end,
+            sub_segments, total_pre_words,
+            interval=interval, threshold=45.0,
+            lookahead=12, debug=debug
+        )
+        if _gap_log:
+            injection_count += len(_gap_log)
+            if debug:
+                print(f"     🔧 gap_fixer_v2: +{len(_gap_log)} inject(s)")
+
     if debug:
         print(f"\n{'─'*60}")
         print(f"✅ Вставлено timestamp : {injection_count}")
@@ -286,16 +464,6 @@ def correct_timestamp_drift(segments, debug=True):
     """
     🆕 v16.22: FIX БАГ #2 - Timestamp назад
     🆕 v16.19: Исправляет сдвиг timestamp после gap filling
-
-    **ПРОБЛЕМА (БАГ #2):**
-    Функция сдвигала timestamp НАЗАД:
-    - prev_seg.end = 183.5 (00:03:03)
-    - current_seg.start = 186.2 (00:03:06)
-    - new_start = prev_end = 183.5  ← МЕНЬШЕ чем 186.2!
-    - Результат: 00:03:06 → 00:03:03 (НАЗАД!)
-
-    **FIX v16.22:**
-    Проверяем монотонность: new_start ДОЛЖЕН быть >= old_start
     """
     if debug:
         print(f"\n🔧 Исправление сдвига timestamp после gap filling...")
@@ -316,7 +484,6 @@ def correct_timestamp_drift(segments, debug=True):
             old_start = current_start
             new_start = prev_end
 
-            # 🆕 v16.22: FIX БАГ #2 — не двигаем назад
             if new_start >= old_start:
                 current_seg['start'] = new_start
                 current_seg['time']  = seconds_to_hms(new_start)
