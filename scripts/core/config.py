@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-core/config.py - Константы и паттерны для v16.7
+# core/config.py - Константы и паттерны пайплайна v17.19
 """
 
 import re
@@ -11,8 +11,8 @@ from pathlib import Path
 # ВЕРСИЯ
 # ═══════════════════════════════════════════════════════════════════════════
 
-VERSION = "17.8"
-VERSION_NAME = "FIX БАГ #26 - speaker_surname в TXT вместо 'Спикер'"
+VERSION = "17.19"
+VERSION_NAME = "Cleanup: version sync, logging_utils, validate.py, debug_checkpoint"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # HUGGING FACE TOKEN

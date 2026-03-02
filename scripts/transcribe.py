@@ -1,99 +1,23 @@
-#!/usr/bin/env python3
 """
-transcribe_v16.py - Главный файл пайплайна транскрибации v17.7
+transcribe.py — Главный оркестратор пайплайна транскрибации
 
-🔥 v17.7: FIX БАГ #25 - GAP pyannote overlap attribution + text-based override
-🔴 v17.1: DEBUG БАГ #15 - Пропуск "прорыв блокады" на 00:02:26
-- Добавлен target timestamp 00:02:26 во все checkpoints
-- Поиск фразы "прорыв блокады" в тексте сегментов
-- Отслеживание этапа, где фраза пропадает
+Пайплайн:
+  1. Диаризация (pyannote 3.1)
+  2. Транскрибация (Whisper large-v3-turbo)
+  3. Выравнивание Whisper ↔ Pyannote
+  4. Коррекции (журналист-команды, boundary, dedup)
+  5. GAP filling + timestamp correction
+  6. Merge реплик
+  7. Классификация спикеров v15
+  8. Split смешанных сегментов
+  8.1 Timestamp injection (>30s)
+  8.2 Text correction
+  8.3 Hallucination removal
+  9. Валидация + auto-merge
+  10. Экспорт (JSON + TXT)
 
-🆕 v16.28: DEBUG CHECKPOINT - Поиск места потери реплик
-- Добавлена функция debug_checkpoint() для отслеживания сегментов
-- Checkpoint после каждого этапа pipeline
-- Поиск конкретных timestamp (00:04:29, 00:10:44)
-- Помогает найти КАКОЙ этап удаляет реплики
-
-🎓 v16.27: Новая стратегия тестирования - Real tests > Unit tests
-- Удалены unit tests для багов (7 файлов)
-- ОБЯЗАТЕЛЬНЫЙ Real test ПЕРЕД коммитом
-- VALIDATION.md (7 пунктов) = условие для коммита
-- Unit tests ТОЛЬКО для изолированных утилит
-
-🔥 v16.25: ОТКАТ txt_export.py к v16.3 + простой FIX дублей
-- Удалили `\\n` перед inner timestamp (причина БАГ #2 - разбиение строк)
-- Добавили условие `i > 0` в should_insert (FIX БАГ #1 - дубли)
-- Результат: TXT без багов v16.22-v16.24
-
-🔥 v16.22: FIX БАГ #1, #2 - Timestamp дубли + назад
-- БАГ #1: insert_intermediate_timestamps() проверяет дубли перед вставкой
-- БАГ #2: correct_timestamp_drift() проверяет монотонность (не сдвигает назад)
-- Результат: TXT без дублей timestamp, без обратного хода времени
-
-🔥 v16.21: Fix continuation phrase position check (90% → in-split check)
-- Проверка позиции continuation phrase теперь ДО is_continuation_phrase()
-- Исправлен баг: накопленный текст (current_text) должен включать текущее предложение
-- Добавлен debug output: показ позиции и расстояния до конца
-- Порог: если фраза ближе к началу (≤30% от длины) → считаем "началом"
-
-🔥 v16.19: КРИТИЧЕСКИЙ FIX - Timestamps + Hallucinations + Continuation
-- Вставка промежуточных timestamp в блоки >30 сек (insert_intermediate_timestamps)
-- Исправление сдвига timestamp после gap filling (correct_timestamp_drift)
-- Удаление дублей + "Продолжение следует" (filter_hallucination_segments)
-- Порог continuation phrase: 80% → 90% (boundary_fixer.py)
-
-🔥 v16.16: КРИТИЧЕСКИЙ FIX - Word Boundary в regex паттернах!
-- Добавлен \\b (word boundary) в начале всех regex паттернов
-- Исправлен баг: 'вы\\s+' ловил "вы " внутри слов (Невы, совы, кровы)
-- Теперь поиск только целых слов: '\\bвы\\s+', '\\bрасскажите\\b' и т.д.
-- Предотвращение FALSE POSITIVE в is_journalist_phrase() и is_expert_phrase()
-- Исправлена ошибка: "То есть с небольшого пространства земли на восточном берегу Невы..." → Journalist=False ✅
-
-🔥 v16.15: DEBUG OUTPUT ДЛЯ SPLIT - находим виновника!
-- Детальный debug output для каждого предложения в split
-- Показ результатов is_journalist_phrase, is_expert_phrase, is_continuation
-- Логирование смены current_speaker с причиной
-- Поможет найти КАКОЕ предложение ошибочно меняет спикера
-
-🔥 v16.14: КРИТИЧЕСКИЙ FIX REPLICA MERGER - SPEAKER ОТ САМОГО ДЛИННОГО
-- replica_merger теперь берёт speaker/raw_speaker_id от САМОГО ДЛИННОГО сегмента
-- Исправлен баг: первый короткий сегмент "заражал" всю склейку
-- Добавлен debug output с выбором доминирующего сегмента
-
-🔥 v16.13: КРИТИЧЕСКИЙ FIX RAW_SPEAKER_ID SYNC В CLASSIFICATION
-- speaker_classifier теперь синхронизирует raw_speaker_id при изменении speaker
-- Передача speaker_roles в apply_speaker_classification_v15
-- Исправлен баг: TXT выводил старый speaker после классификации
-- Аналогичный фикс v16.12, но для этапа 7 (классификация)
-
-🔥 v16.12: КРИТИЧЕСКИЙ FIX RAW_SPEAKER_ID + VERSION В JSON
-- При split обновляется не только speaker, но и raw_speaker_id
-- Добавлено поле "pipeline_version" в JSON metadata
-- Исправлен баг: TXT выводил старый speaker вместо нового
-- Передача speaker_roles в split_mixed_speaker_segments
-
-🔥 v16.11: ПРАВИЛЬНАЯ ЛОГИКА CONTINUATION PHRASE FIX
-- Исправлена логика проверки контекста в split_mixed_speaker_segments
-- Continuation phrase проверяется ВНУТРИ текущего split (не предыдущий сегмент)
-- Если накоплено >80 слов → continuation сохраняет текущего спикера
-- Защита от смены спикера внутри длинного монолога
-
-🔥 v16.8: DEBUG LOG + LONG MONOLOGUE FIX
-- Автоматическое логирование всего pipeline в файл
-- Monologue context protection для длинных монологов >60s
-- Continuation phrase detection
-- GAP overlap protection
-
-🔥 v16.7: AUTO TEST-RESULTS COPY
-- Автоматическое копирование результатов в test-results/latest/
-- Очистка latest/ перед каждым запуском
-- Логирование копирования
-
-📁 СТРУКТУРА ПАПОК:
-	Спикер (ДД.ММ)/
-		audio/        ← WAV файлы здесь
-		json/         ← JSON сохраняются сюда
-		txt/          ← TXT сохраняется сюда
+Tech: Whisper large-v3-turbo, Pyannote 3.1, Python 3.10+
+История изменений: см. docs/CHANGELOG.md
 """
 
 import re
@@ -146,98 +70,77 @@ from merge.validator import (
 from export.json_export import export_to_json
 from export.txt_export import export_to_txt, jsons_to_txt
 
+from core.logging_utils import TeeOutput, set_tee, switch_log_phase
+
 from huggingface_hub import login
 
 warnings.filterwarnings("ignore")
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 🔴 v17.1: DEBUG CHECKPOINT HELPER - БАГ #15
+# DEBUG CHECKPOINT (v17.19: универсальная версия, без привязки к конкретному багу)
+# Для активации отладки конкретного бага — задать _DEBUG_SCENARIO в main()
 # ═══════════════════════════════════════════════════════════════════════════
 
-def debug_checkpoint(segments, stage_name, target_timestamps=None):
+# Настраивается из main() или напрямую для отладки конкретного бага.
+# Для обычного прогона: пустые значения — только счётчики сегментов.
+_DEBUG_TARGET_TIMESTAMPS: list = []   # пример: ["00:02:26", "00:04:29"]
+_DEBUG_TARGET_PHRASE: str | None = None  # пример: "прорыв блокады"
+
+def debug_checkpoint(segments, stage_name,
+                     target_timestamps=None, target_phrase=None):
     """
-    🔴 v17.1: DEBUG БАГ #15 - Отслеживание "прорыв блокады" на 00:02:26
+    Универсальный checkpoint для всех этапов пайплайна.
+
+    Показывает состояние segments на этапе stage_name.
+    Помогает локализовать, где пропал текст/фраза/спикер.
+
+    Если target_timestamps и target_phrase не переданы явно — берёт
+    из модульных переменных _DEBUG_TARGET_TIMESTAMPS / _DEBUG_TARGET_PHRASE,
+    которые задаются под конкретный баг в main() или в начале файла.
+
+    Args:
+        segments: список сегментов
+        stage_name: имя этапа ("AFTER MERGE" и т.п.)
+        target_timestamps: список строк HH:MM:SS (переопределяет модульный)
+        target_phrase: строка для поиска в тексте (переопределяет модульный)
     """
     if target_timestamps is None:
-        # 🔴 v17.1: Добавлен 00:02:26 для БАГ #15
-        target_timestamps = ["00:02:26"]
-    
+        target_timestamps = _DEBUG_TARGET_TIMESTAMPS
+    if target_phrase is None:
+        target_phrase = _DEBUG_TARGET_PHRASE
+
     print(f"\n🔍 CHECKPOINT [{stage_name}]: {len(segments)} сегментов")
-    
+
     for target_ts in target_timestamps:
         found = False
         for seg in segments:
             seg_start = seconds_to_hms(seg['start'])
-            seg_end = seconds_to_hms(seg['end'])
-            
-            # Проверяем, содержит ли сегмент целевой timestamp
+            seg_end   = seconds_to_hms(seg['end'])
+
             if seg_start <= target_ts <= seg_end or seg_start == target_ts:
                 found = True
-                text = seg.get('text', '')
+                text     = seg.get('text', '')
                 duration = seg['end'] - seg['start']
-                
-                # 🔴 v17.1: Целевая фраза для БАГ #15
-                target_phrase = "прорыв блокады"
-                has_phrase = target_phrase.lower() in text.lower()
-                
-                print(f"   ✅ {target_ts}: НАЙДЕН в [{seg_start}-{seg_end}] (длит={duration:.1f}s, слов={len(text.split())})")
-                
-                # 🔴 v17.1: Показываем ВЕСЬ текст для 00:02:26
-                print(f"\n      📝 ПОЛНЫЙ ТЕКСТ СЕГМЕНТА ({len(text)} символов):")
-                print(f"      {text}")
-                print()
-                
-                # 🔴 v17.1: Проверка наличия фразы "прорыв блокады"
-                if has_phrase:
-                    print(f"      ✅ Целевая фраза \"{target_phrase}\" НАЙДЕНА в тексте!")
+
+                print(f"   ✅ {target_ts}: НАЙДЕН в [{seg_start}-{seg_end}] "
+                      f"(длит={duration:.1f}s, слов={len(text.split())})")
+
+                if len(text) > 120:
+                    print(f"      📝 Начало: \"{text[:60]}...\"")
+                    print(f"      📝 Конец:  \"...{text[-60:]}\"")
                 else:
-                    print(f"      ❌ Целевая фраза \"{target_phrase}\" НЕ НАЙДЕНА в тексте!")
-                
+                    print(f"      📝 Текст: \"{text}\"")
+
+                if target_phrase:
+                    if target_phrase.lower() in text.lower():
+                        print(f"      ✅ Фраза \"{target_phrase}\" — НАЙДЕНА")
+                    else:
+                        print(f"      ❌ Фраза \"{target_phrase}\" — НЕ НАЙДЕНА")
                 break
-        
+
         if not found:
-            print(f"   ❌ {target_ts}: НЕ НАЙДЕН! (возможно удалён на предыдущих этапах)")
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 🆕 v16.8: CONSOLE OUTPUT CAPTURE
-# ═══════════════════════════════════════════════════════════════════════════
-
-class TeeOutput:
-    """
-    🆕 v17.10: Поддержка split-логов по фазам пайплайна
-    Основной _debug.log сохраняется ПОЛНОСТЬЮ.
-    Дополнительно пишутся 4 файла в log/ по фазам.
-    """
-    def __init__(self, main_log_path):
-        self.terminal = sys.stdout
-        self.main_log = open(main_log_path, 'w', encoding='utf-8')
-        self.phase_log = None
-        self._phase_path = None
-
-    def switch_phase(self, phase_path: Path):
-        """Переключить фазовый файл (основной лог продолжает писаться)."""
-        if self.phase_log:
-            self.phase_log.close()
-        phase_path.parent.mkdir(exist_ok=True)
-        self.phase_log = open(phase_path, 'w', encoding='utf-8')
-        self._phase_path = phase_path
-
-    def write(self, message):
-        self.terminal.write(message)
-        self.main_log.write(message)
-        if self.phase_log:
-            self.phase_log.write(message)
-
-    def flush(self):
-        self.terminal.flush()
-        self.main_log.flush()
-        if self.phase_log:
-            self.phase_log.flush()
-
-    def close(self):
-        if self.phase_log:
-            self.phase_log.close()
-        self.main_log.close()
+            print(f"   ❌ {target_ts}: НЕ НАЙДЕН! "
+                  f"(возможно удалён на предыдущих этапах)")
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 🆕 v17.10: SPLIT-ЛОГ ПО ФАЗАМ
@@ -249,13 +152,6 @@ def switch_log_phase(phase_path):
     """Переключить фазовый лог-файл. Вызывать перед каждым этапом."""
     if _tee is not None:
         _tee.switch_phase(phase_path)
-
-# ═══════════════════════════════════════════════════════════════════════════
-# ВЕРСИЯ
-# ═══════════════════════════════════════════════════════════════════════════
-
-VERSION = "17.8"
-VERSION_NAME = "FIX БАГ #26 - speaker_surname в TXT вместо 'Спикер'"
 
 # ═══════════════════════════════════════════════════════════════════════════
 # ГЛОБАЛЬНАЯ ПЕРЕМЕННАЯ ДЛЯ PIPELINE
@@ -688,12 +584,12 @@ def process_audio_file(
 # ═══════════════════════════════════════════════════════════════════════════
 
 def main():
-	"""
-	Главная функция - интерактивный режим
-	
-	Returns:
-			(json_files, txt_path, speaker_surname) для копирования в test-results
-	"""
+	# ── DEBUG SCENARIO ───────────────────────────────────────────────────
+	# Задать при отладке конкретного бага. Для обычного прогона — не трогать.
+	global _DEBUG_TARGET_TIMESTAMPS, _DEBUG_TARGET_PHRASE
+	_DEBUG_TARGET_TIMESTAMPS = []    # пример: ["00:02:26"]
+	_DEBUG_TARGET_PHRASE     = None  # пример: "прорыв блокады"
+	# ─────────────────────────────────────────────────────────────────────
 
 	# Инициализация
 	login(token=HF_TOKEN)
@@ -793,7 +689,7 @@ if __name__ == "__main__":
     tee = TeeOutput(log_file)
 
     # 🆕 v17.10: регистрируем глобально для switch_log_phase()
-    _tee = tee
+    set_tee(tee)
 
     original_stdout = sys.stdout
     sys.stdout = tee

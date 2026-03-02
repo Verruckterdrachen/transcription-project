@@ -105,8 +105,8 @@ clean_loops_real_texts.txt ← реальные MERGE-блоки для симу
 
 text
 
-⚠️ `test_clean_loops_sim.py` из корня `scripts/` — перенести в
-`tests/simulations/sim_bug27_clean_loops.py` при следующем коммите.
+✅ Структура актуальна. Все симуляции живут в tests/simulations/.
+   Новый баг → sim_bug{NN}_{func}.py, старые не удалять (регрессия).
 
 ---
 
