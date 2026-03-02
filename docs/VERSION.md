@@ -1,12 +1,12 @@
-# Version: v17.18
-# Last updated: 2026-02-27
+# Version: v17.20
+# Last updated: 2026-03-02
 # Status: STABLE ✅
 
 ## 🎯 Текущее состояние
 
 **Base:** v17.0 BASELINE
-**Test audio:** Исаев (27.05) — NW_Uckpa0001_01, NW_Uckpa0003_01
-**Последний фикс:** BAG_D_v3 — таймкод внутри предложения после auto_merge (очистка ts перед повторным inject)
+**Test audio:** Исаев (27.05) — NW_Uckpa0001_01, NW_Uckpa0001_02, NW_Uckpa0003_01
+**Последний фикс:** v17.20 — [?]-метки спорных сегментов + footer-реестр (txt_export.py)
 
 | Баг | Описание | Статус |
 |-----|----------|--------|

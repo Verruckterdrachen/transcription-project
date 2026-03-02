@@ -98,30 +98,81 @@ GUARD C: N-грамм sim ≥ 0.85 из ≥3 значимых слов с lookBE
 
 ---
 
-## BAG_E — speaker micro-fragment: короткая реплика журналиста → Исаев
-- **Статус:** 🔴 OPEN
-- **Файл:** NW_Uckpa0001_02 (NW_02)
-- **Таймкод:** 00:00:10
-- **Симптом:** "Исаев: В чем немецкая." — принадлежит журналисту
-- **Root cause:** pyannote назначил короткий (<1s) фрагмент SPEAKER_00, окружённый SPEAKER_01; speaker role assignment не скорректировал. Риск фикса: при быстром ping-pong спикер→журналист→спикер "island suppression" может удалить реальную реплику
-- **Этап пайплайна:** diarization (pyannote) → speaker role assignment
-- **Симуляция:** tests/simulations/sim_bug30_speaker_attribution.py
-- **Фикс:** island suppression ТОЛЬКО при: длительность <1.5s + текст <3 слов + оба соседа — один спикер
-- **Исправлено в версии:** —
+## BAG_E — speaker attribution FP: давайте + merged-диалог
+- **Статус:** ✅ FIXED v17.19–20
+- **Файл:** NW_Uckpa0001_02
+- **Таймкод:** 00:14:21 (MERGE #15)
+- **Симптом:** 5 реплик диалога (Исаев ↔ Журналист) слиты в один блок Журналиста; "Да, ну давайте еще раз." / "Да, давай." / "Ну, добавьте..." → все к Журналисту
+- **По аудио:** 5 отдельных реплик с паузами 0.1–0.3s чередуются между спикерами
+- **Root cause:** pyannote не разделил быстрый диалог → все в SPEAKER_01 → merge законно склеил → split не имеет сигналов смены (все предложения нейтральные) → `neutral → original_speaker = Журналист`. Дополнительно: `\bдавайте\b` давал Journalist=True на фразах Исаева
+- **Этап пайплайна:** diarization (паузы 0.1–0.3s) → MERGE #15 → split_mixed_speaker_segments → neutral path
+- **Симуляция:** tests/simulations/sim_bugE_davai_false_positive.py (PART1 GREEN, PART2 ожидаемо FAIL → см. BAG_E_v2)
 
----
+**FIX v17.19:** антипаттерн в `is_journalist_phrase`:
+```python
+r'\bдавайте\s+(я|мы|еще|ещё)\b'
+Файл: scripts/corrections/boundary_fixer.py
 
-## BAG_F — speaker attribution FP + timestamp inversion
-- **Статус:** ✅ FIXED v17.11
-- **Файл:** NW_Uckpa0001_03 (NW_03)
-- **Таймкод:** 00:15:59
-- **Симптом:** реплика Исаева атрибутирована как Журналист; после неё timestamp идёт назад (00:16:26 → 00:15:59)
-- **Root cause:** паттерн определения журналиста сработал на "формальный" зачин фразы (предположительно "Несмотря на..."); монотонность таймкодов не проверяется при экспорте
-- **Этап пайплайна:** speaker pattern matching → timestamp export
-- **Симуляция:** tests/simulations/sim_bug30_speaker_attribution.py (второй кейс)
-- **Фикс (два независимых):**
-  1. Добавить DEBUG лог "какое слово/признак решило атрибуцию"
-  2. При экспорте — проверка монотонности: если timestamp[n] < timestamp[n-1], заменить на prev + avg_delta
-- **Исправлено в версии:** v17.11
-- **Симуляция:** tests/simulations/sim_bug30_timestamp_scale.py (4/4 GREEN)
-- **FIX:** scale guard в insert_intermediate_timestamps() — порог 1.8
+FIX v17.20: [?]-метки в TXT — два триггера:
+
+micro-fragment: confidence < -0.25 AND ≤5 слов
+
+merged-диалог: confidence < -0.25 AND ≥3 предложений → ловит 00:14:21
+
+FIX: confidence теперь корректно переносится в all_segments dict (был потерян)
+
+Файл: scripts/export/txt_export.py
+
+Исправлено в версии: v17.19–20
+
+Проверено на: NW_Uckpa0001_02 — [?]-метка на 00:14:21 появилась ✅, footer-реестр корректен ✅
+
+BAG_E_v2 — split neutral-path: merged-диалог не разделяется
+Статус: 🔴 OPEN
+
+Файл: NW_Uckpa0001_02
+
+Таймкод: 00:14:21 (MERGE #15)
+
+Симптом: после [?]-метки блок виден в footer, но в TXT реплики по-прежнему в одном блоке Журналиста — автоматического split не происходит
+
+По аудио: "Да, ну давайте еще раз." / "Нет, не надо еще раз." / "Да, давай." / "Ну, добавьте..." → чередование Исаев↔Журналист
+
+Root cause: split_mixed_speaker_segments — neutral path всегда возвращает к original_speaker. В merged-блоке из быстрого диалога нет ни is_journalist_phrase=True, ни is_expert_phrase=True для коротких нейтральных реплик — все уходят к Журналисту
+
+Этап пайплайна: split_mixed_speaker_segments → neutral path logic
+
+Симуляция: tests/simulations/sim_bugE_davai_false_positive.py → PART2 FAIL (ожидаемо)
+
+Риски фикса: детектор чередующихся коротких реплик → высокий риск регрессии на монологах с короткими предложениями
+
+Воркэраунд: [?]-метка [merged] в TXT → ручная правка (v17.20)
+
+Исправлено в версии: —
+
+BAG_F — speaker attribution FP + timestamp inversion
+Статус: ✅ FIXED v17.11
+
+Файл: NW_Uckpa0001_03 (NW_03)
+
+Таймкод: 00:15:59
+
+Симптом: реплика Исаева атрибутирована как Журналист; после неё timestamp идёт назад (00:16:26 → 00:15:59)
+
+Root cause: паттерн определения журналиста сработал на "формальный" зачин фразы (предположительно "Несмотря на..."); монотонность таймкодов не проверяется при экспорте
+
+Этап пайплайна: speaker pattern matching → timestamp export
+
+Симуляция: tests/simulations/sim_bug30_speaker_attribution.py (второй кейс)
+
+Фикс (два независимых):
+
+Добавить DEBUG лог "какое слово/признак решило атрибуцию"
+
+При экспорте — проверка монотонности: если timestamp[n] < timestamp[n-1], заменить на prev + avg_delta
+
+Исправлено в версии: v17.11
+
+Симуляция: tests/simulations/sim_bug30_timestamp_scale.py (4/4 GREEN)
+
+FIX: scale guard в insert_intermediate_timestamps() — порог 1.8

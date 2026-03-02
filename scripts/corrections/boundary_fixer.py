@@ -21,32 +21,14 @@ import re
 from difflib import SequenceMatcher
 from core.utils import seconds_to_hms
 
-
 def is_journalist_phrase(text, context_words=0):
     """
-    🔥 v17.6: Проверяет, является ли фраза журналистской
-    
-    **FIX БАГ #25: Добавлена защита от цитационных оборотов**
-    
-    Если фраза содержит маркеры цитирования ("так и сказал", "товарищ сказал", 
-    "ответил, что"), то это НЕ журналистская фраза, а пересказ/цитата экспертом.
-    
-    **FIX БАГ #21, #24: Защита от false positive в монологах**
-    
-    Если context_words > 100, то паттерны «вы» и «давайте» игнорируются,
-    так как они могут быть частью цитируемой речи или косвенного пересказа.
-    
-    Args:
-        text: Текст для проверки
-        context_words: Количество слов, накопленных в текущем монологе
-    
-    Returns:
-        True если это журналистская фраза
+    🔧 v17.19: BAG_E FIX — добавлен антипаттерн 'давайте я/мы/еще/ещё'
+    🔥 v17.6: Защита от цитационных оборотов
+    🔥 v17.4: Защита от false positive в длинных монологах
     """
     text_lower = text.lower()
-    
-    # 🆕 v17.6: АНТИПАТТЕРН - Цитационные обороты (цитаты/пересказ)
-    # Если присутствует — автоматически НЕ журналист
+
     quotation_antipatterns = [
         r'\bтак и сказал\b',
         r'\bвот и сказал\b',
@@ -57,13 +39,14 @@ def is_journalist_phrase(text, context_words=0):
         r'\bцитирую\b',
         r'\bпо\s+его\s+словам\b',
         r'\bпо\s+их\s+словам\b',
+        # 🔧 v17.19: BAG_E — эксперт предлагает действие от себя/от нас
+        r'\bдавайте\s+(я|мы|еще|ещё)\b',
     ]
-    
+
     for pattern in quotation_antipatterns:
         if re.search(pattern, text_lower):
-            return False  # Это цитация, не журналист
-    
-    # 🔥 v17.4: Сильные паттерны - всегда срабатывают
+            return False
+
     strong_journalist_markers = [
         r'\bрасскажите\b',
         r'\bобъясните\b',
@@ -72,27 +55,21 @@ def is_journalist_phrase(text, context_words=0):
         r'\bчто\s+вы\b',
         r'\bсмотрим\b',
     ]
-    
     for marker in strong_journalist_markers:
         if re.search(marker, text_lower):
             return True
-    
-    # 🔥 v17.4: Слабые паттерны - игнорируются в длинных монологах
+
     weak_journalist_markers = [
         r'\bвы\s+(можете|могли|должны)?',
         r'\bдавайте\b',
     ]
-    
-    # Если контекст длинный (>100 слов) - не триггерим на слабые паттерны
     if context_words > 100:
         return False
-    
     for marker in weak_journalist_markers:
         if re.search(marker, text_lower):
             return True
-    
-    return False
 
+    return False
 
 def is_expert_phrase(text, speaker_surname):
     """
