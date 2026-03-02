@@ -126,8 +126,9 @@ git pull origin main
 Simulation GREEN ✅
 
 python scripts/transcribe.py на реальном аудио
+python scripts/validate.py   ← автоматические пункты 1,2,3,5,7
+Проверь 8 пунктов VALIDATION.md (4,6,8 — вручную)
 
-Проверь 8 пунктов VALIDATION.md
 
 ✅ Все GREEN → обнови VERSION.md + KNOWN-ISSUES.md + CHANGELOG.md
 
@@ -166,10 +167,13 @@ Git команды для коммита
 
 Подробный формат отправки → см. INTEGRATION-CHECKLIST.md раздел 2.8
 
-ЗАПУСК ПАЙПЛАЙНА
-bash
+## ЗАПУСК ПАЙПЛАЙНА
+
 cd scripts
-python transcribe.py
+python transcribe.py     ← основной пайплайн, результаты → test-results/latest/
+python validate.py        ← сразу после: автопроверка пунктов 1,2,3,5,7
+                            Если RED → чинить ДО ручных проверок 4,6,8
+
 Интерактивно:
 
 Путь к папке спикера (Спикер (ДД.ММ)/)

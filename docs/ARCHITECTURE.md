@@ -10,8 +10,15 @@
 Директории:
 
 - `scripts/`
-  - `transcribe.py` — главный entry‑point пайплайна
+  - `transcribe.py` — главный entry‑point пайплайна (оркестратор)
+  - `validate.py` — автоматическая проверка пунктов 1,2,3,5,7 из VALIDATION.md
+                    Запуск: `python scripts/validate.py` (автопоиск в test-results/latest/)
+                    или явно: `python scripts/validate.py file.json file.txt`
+                    ⚡ Запускать ПОСЛЕ каждого real test, ПЕРЕД ручными проверками 4,6,8
+  - `compare_snapshot.py` — сравнение снапшотов результатов (regression)
   - `core/` — базовые функции (диаризация, транскрибация, выравнивание, utils)
+    - `logging_utils.py` — TeeOutput, set_tee(), switch_log_phase()
+                           Импортируется в transcribe.py; НЕ трогать напрямую
   - `corrections/` — исправления текста, границ, спикеров, hallucinations
   - `merge/` — слияние, дедупликация и валидация сегментов
   - `export/` — экспорт JSON и TXT

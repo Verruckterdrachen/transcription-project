@@ -120,51 +120,31 @@ print(f"🧹 HALLUCINATION REMOVE: [{seg['time']}] "
 Половина времени ушла на то, чтобы понять, что текст обрезается именно на этапе
 insert_intermediate_timestamps() — до этого не было системных checkpoint'ов.
 
-4.1. Стандартная функция checkpoint'а
+### 4.1. Стандартная функция checkpoint'а (v17.19)
+
+Функция находится в `scripts/transcribe.py`.
+Параметризована через две модульные переменные — задай их в `main()` при отладке:
+
+```python
+# Задать в начале main() для конкретного бага:
+global _DEBUG_TARGET_TIMESTAMPS, _DEBUG_TARGET_PHRASE
+_DEBUG_TARGET_TIMESTAMPS = ["00:02:26"]        # нужные HH:MM:SS
+_DEBUG_TARGET_PHRASE     = "прорыв блокады"    # целевая фраза (или None)
+Для обычного прогона (без отладки конкретного бага) — оставить пустыми:
+
 python
-from core.utils import seconds_to_hms
+_DEBUG_TARGET_TIMESTAMPS = []
+_DEBUG_TARGET_PHRASE     = None
+Тогда debug_checkpoint выводит только счётчик сегментов на каждом этапе — без спама.
 
-def debug_checkpoint(segments, stage_name, target_timestamps=None):
-    """
-    v16.28: Стандартный checkpoint для всех этапов пайплайна.
+Сигнатура (не менять):
 
-    Показывает состояние segments на этапе stage_name.
-    Помогает локализовать, где пропал текст/фраза/спикер.
+python
+def debug_checkpoint(segments, stage_name,
+                     target_timestamps=None, target_phrase=None):
+Приоритет параметров: явные аргументы при вызове → модульные переменные.
+Это позволяет одновременно отлаживать два разных timestamp в разных частях пайплайна.
 
-    Args:
-        segments: список сегментов
-        stage_name: имя этапа (например, "AFTER MERGE")
-        target_timestamps: список строковых HH:MM:SS для целевой проверки
-    """
-    if target_timestamps is None:
-        target_timestamps = []
-
-    print(f"\n🔍 CHECKPOINT [{stage_name}]: {len(segments)} сегментов")
-
-    for target_ts in target_timestamps:
-        found = False
-        for seg in segments:
-            seg_start = seconds_to_hms(seg["start"])
-            seg_end   = seconds_to_hms(seg["end"])
-
-            if seg_start <= target_ts <= seg_end or seg_start == target_ts:
-                found = True
-                text     = seg.get("text", "")
-                duration = seg["end"] - seg["start"]
-
-                print(f"   ✅ {target_ts}: НАЙДЕН в [{seg_start}-{seg_end}] "
-                      f"(длит={duration:.1f}s, слов={len(text.split())})")
-
-                if len(text) > 120:
-                    print(f"      📝 Начало: \"{text[:60]}...\"")
-                    print(f"      📝 Конец:  \"...{text[-60:]}\"")
-                else:
-                    print(f"      📝 Текст: \"{text}\"")
-                break
-
-        if not found:
-            print(f"   ❌ {target_ts}: НЕ НАЙДЕН! "
-                  f"(возможно удалён на предыдущих этапах)")
 4.2. Где ОБЯЗАТЕЛЬНО вызывать checkpoint
 В process_audio_file():
 
@@ -185,6 +165,12 @@ debug_checkpoint(segments_merged, "AFTER TEXT CORRECTION")
 debug_checkpoint(segments_merged, "AFTER HALLUCINATION REMOVAL")
 debug_checkpoint(segments_merged, "AFTER AUTO-MERGE")            # если был auto-merge
 debug_checkpoint(segments_merged, "BEFORE EXPORT (FINAL)")
+
+```markdown
+Правило v17.19:
+Для обычного прогона все 14 checkpoint'ов выводят только счётчики — это бесплатно.
+Для отладки конкретного бага — задать _DEBUG_TARGET_TIMESTAMPS в main().
+Не удалять checkpoint'ы после закрытия бага.
 Правило v16.28:
 Если функция меняет seg["text"] или границы (start / end), checkpoint обязателен сразу после неё.
 

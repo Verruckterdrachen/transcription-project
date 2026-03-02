@@ -23,9 +23,11 @@
 - ❌ Описание «РЕШЕНО» — может быть ещё RED
 - ❌ Git команды — коммит ПОСЛЕ GREEN
 
-### Шаг 2: ПОСЛЕ REAL TEST GREEN (AI → человек)
+⚡ Сначала ты запускаешь:
+  python scripts/validate.py   ← пункты 1,2,3,5,7 должны быть GREEN
+  (пункты 4,6,8 — вручную по VALIDATION.md)
 
-Присылаю **ДОКУМЕНТАЦИЮ + GIT**:
+Затем AI присылает ДОКУМЕНТАЦИЮ + GIT:
 - ✅ `docs/VERSION.md` (полностью, ~30 строк)
 - ✅ `docs/KNOWN-ISSUES.md` (полностью)
 - ✅ `docs/CHANGELOG.md` (только новый блок — prepend в начало)
@@ -132,6 +134,8 @@ text
 - [ ] Debug checkpoints на всех text-критичных этапах
 - [ ] При текстовом баге: симуляция GREEN
 - [ ] ⚠️ REAL TEST выполнен и GREEN
+- [ ] ⚠️ `python scripts/validate.py` — GREEN (пункты 1,2,3,5,7)
+- [ ] Пункты 4,6,8 VALIDATION.md — проверены вручную
 - [ ] ⚠️ VERSION.md обновлён ПОСЛЕ GREEN test
 - [ ] KNOWN-ISSUES.md обновлён
 - [ ] CHANGELOG.md — новый блок prepend
