@@ -11,7 +11,7 @@ category_id,category_name,url,status_code,content_type,parseable,priority,notes
 1,СОВЕТСКИЕ КОМАНДИРЫ,https://rt82.ru/en/security/kurskaya-bitva-sobytiya-kratko-spisok-komanduyushchih-frontami-i-suhoputnymi-armiyami-prinimavshimi-uchastie,200,text/html,requests+bs4,LOW,
 1,СОВЕТСКИЕ КОМАНДИРЫ,http://militera.lib.ru/enc/komandarmy/index.html,200,text/html,requests+bs4,HIGH,
 1,СОВЕТСКИЕ КОМАНДИРЫ,http://militera.lib.ru/enc/zalessky_ka05/index.html,200,text/html,requests+bs4,HIGH,
-1,СОВЕТСКИЕ КОМАНДИРЫ,https://ru.wikipedia.org/wiki/Герой_Советского_Союза,200,text/html,requests+bs4,MED,
+1,СОВЕТСКИЕ КОМАНДИРЫ,https://ru.wikipedia.org/wiki/Список_Героев_Советского_Союза,200,text/html,requests+bs4,MED,
 1,СОВЕТСКИЕ КОМАНДИРЫ,https://en.wikipedia.org/wiki/Hero_of_the_Soviet_Union,200,text/html,requests+bs4,MED,
 1,СОВЕТСКИЕ КОМАНДИРЫ,https://ru.wikipedia.org/wiki/Список_дважды_Героев_Советского_Союза,404,text/html,dead,MED,
 1,СОВЕТСКИЕ КОМАНДИРЫ,https://ru.wikipedia.org/wiki/Список_трижды_Героев_Советского_Союза,404,text/html,dead,MED,
