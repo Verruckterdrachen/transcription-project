@@ -1,0 +1,82 @@
+# Vocab Module — История версий
+
+## v17.21 (2026-03-04) — wiki_parser.py ✅
+
+### Добавлено
+- `scripts/vocab/utils.py` — инфраструктура (rate limit, cache, retry)
+- `scripts/vocab/parsers/__init__.py`
+- `scripts/vocab/parsers/base_parser.py` — Template Method
+- `scripts/vocab/parsers/wiki_parser.py` — Wikipedia ru+en
+
+### wiki_parser — ключевые решения
+- Три стратегии: wikitable → ul/li → h2/h3
+- `_clean_term()`: убирает [[...]], сноски[1], скобки с рус. текстом
+- `_normalize_caps()`: ЖУКОВ → Жуков, но ГДР/СССР ≤4 chr не трогать
+- en.wikipedia:
+  - Primary: кириллица из скобок "(Георгий Жуков)"
+  - Secondary: латиница ТОЛЬКО техника/аббревиатуры (Panzer-IV, StuG)
+  - Discard: транслитерации (Georgy Zhukov)
+- `_is_useful_latin()`: фильтр латиницы (цифры + буквы, римские, не стоп-слова)
+
+### Real test результаты
+- `ru/Список_Маршалов_Советского_Союза` → 42 термина ✅
+- `en/Marshal_of_the_Soviet_Union` → 0 (нет кириллицы — ожидаемо)
+- `ru/Герой_Советского_Союза` → 61 ✅
+
+### Симуляции
+- `tests/simulations/sim_utils_base.py` — 14/14 GREEN
+- `tests/simulations/sim_bug_wiki_parser.py` — 60/60 GREEN
+
+### Документация
+- `docs/vocab/README.md` — входная точка
+- `docs/vocab/ARCHITECTURE.md` — структура, этапы 0-4
+- `docs/vocab/PARSERS.md` — как писать парсеры
+- `docs/vocab/URL_AUDIT.md` — работа с url_audit.csv
+- `docs/vocab/WORKFLOW.md` — полный цикл URL → dict → Whisper
+
+### Коммит
+🔧 v17.21: ADD wiki_parser [real test 3 URLs] - Wikipedia ru+en parser
+
+---
+
+## v17.22 (planned) — militera_parser.py
+
+### План
+- Двухуровневый crawler (index.html + chapters)
+- Level 0: автор + TOC (топонимы из названий глав)
+- Level 1: 4 паттерна без NER (rank+name, quotes, units, cap-sequences)
+- Real test: isaev_av3, rokossovsky → ~500 терминов/книга
+- Симуляция: `sim_militera_parser.py`
+
+---
+
+## v17.23 (planned) — rkka_parser.py
+
+### План
+- Парсинг таблиц командиров, списков операций
+- Real test: `rkka.ru/oper.htm`, `rkka.ru/hist/f.htm`
+
+---
+
+## v17.24 (planned) — run_all_parsers.py
+
+### План
+- Оркестратор: читает url_audit.csv → выбирает парсер → батч-парсинг
+- CLI: `--all`, `--priority HIGH`, `--categories 1,5`, `--parsers wiki`
+- Логирование: прогресс + ошибки
+
+---
+
+## Backlog
+
+- [ ] `iremember_parser.py` (воспоминания ветеранов)
+- [ ] `api_parser.py` (pamyat-naroda, podvignaroda, rate 0.5 req/s)
+- [ ] `pdf_parser.py` (PyMuPDF для PDF-словарей)
+- [ ] `build_raw_dicts.py` (Этап 2)
+- [ ] `clean_dicts.py` (Этап 3)
+- [ ] `load_vocab.py` (Этап 4A)
+- [ ] `correct.py` (Этап 4B, 4-слойная постобработка)
+
+---
+
+**Последнее обновление:** 2026-03-04
