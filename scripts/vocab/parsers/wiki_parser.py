@@ -122,7 +122,7 @@ def _clean_term(raw: str) -> str | None:
         return None
     if _RE_DIGITS_ONLY.match(t):
         return None
-    if not re.search(r"[А-ЯA-Za-zёЁ]", t):
+    if not re.search(r"[А-ЯЁа-яёA-Za-z]", t):
         return None
 
     # БАГ 1 FIX: нормализуем КАПСЛОК
