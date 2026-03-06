@@ -1,5 +1,26 @@
 # Vocab Module — История версий
 
+## v17.23 (2026-03-06) — rkka_parser.py ✅
+
+### Добавлено
+- `scripts/vocab/parsers/rkka_parser.py` — двухуровневый crawler rkka.ru
+- `tests/simulations/sim_rkka_parser.py` — 27/27 GREEN
+
+### rkka_parser — ключевые решения
+- Кодировка windows-1251 явно (не autodetect)
+- Level 0: текст ссылок (названия операций) + заголовки разделов из <td>
+- Level 1: таблицы + rank_names + unit_names + quoted_terms (импорт из militera_parser)
+- _is_content_link(): фильтр по .htm/.html, без внешних доменов/якорей/CSS
+- _clean_link_text(): фильтр кириллицы + стоп-слова начала строки
+- MAX_PAGES=60, rate limit 2 сек/запрос
+- Баги найденные в симуляции: _clean_link_text без проверки кириллицы (FIX), _extract_quoted_terms не вызывался (FIX)
+
+### Real test результаты
+- `http://rkka.ru/oper.htm` → 3486 терминов ✅
+
+### Симуляция
+- `tests/simulations/sim_rkka_parser.py` — 27/27 GREEN
+
 ## 2026-03-05
 
 ### FIX: wiki_parser._clean_term — строчная кириллица

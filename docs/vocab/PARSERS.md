@@ -233,5 +233,36 @@ python scripts/vocab/parsers/my_parser.py --url "..." --category X
 
 ✅ GREEN → обновить docs → коммит
 
-Версия: v17.21
-Последнее обновление: 2026-03-04
+## 3. rkka_parser.py — rkka.ru (готов v17.23)
+
+Двухуровневый crawler:
+
+**Level 0 — directory page (oper.htm, hist/f.htm итд):**
+- Текст ссылок → названия операций/статей (`_extract_level0_link_texts()`)
+- Заголовки разделов из `<td>` без href (`_extract_table_cells()`)
+- `_clean_link_text()`: фильтр кириллицы + стоп-слова начала строки (В, На, За...)
+- Выход: ~50–80 терминов
+
+**Level 1 — страницы операций (max 60 страниц):**
+- 3 стратегии:
+  1. `_extract_table_cells()`: scan `<td>` (командиры, формирования, данные)
+  2. `_extract_rank_names()`: звание + ФИО (импорт из `militera_parser`)
+  3. `_extract_unit_names()`: формирования всех падежей (импорт из `militera_parser`)
+  4. `_extract_quoted_terms()`: текст в `«»` (импорт из `militera_parser`)
+- Выход: ~20–50 терминов/страница
+
+**Итого:** ~500–1500 терминов/директория
+
+**Особенности:**
+- Кодировка `windows-1251` явно (не autodetect — сайт 2000-х годов)
+- `_is_content_link()`: фильтр `.htm/.html`, без внешних доменов / якорей / CSS/JS
+- Дубли URL на index-странице снимаются через `seen` set в `_get_page_urls()`
+- SSL: `verify=False` (через `utils.py`)
+- Rate limit: 2 сек/запрос
+
+**Real test результаты:**
+- `http://rkka.ru/oper.htm` → 3486 терминов ✅
+- Симуляция: `tests/simulations/sim_rkka_parser.py` (27/27 GREEN)
+
+Версия: v17.23
+Последнее обновление: 2026-03-06
