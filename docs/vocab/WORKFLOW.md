@@ -1,3 +1,6 @@
+Вот полностью обновлённый WORKFLOW.md:
+
+text
 # Vocab Module — Полный цикл работы
 
 ## 🔄 Workflow: От URL до Whisper
@@ -10,11 +13,11 @@ data/parsed/{category}/{domain}.txt ← Этап 0
 ↓
 build_raw_dicts.py
 ↓
-data/raw_dicts/base_.txt ← Этап 2
+data/raw_dicts/combined_all.txt ← Этап 2
 ↓
 clean_dicts.py
 ↓
-data/final_dicts/base_.txt ← Этап 3
+data/final_dicts/combined_all.txt ← Этап 3
 ↓
 load_vocab.py
 ↓
@@ -97,71 +100,83 @@ bash
 python scripts/vocab/run_all_parsers.py --priority HIGH
 58 URL, ~12 минут.
 
-5. Объединить в сырые словари
+5. Объединить в сырой словарь
 bash
 python scripts/vocab/build_raw_dicts.py
 Что делает:
 
-Читает все data/parsed/{1..13}/*.txt
+Рекурсивно читает все data/parsed/{1..16}/*.txt
 
-Объединяет файлы одной категории
+Объединяет в один файл (без категоризации)
 
-Сохраняет в data/raw_dicts/base_*.txt
+Сохраняет дубли между доменами (удалятся на этапе 3)
 
-Маппинг: см. таблицу в URL_AUDIT.md.
+Логирует пустые файлы + детальную статистику
 
 Результат:
 
 text
-data/raw_dicts/
-├── base_ussr_commanders.txt    ← категория 1
-├── base_operations.txt         ← категория 5
-├── base_toponyms.txt           ← категория 7
-...
+data/raw_dicts/combined_all.txt  ← 159,340 строк (с дублями между доменами)
 Проверка:
 
 bash
-wc -l data/raw_dicts/*.txt
-Ожидаемо: 2500–3500 строк (с дублями между доменами).
+wc -l data/raw_dicts/combined_all.txt
+head -50 data/raw_dicts/combined_all.txt
+Ожидаемо: 150,000–200,000 строк (зависит от кол-ва распарсенных URL).
 
 6. Очистить и дедуплицировать
 bash
 python scripts/vocab/clean_dicts.py
-Что делает:
+Что делает (6 слоёв фильтрации):
 
-Case-insensitive дедупликация (сохраняет вариант с большими буквами)
+Длина: 3-100 символов
 
-Убирает короткие термины (< 3 символа)
+Стоп-слова: местоимения, союзы, предлоги, наречия, Wikipedia-шаблоны (~150 слов)
 
-Фильтрует стоп-слова ("Глава", "Часть", "Раздел")
+Префиксы предложений: глаголы прош. времени ("был", "начал"), наречия ("только", "уже")
 
-Нормализует пробелы
+Родительный падеж: "Германии было важно" → REJECT (окончания: -ии, -ей, -ов, -ям)
 
-Сортирует по частоте (термины из >1 источника → приоритет)
+Паттерны: HTML, URL, даты, глаголы в середине строки (regex)
+
+Дедупликация: case-insensitive с сохранением Title Case
 
 Результат:
 
 text
-data/final_dicts/
-├── base_ussr_commanders.txt    ← 200–300 уникальных
-├── base_operations.txt         ← 100–150
-├── base_toponyms.txt           ← 150–200
-...
+data/final_dicts/combined_all.txt  ← 85,904 уникальных термина (46% сокращение)
 Проверка:
 
 bash
-wc -l data/final_dicts/*.txt
-diff data/raw_dicts/base_ussr_commanders.txt data/final_dicts/base_ussr_commanders.txt | head
-Ожидаемо: ~20–30% сокращение (дедупликация).
+wc -l data/final_dicts/combined_all.txt
+head -100 data/final_dicts/combined_all.txt
+
+# Проверка важных терминов
+grep -i 'цитадель' data/final_dicts/combined_all.txt
+grep -i 'багратион' data/final_dicts/combined_all.txt
+grep -i 'днепр' data/final_dicts/combined_all.txt
+
+# Проверка дублей (должно быть пусто)
+sort -f data/final_dicts/combined_all.txt | uniq -di
+Статистика (пример):
+
+text
+Входных терминов:        159,340
+После фильтрации:        138,014
+После дедупликации:      85,904
+Отклонено (общее):       21,326
+  - род. падеж:          12,222
+  - другое:              9,104
+Дубликатов удалено:      52,110
+Итоговое сокращение:     46.1%
+Ожидаемо: ~80,000–100,000 уникальных терминов.
 
 7. Собрать hotwords для Whisper
 bash
 python scripts/vocab/load_vocab.py
 Что делает:
 
-Читает все data/final_dicts/*.txt
-
-Объединяет в один файл
+Читает data/final_dicts/combined_all.txt
 
 Добавляет веса (частотность → boost)
 
@@ -204,6 +219,7 @@ Context-aware (биграммы, титулы + имена)
 Быстрый путь (только новые URL)
 bash
 # 1. Добавь URL в url_audit.csv
+
 # 2. Парсинг только этого URL
 python scripts/vocab/parsers/wiki_parser.py \
     --url "https://..." --category X
@@ -236,14 +252,17 @@ wc -l data/raw_dicts/*.txt     # после объединения
 wc -l data/final_dicts/*.txt   # после очистки
 2. Образцы терминов
 bash
-# Первые 20 терминов из категории КОМАНДИРЫ
-head -20 data/final_dicts/base_ussr_commanders.txt
+# Первые 100 терминов
+head -100 data/final_dicts/combined_all.txt
+
+# Случайная выборка
+shuf -n 50 data/final_dicts/combined_all.txt
 
 # Поиск конкретного термина
-grep -i "жуков" data/final_dicts/base_ussr_commanders.txt
+grep -i "жуков" data/final_dicts/combined_all.txt
 3. Дубли (не должно быть после clean)
 bash
-sort data/final_dicts/base_ussr_commanders.txt | uniq -d
+sort -f data/final_dicts/combined_all.txt | uniq -di
 Ожидаемо: пустой вывод.
 
 4. Мусор
@@ -251,12 +270,18 @@ bash
 # Короткие термины (< 3 chr)
 awk 'length($0) < 3' data/final_dicts/*.txt
 
-# Цифры
+# Только цифры
 grep -E '^[0-9]+$' data/final_dicts/*.txt
 
 # HTML-теги
 grep -E '<[^>]+>' data/final_dicts/*.txt
-Ожидаемо: пустой вывод.
+
+# Предложения (>80 символов)
+awk 'length($0) > 80' data/final_dicts/*.txt | head -20
+
+# Родительный падеж в начале строки
+grep -E '^[А-ЯЁ][а-яё]+(ии|ей|ов|ям) ' data/final_dicts/*.txt | head -20
+Ожидаемо: пустой вывод или минимальное кол-во строк.
 
 🚨 Частые проблемы
 1. Парсер падает с SSL error
@@ -280,7 +305,18 @@ grep -E '<[^>]+>' data/final_dicts/*.txt
 
 Решение: это нормально, clean_dicts.py удалит дубли на этапе 3.
 
-4. Rate limit 429 Too Many Requests
+4. Много мусора после clean_dicts.py
+Симптом: в final_dicts/ остались предложения, фрагменты текста.
+
+Решение:
+
+Проверь образцы: shuf -n 50 data/final_dicts/combined_all.txt
+
+Если мусора >20% — добавь фильтры в clean_dicts.py (STOPWORDS, PATTERNS_TO_REJECT)
+
+Или используй load_vocab.py с white-list паттернами (следующий этап)
+
+5. Rate limit 429 Too Many Requests
 Причина: слишком быстрый парсинг.
 
 Решение: увеличить интервал в utils.py:
@@ -290,5 +326,11 @@ RATE_LIMITS = {
     "wikipedia.org": 2.0,  # было 1.0
     "militera.lib.ru": 3.0,  # было 2.0
 }
-Версия: v17.21
-Последнее обновление: 2026-03-04
+📈 Ожидаемые объёмы данных
+Этап	Файл	Объём (строк)	Качество
+0. Парсинг	data/parsed/*/*.txt	150,000–200,000	⭐ (много мусора)
+2. Объединение	data/raw_dicts/combined_all.txt	150,000–200,000	⭐ (дубли + мусор)
+3. Очистка	data/final_dicts/combined_all.txt	80,000–100,000	⭐⭐⭐ (чисто, но есть мусор)
+4A. Hotwords	data/hotwords/combined_vocab.txt	80,000–100,000	⭐⭐⭐ (для Whisper)
+Версия: v17.24
+Последнее обновление: 2026-03-06

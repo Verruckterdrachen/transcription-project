@@ -1,12 +1,12 @@
-# Version: v17.20
-# Last updated: 2026-03-02
+# Version: v17.24
+# Last updated: 2026-03-06
 # Status: STABLE ✅
 
 ## 🎯 Текущее состояние
 
-**Base:** v17.0 BASELINE
-**Test audio:** Исаев (27.05) — NW_Uckpa0001_01, NW_Uckpa0001_02, NW_Uckpa0003_01
-**Последний фикс:** v17.20 — [?]-метки спорных сегментов + footer-реестр (txt_export.py)
+**Base:** v17.0 BASELINE  
+**Test audio:** Исаев (27.05) — NW_Uckpa0001_01, NW_Uckpa0001_02, NW_Uckpa0003_01  
+**Последний фикс:** v17.24 — build_raw_dicts + clean_dicts (vocab module, 159K→86K терминов)
 
 | Баг | Описание | Статус |
 |-----|----------|--------|
