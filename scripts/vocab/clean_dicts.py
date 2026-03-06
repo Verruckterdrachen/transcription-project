@@ -2,7 +2,12 @@
 """
 scripts/vocab/clean_dicts.py
 
-Очистка и дедупликация сырого словаря (щадящий режим + фильтр родительного падежа).
+Очистка и дедупликация сырого словаря (щадящий режим + усиленные фильтры).
+
+Изменения в v17.X:
+- Фильтр английских дат (1 April 1942)
+- Расширенный фильтр глаголов в середине фразы
+- Улучшенный фильтр родительного падежа для воинских частей
 
 Usage:
     python scripts/vocab/clean_dicts.py
@@ -98,14 +103,27 @@ PATTERNS_TO_REJECT = [
     re.compile(r"[<>{}()\[\]]"),
     re.compile(r"https?://"),
     re.compile(r"^\W+$"),
+    # РАСШИРЕННЫЙ: фразы с глаголами
     re.compile(
         r"\b(напомнил|приходилось|поинтересовался|улыбнулся|"
         r"пишут|писал|говорил|сказал|ответил|спросил|"
         r"видел|слышал|знал|думал|считал|полагал|"
-        r"надеялось|продолжал|продолжали|оказывал|оказывали)\b",
+        r"надеялось|продолжал|продолжали|оказывал|оказывали|"
+        r"принял|вскоре|встревожило|изумило|вызывал|"
+        r"доложил|сообщал|сообщила|вышли|гласила)\b",
         re.IGNORECASE
     ),
-    re.compile(r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4}"),
+    # НОВОЕ: английские даты (1 April 1942)
+    re.compile(
+        r"\b\d{1,2}\s+(January|February|March|April|May|June|"
+        r"July|August|September|October|November|December)\s+\d{4}\b",
+        re.IGNORECASE
+    ),
+    # НОВОЕ: английские сокращения дат (1 Apr 1942)
+    re.compile(
+        r"\b\d{1,2}\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4}\b",
+        re.IGNORECASE
+    ),
 ]
 
 # ─────────────────────────────────────────────
@@ -122,13 +140,14 @@ def normalize_term(term: str) -> str:
 def is_genitive_fragment(term: str) -> bool:
     """
     Проверяет, является ли строка фрагментом предложения
-    с родительным падежом в начале.
+    с родительным падежом в начале или конце.
     
     Примеры:
     - "Германии было важно" → True (REJECT)
-    - "Германии актов" → True (REJECT)
+    - "1-го Белорусского фронта" → True (REJECT)
+    - "Г.К. Жукова" → True (REJECT, фамилия в род. падеже)
     - "Германия" → False (OK, одно слово)
-    - "Германский фронт" → False (OK, не родительный падеж)
+    - "1-й Белорусский фронт" → False (OK, именительный падеж)
     
     Args:
         term: проверяемая строка
@@ -142,6 +161,10 @@ def is_genitive_fragment(term: str) -> bool:
     if len(words) == 1:
         return False
     
+    # ═══════════════════════════════════════════════════════════
+    # ПРОВЕРКА 1: Родительный падеж в начале (первое слово)
+    # ═══════════════════════════════════════════════════════════
+    
     first_word = words[0].lower()
     
     # Окончания родительного падежа
@@ -149,26 +172,19 @@ def is_genitive_fragment(term: str) -> bool:
     
     if first_word.endswith(genitive_endings):
         # Исключения: известные страны/регионы в родительном падеже
-        # могут быть частью валидного термина
         known_genitives = {
             "германии", "италии", "франции", "польши", "румынии",
             "венгрии", "австрии", "чехословакии", "югославии",
             "финляндии", "норвегии", "швеции", "испании",
         }
         
-        # Если это известная страна в род. падеже + ещё слова
-        # проверяем второе слово
         if first_word in known_genitives:
-            # "Германии войска" — может быть валидным
-            # "Германии было важно" — точно мусор (есть глагол)
-            
             # Проверяем второе слово на глаголы
             if len(words) > 1:
                 second_word = words[1].lower()
-                # Типичные глаголы в прошедшем времени
                 verb_markers = (
                     "был", "была", "было", "были", "стал", "начал",
-                    "пошел", "имел", "мог", "должен", "может", "может",
+                    "пошел", "имел", "мог", "должен", "может",
                 )
                 if second_word in verb_markers:
                     return True  # REJECT
@@ -176,18 +192,50 @@ def is_genitive_fragment(term: str) -> bool:
             # Неизвестное слово в род. падеже + другие слова = фрагмент
             return True
     
+    # ═══════════════════════════════════════════════════════════
+    # ПРОВЕРКА 2: Родительный падеж воинских частей
+    # ═══════════════════════════════════════════════════════════
+    
+    # Паттерн: "1-го Белорусского фронта" → REJECT
+    # Валидный: "1-й Белорусский фронт" → OK
+    
+    # Ловим "1-го/2-го/N-го" или "1-й/2-й" в начале
+    if re.match(r"^\d+-го\b", first_word, re.IGNORECASE):
+        # Это родительный падеж воинской части
+        return True
+    
+    # ═══════════════════════════════════════════════════════════
+    # ПРОВЕРКА 3: Фамилии в родительном падеже (Жукова, Конева)
+    # ═══════════════════════════════════════════════════════════
+    
+    # Паттерн: инициалы + фамилия в род. падеже
+    # "Г.К. Жукова" → REJECT, "Г.К. Жуков" → OK
+    
+    last_word = words[-1]
+    
+    # Фамилии в род. падеже обычно заканчиваются на -а/-я
+    if len(words) >= 2 and re.match(r"^[А-ЯЁ]\.[А-ЯЁ]\.$", first_word):
+        # Это инициалы (Г.К.)
+        if last_word.endswith(("ова", "ева", "ина", "ына", "ёва")):
+            # Фамилия в род. падеже
+            return True
+    
+    # Также ловим случаи "1-го Украинского фронта" (окончание -ого/-его)
+    if any(word.lower().endswith(("ого", "его")) for word in words):
+        return True
+    
     return False
 
 
 def is_valid_term(term: str) -> bool:
     """
-    Проверяет валидность термина (щадящий режим + фильтр род. падежа).
+    Проверяет валидность термина (щадящий режим + усиленные фильтры).
     """
     # 1. Длина
     if len(term) < MIN_LENGTH or len(term) > MAX_LENGTH:
         return False
     
-    # 2. Паттерны (HTML, URL, глаголы)
+    # 2. Паттерны (HTML, URL, глаголы, английские даты)
     for pattern in PATTERNS_TO_REJECT:
         if pattern.search(term):
             return False
@@ -201,7 +249,7 @@ def is_valid_term(term: str) -> bool:
     if first_word in SENTENCE_STARTERS:
         return False
     
-    # 5. НОВОЕ: Фильтр родительного падежа
+    # 5. Фильтр родительного падежа
     if is_genitive_fragment(term):
         return False
     
@@ -265,7 +313,8 @@ def clean_dictionary(input_path: Path, output_path: Path) -> dict[str, int]:
         "after_filter": 0,
         "after_dedup": 0,
         "rejected": 0,
-        "genitive_fragments": 0,  # НОВОЕ
+        "genitive_fragments": 0,
+        "english_dates": 0,  # НОВОЕ
     }
     
     logger.info(f"Загружено терминов: {stats['input']:,}")
@@ -275,12 +324,27 @@ def clean_dictionary(input_path: Path, output_path: Path) -> dict[str, int]:
     
     valid_terms = []
     rejected_samples = []
-    genitive_samples = []  # НОВОЕ: примеры фрагментов с род. падежом
+    genitive_samples = []
+    english_date_samples = []  # НОВОЕ
     
     for term in raw_terms:
         normalized = normalize_term(term)
         
-        # Проверка на род. падеж отдельно (для статистики)
+        # Проверка на английские даты (для статистики)
+        english_date_pattern = re.compile(
+            r"\b\d{1,2}\s+(January|February|March|April|May|June|"
+            r"July|August|September|October|November|December|"
+            r"Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4}\b",
+            re.IGNORECASE
+        )
+        if english_date_pattern.search(normalized):
+            stats["english_dates"] += 1
+            if len(english_date_samples) < 5:
+                english_date_samples.append(normalized)
+            stats["rejected"] += 1
+            continue
+        
+        # Проверка на род. падеж (для статистики)
         if is_genitive_fragment(normalized):
             stats["genitive_fragments"] += 1
             if len(genitive_samples) < 5:
@@ -300,9 +364,12 @@ def clean_dictionary(input_path: Path, output_path: Path) -> dict[str, int]:
     logger.info(f"После фильтрации: {stats['after_filter']:,}")
     logger.info(f"Отклонено (общее): {stats['rejected']:,}")
     logger.info(f"  из них род. падеж: {stats['genitive_fragments']:,}")
+    logger.info(f"  из них английские даты: {stats['english_dates']:,}")
     
     if genitive_samples:
         logger.info(f"Примеры род. падежа: {genitive_samples}")
+    if english_date_samples:
+        logger.info(f"Примеры английских дат: {english_date_samples}")
     if rejected_samples:
         logger.info(f"Примеры другого мусора: {rejected_samples[:5]}")
     
@@ -329,7 +396,7 @@ def main() -> None:
     logger = setup_logger(__name__)
     
     logger.info("=" * 60)
-    logger.info("ОЧИСТКА СЛОВАРЯ (ЩАДЯЩИЙ + ФИЛЬТР РОД. ПАДЕЖА)")
+    logger.info("ОЧИСТКА СЛОВАРЯ (ЩАДЯЩИЙ + УСИЛЕННЫЕ ФИЛЬТРЫ)")
     logger.info("=" * 60)
     
     if not INPUT_FILE.exists():
@@ -348,7 +415,8 @@ def main() -> None:
     logger.info(f"После дедупликации:      {stats['after_dedup']:,}")
     logger.info(f"Отклонено (общее):       {stats['rejected']:,}")
     logger.info(f"  - род. падеж:          {stats['genitive_fragments']:,}")
-    logger.info(f"  - другое:              {stats['rejected'] - stats['genitive_fragments']:,}")
+    logger.info(f"  - английские даты:     {stats['english_dates']:,}")
+    logger.info(f"  - другое:              {stats['rejected'] - stats['genitive_fragments'] - stats['english_dates']:,}")
     logger.info(f"Дубликатов удалено:      {stats['after_filter'] - stats['after_dedup']:,}")
     logger.info(f"Итоговое сокращение:     {100 * (stats['input'] - stats['after_dedup']) / stats['input']:.1f}%")
     logger.info("=" * 60)
@@ -357,9 +425,9 @@ def main() -> None:
     logger.info("")
     logger.info("💡 Проверь качество:")
     logger.info(f"   head -100 {OUTPUT_FILE}")
-    logger.info(f"   grep -i 'германии' {OUTPUT_FILE}")
-    logger.info(f"   grep -i 'цитадель' {OUTPUT_FILE}")
-    logger.info(f"   grep -i 'багратион' {OUTPUT_FILE}")
+    logger.info(f"   grep -i 'жуков$' {OUTPUT_FILE}  # только именительный падеж")
+    logger.info(f"   grep -i 'april' {OUTPUT_FILE}  # должно быть пусто")
+    logger.info(f"   grep -i '1-го' {OUTPUT_FILE}  # должно быть пусто")
     logger.info("")
     logger.info("Следующий шаг: python scripts/vocab/load_vocab.py")
 
