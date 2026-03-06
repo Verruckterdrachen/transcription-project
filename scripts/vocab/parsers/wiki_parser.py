@@ -5,14 +5,12 @@ scripts/vocab/parsers/wiki_parser.py
 
 Стратегия:
   1. Wikipedia REST API (action=parse&prop=text) → чистый HTML
-  2. Три режима извлечения: wikitable → ul/li → h2/h3
-  3. Нормализация: убираем [[...]], сноски[1], скобки кроме латиницы
-  4. Язык определяется автоматически из домена URL
-  5. en.wikipedia: primary=кириллица из ячеек, secondary=латиница
+  2. ru.wikipedia: structure (wikitable → ul/li → h2/h3) + NARRATIVE (rank_names, unit_names, quoted)
+  3. en.wikipedia: cyrillic_from_cells + useful_latin (техника/аббревиатуры)
+  4. Нормализация: убираем [[...]], сноски[1], скобки кроме латиницы
+  5. Язык определяется автоматически из домена URL
 
-FIX A: _extract_from_tables — сканирует cells[0..2], берёт первый валидный
-FIX B: extract_terms — для en.wikipedia сначала ищет кириллицу,
-        латиница сохраняется в отдельный файл _en.txt
+FIX V3: добавлена _extract_narrative_terms() для статей-повествований (операции, битвы)
 
 Запуск:
   python scripts/vocab/parsers/wiki_parser.py \
@@ -68,11 +66,10 @@ _RE_PARENS_KEEP = re.compile(r"\([A-Za-z][^()]*?\)")
 _RE_DIGITS_ONLY = re.compile(r"^\d[\d\s\-–—.,]*$")
 _RE_SPACES      = re.compile(r"\s{2,}")
 _RE_HTML_ENTITY = re.compile(r"&[a-zA-Z]+;|&#\d+;")
-_RE_CYRILLIC    = re.compile(r"[А-ЯЁа-яё]{2,}")  # FIX B: детектор кириллицы
+_RE_CYRILLIC    = re.compile(r"[А-ЯЁа-яё]{2,}")
 
 _NOISE_TAGS = ["sup", "span.reference", "span.mw-editsection"]
 
-# Максимум столбцов таблицы для сканирования (FIX A)
 _MAX_COL_SCAN = 3
 
 # ─────────────────────────────────────────────
@@ -125,7 +122,6 @@ def _clean_term(raw: str) -> str | None:
     if not re.search(r"[А-ЯЁа-яёA-Za-z]", t):
         return None
 
-    # БАГ 1 FIX: нормализуем КАПСЛОК
     t = _normalize_caps(t)
 
     return t
@@ -169,14 +165,12 @@ _RE_ROMAN_NUM  = re.compile(r"\b(I{1,3}|IV|VI{0,3}|IX|X{1,3}XI{0,2}|XII)\b")
 _RE_ALL_LATIN = re.compile(r"^[A-Za-z\d\s\-\.\/]+$")
 
 
-# Служебные слова en.wikipedia — не техника
 _LATIN_STOPWORDS = {
     "timeline", "bibliography", "contents", "references", "notes",
     "see also", "further reading", "external links", "gallery",
     "sources", "footnotes", "appendix", "index", "overview",
 }
 
-# Строки состоящие только из цифр, пробелов, "and" — это годы/диапазоны
 _RE_YEARS_RANGE = re.compile(r"^[\d\s\-–andto]+$", re.IGNORECASE)
 
 
@@ -194,23 +188,18 @@ def _is_useful_latin(term: str) -> bool:
     if not _RE_ALL_LATIN.match(term):
         return False
 
-    # БАГ 2 FIX (a): исключаем служебные слова
     if term.lower().strip() in _LATIN_STOPWORDS:
         return False
 
-    # БАГ 2 FIX (b): исключаем строки из цифр/годов без букв-индексов
     if _RE_YEARS_RANGE.match(term):
         return False
 
-    # Цифры + буквы → техника (Panzer-IV, Bf-109)
     if _RE_HAS_DIGIT.search(term) and re.search(r"[A-Za-z]", term):
         return True
 
-    # Римские числа → Tiger I, Panzer III
     if _RE_ROMAN_NUM.search(term):
         return True
 
-    # Одиночное слово, не служебное
     words = term.split()
     if len(words) == 1 and len(term) <= 20:
         return True
@@ -234,7 +223,6 @@ def _extract_from_tables(soup: BeautifulSoup) -> list[str]:
             cells = row.select("td")
             if not cells:
                 continue
-            # FIX A: сканируем первые _MAX_COL_SCAN ячеек, берём первый валидный
             for idx in range(min(_MAX_COL_SCAN, len(cells))):
                 cell = cells[idx]
                 _remove_noise(cell)
@@ -242,7 +230,7 @@ def _extract_from_tables(soup: BeautifulSoup) -> list[str]:
                 term = _clean_term(raw)
                 if term:
                     terms.append(term)
-                    break  # нашли валидный термин в этой строке — переходим к следующей
+                    break
     return terms
 
 
@@ -283,11 +271,45 @@ def _extract_from_headings(soup: BeautifulSoup) -> list[str]:
 
 
 # ─────────────────────────────────────────────
+# FIX V3: НАРРАТИВНАЯ ЭКСТРАКЦИЯ ДЛЯ ru.wikipedia
+# ─────────────────────────────────────────────
+
+def _extract_narrative_terms(soup: BeautifulSoup) -> list[str]:
+    """
+    FIX V3: извлекает термины из нарративного текста (параграфы).
+    Используется для статей-повествований (операции, битвы, события).
+    
+    Применяет паттерны из militera_parser:
+      - _extract_rank_names (генерал Жуков, маршал Василевский)
+      - _extract_unit_names (24-я армия, Западный фронт)
+      - _extract_quoted_terms (термины в кавычках)
+    """
+    from scripts.vocab.parsers.militera_parser import (
+        _extract_rank_names,
+        _extract_unit_names,
+        _extract_quoted_terms,
+    )
+    
+    # Удаляем навигацию, сноски, боксы
+    for noise in soup.select("nav, .navbox, .reflist, .reference, sup, .infobox"):
+        noise.decompose()
+    
+    # Берём текст всех <p> параграфов основной статьи
+    text_blocks = [p.get_text(" ", strip=True) for p in soup.select("p")]
+    full_text = " ".join(text_blocks)
+    
+    terms: list[str] = []
+    terms.extend(_extract_rank_names(full_text))
+    terms.extend(_extract_unit_names(full_text))
+    terms.extend(_extract_quoted_terms(full_text))
+    
+    return terms
+
+
+# ─────────────────────────────────────────────
 # FIX БАГ 2: _extract_cyrillic_from_cells — только кириллица в скобках
 # ─────────────────────────────────────────────
 
-# Паттерн: (Кириллический текст) — именно так en.wikipedia пишет оригинальные имена:
-# "Georgy Zhukov (Георгий Жуков)" → захватываем "Георгий Жуков"
 _RE_CYRILLIC_IN_PARENS = re.compile(
     r"\(\s*([А-ЯЁа-яё][А-ЯЁа-яё\s\-\.]{3,})\s*\)"
 )
@@ -295,13 +317,12 @@ _RE_CYRILLIC_IN_PARENS = re.compile(
 
 def _extract_cyrillic_from_cells(soup: BeautifulSoup) -> list[str]:
     """
-    FIX БАГ 2: ищет кириллику ТОЛЬКО внутри скобок в ячейках таблиц и li.
+    FIX БАГ 2: ищет кириллицу ТОЛЬКО внутри скобок в ячейках таблиц и li.
     Паттерн: 'Georgy Zhukov (Георгий Жуков)' → 'Георгий Жуков'
     Одиночные кириллические слова вне скобок (Выстрел, etc.) — игнорируются.
     """
     terms: list[str] = []
 
-    # Ячейки таблиц
     for table in soup.select("table.wikitable"):
         for row in table.select("tr"):
             cells = row.select("td")
@@ -313,7 +334,6 @@ def _extract_cyrillic_from_cells(soup: BeautifulSoup) -> list[str]:
                     if term and len(term) >= 4:
                         terms.append(term)
 
-    # li элементы
     for li in soup.select("ul > li"):
         _remove_noise(li)
         raw = li.get_text(" ", strip=True)
@@ -323,7 +343,7 @@ def _extract_cyrillic_from_cells(soup: BeautifulSoup) -> list[str]:
                 terms.append(term)
 
     return terms
-		
+
 # ─────────────────────────────────────────────
 # WIKI PARSER
 # ─────────────────────────────────────────────
@@ -332,9 +352,8 @@ class WikiParser(BaseParser):
     """
     Парсер Wikipedia (ru + en).
 
-    ru.wikipedia: стандартная стратегия table → list → heading
-    en.wikipedia: FIX B — сначала ищет кириллицу в ячейках (primary),
-                  затем латиницу (secondary, сохраняется в _en.txt)
+    ru.wikipedia: structure (table → list → heading) + narrative (rank_names, unit_names, quoted)
+    en.wikipedia: кириллица из ячеек (primary) + латиница-техника (secondary, _en.txt)
     """
 
     def fetch(self) -> str:
@@ -370,12 +389,13 @@ class WikiParser(BaseParser):
 
     def extract_terms(self, html: str) -> list[str]:
         """
-        ru.wikipedia: table → list → heading, возвращает кириллицу.
-
+        ru.wikipedia:
+          structure: table → list → heading
+          narrative: rank_names, unit_names, quoted (FIX V3)
+          
         en.wikipedia:
           Primary   → кириллица из ячеек (имена в скобках)
           Secondary → латиница ТОЛЬКО если это техника/аббревиатура
-                      (цифры, римские числа, одиночное слово)
           Discard   → транслитерированные русские имена (Georgy Zhukov и т.п.)
         """
         soup = BeautifulSoup(html, "html.parser")
@@ -385,25 +405,30 @@ class WikiParser(BaseParser):
         list_terms    = _extract_from_lists(soup)
         heading_terms = _extract_from_headings(soup)
 
-        self.logger.info(
-            f"extract [{lang}]: tables={len(table_terms)}, "
-            f"lists={len(list_terms)}, headings={len(heading_terms)}"
-        )
+        if lang == "ru":
+            # FIX V3: добавляем нарративную экстракцию для статей-повествований
+            narrative_terms = _extract_narrative_terms(soup)
+            
+            self.logger.info(
+                f"extract [ru]: tables={len(table_terms)}, "
+                f"lists={len(list_terms)}, headings={len(heading_terms)}, "
+                f"narrative={len(narrative_terms)}"
+            )
+            
+            combined = table_terms + list_terms + heading_terms + narrative_terms
+            result = _dedupe_ordered(combined)
 
-        if lang == "en":
-            # Primary: кириллица из ячеек (имена через скобки)
+        elif lang == "en":
             cyrillic_terms = _dedupe_ordered(
                 [t for t in _extract_cyrillic_from_cells(soup)
                  if _is_cyrillic_term(t)]
             )
 
-            # Secondary: латиница ТОЛЬКО для техники/аббревиатур
             useful_latin = _dedupe_ordered(
                 [t for t in (table_terms + list_terms + heading_terms)
                  if not _is_cyrillic_term(t) and _is_useful_latin(t)]
             )
 
-            # Отброшенные транслитерации (только для лога)
             discarded = [
                 t for t in (table_terms + list_terms + heading_terms)
                 if not _is_cyrillic_term(t) and not _is_useful_latin(t)
@@ -427,10 +452,10 @@ class WikiParser(BaseParser):
             if useful_latin:
                 self._save_latin(useful_latin)
 
-            # Возвращаем кириллицу + полезную латиницу (техника)
             result = _dedupe_ordered(cyrillic_terms + useful_latin)
 
         else:
+            # Fallback для других языков
             combined = table_terms + list_terms + heading_terms
             result = _dedupe_ordered(combined)
 

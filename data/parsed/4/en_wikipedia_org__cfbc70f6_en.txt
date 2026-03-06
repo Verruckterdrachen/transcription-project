@@ -1,0 +1,339 @@
+Seitengewehr 42
+S84/98 III bayonet
+Seitengewehr 98
+Bodeo M1889
+Beretta M1934
+Beretta M1935
+Pistole vz. 22
+Pistole vz. 24
+Nagant M1895
+Dreyse M1907
+Luger P08
+Lange Pistole 08
+Luger M1900 Carbine
+Mauser C96
+Mauser M1914
+Sauer 38H
+Steyr M1912
+Radom vz. 35 Vis
+Volkspistole
+Walther P38
+Walther Model 7
+Walther Model 8
+Walther Model 9
+Astra 300
+Astra 400
+Astra 600
+Astra 900
+FN M1910
+FN M1922
+Kongsberg M1914 Colt
+Colt M1911/A1
+M1917 Revolver
+EMP 44
+MAS-38
+Astra 902
+Astra 904
+Mauser M712 Schnellfeuer
+Beretta Model 38
+MP 18
+MP 28
+MP 34
+MP 35
+MP 38
+MP 40
+MP 41
+MP 3008
+Suomi KP/-31
+Danuvia 39M
+ZK-383
+PPD-34/38
+PPD-40
+PPSh-41
+Gewehr 43
+Gewehr 43 sniper rifle
+Gewehr 98
+Karabiner 98a
+Karabiner 98b
+Gewehr 98 sniper rifle
+Karabiner 98k
+Karabiner 98k sniper rifle
+M30 Luftwaffe drilling
+Gewehr-Granatpatrone 40
+Gewehr-Panzergranate
+Gewehr-Sprenggranate
+Hafthohlladung
+Kampfpistole
+Leuchtpistole 34
+Leuchtpistole 42
+Model 24 Grenade
+Model 39 grenade
+Model 43
+Panzerwurfmine
+Schiessbecher
+Sprengpatrone
+Sturmpistole
+Wurfgranate Patrone 326
+FG 42
+StG 44
+Knorr-Bremse 1935/36
+MG 08
+MG 13
+MG 15
+MG 30
+MG 34
+MG 42
+MG 45
+MG 39 Rh
+MG 81
+Schwarzlose MG M.07/12
+VMG 1927
+Sturmgewehr 45K
+ZB vz. 26
+ZB vz. 30
+ZB-53
+MG 17
+MG 131
+MG 151/15
+MG 151/20
+Mauser MG 213
+Mauser MK 213
+MK 101
+MK 103
+MK 108
+MK 214A
+BK 3.7
+BK 5
+BK 7.5
+Stridsvagn L-5
+Leichttraktor
+Grosstraktor
+Panzer I
+Panzer II
+VK 16.02 Leopard
+Neubaufahrzeug
+Panzer III
+Panzerbeobachtungswagen III
+Panzer IV
+Panther
+Tiger I
+Tiger II
+Glasmine 43
+Hohl-Sprung mine 4672
+Holzmine 42
+Panzer stab 43
+Riegel mine 43
+Schu-mine 42
+S-mine
+Panzerfaust
+Panzerschreck
+Einstossflammenwerfer 46
+Flammenwerfer 35
+Flammenwerfer 41
+Abwehrflammenwerfer 42
+Henschel Hs 129
+Henschel Hs 129 B-1
+Dornier Do 335
+Messerschmitt Bf 110G-2 bomber destroyers
+Messerschmitt Bf 109G-6/U4
+Stielgranate 41
+Stielgranate 42
+5 cm Granatwerfer 40
+8 cm Granatwerfer 73
+8 cm minomet vz. 36
+8 cm Granatwerfer 33
+10 cm Nebelwerfer 35
+Reihenwerfer
+10 cm Nebelwerfer 40
+20 cm leichter Ladungswerfer
+21 cm heavy mortar 69
+38 cm schwerer Ladungswerfer
+2 cm KwK 30
+3.7 cm KwK 36
+Skoda 37 mm A7
+5 cm KwK 38
+5 cm KwK 39
+7.5 cm FK 16 nA
+7.5 cm FK 18
+7.5 cm FK 38
+7.5 cm FK 7M59
+7.5 cm KwK 37
+7.5 cm KwK 40
+7.5 cm KwK 42
+Ehrhardt 7.5 cm Model 1901
+8 cm kanon vz. 30
+8.8 cm KwK 36
+8.8 cm KwK 43
+10 cm K 17
+10 cm M. 14 Feldhaubitze
+10 cm schwere Kanone 18
+Canon de 105 mle 1913 Schneider
+10.5 cm Gebirgshaubitze 40
+10.5 cm hruby kanon vz. 35
+10.5 cm leFH 16
+10.5 cm leFH 18/40
+10.5 cm leFH 18M
+15 cm Kanone 18
+15 cm Kanone 39
+152 mm gun M1910/34
+Obice da 210/22
+Canon de 220 L mle 1917
+V-3 cannon
+21 cm Kanone 38
+21 cm Kanone 39
+24 cm Haubitze 39
+24 cm Kanone 3
+24 cm Kanone M. 16
+28 cm Haubitze L/12
+35.5 cm Haubitze M1
+42 cm Haubitze M. 14/16
+2.8 cm sPzB 41
+4.2 cm Pak 41
+M35 Bohler and Breda 47mm guns of unclear origin
+Austrian 4.7 cm IG 35/36
+5 cm Pak 38
+7.5 cm Pak 39
+7.5 cm Pak 40
+7.5 cm Pak 41
+8 cm PAW 600 Panzerwurfkanone 10H64
+Panzerwurfkanone 10H64
+8.8 cm Flak 18/36/37/41 AT/AA gun 8.8 cm Pak 43
+8.8 cm Pak 43
+12.8 cm Pak 44
+Solothurn S-18/1000 Solothurn S-18/1100
+Solothurn S-18/1100
+2 cm Flak 30/38/Flakvierling
+Gebirgsflak 38
+3 cm MK 303 Flak
+3.7 cm Flak 18/36/37/43
+3.7 cm SK C/30
+3.7 cm FlaK 43
+5 cm FlaK 41
+Jagdfaust
+Henschel Hs 297
+8.8 cm Flak 18/36/37/41 AT/AA gun
+10.5 cm FlaK 38
+12.8 cm FlaK 40
+AMR 35
+Flakpanzer I
+Wirbelwind
+Ostwind
+Kugelblitz
+5 cm PaK 38 auf Fahrgestell Panzerkampfwagen II
+Jagdpanzer IV
+Panzer IV/70
+Sturmtiger
+Wespe
+Hummel
+7.7 cm FK WD Schlepper 50PS
+8.8 cm Flak 18 auf Zgkw 12
+8.8 cm Flak 18 auf Zgkw 18
+Sd.Kfz. 221
+Sd.Kfz. 222
+Sd.Kfz. 223
+Sd.Kfz. 231
+Sd.Kfz. 232
+Sd.Kfz. 233
+Sd.Kfz. 234
+Sd.Kfz. 252 half-track ammunition carrier
+Borgward B III
+Kugelpanzer
+Sd.Kfz. 247
+Sd.Kfz. 253 half-track artillery observer
+Mercedes-Benz L3000
+Krupp Protze Kfz.19
+Kfz.19
+Kfz.21
+Kfz.68
+Kfz.69
+Kfz.70
+Kfz.81
+Kfz.83
+Borgward B 3000
+Sd.Kfz. 4 half-track
+Polski Fiat 621
+Tatra 111
+Zis-5
+Mercedes-Benz W31
+Trippel SG6 amphibious car
+BMW R75
+NSU
+DKW NZ 350
+Sd.Kfz. 6 half-track
+Sd.Kfz. 7 half-track
+Sd.Kfz. 8 half-track
+Sd.Kfz. 9 half-track
+Sd.Kfz. 10 light half-track
+Sd.Kfz. 11 half-track
+Bergepanzer III
+Bergepanzer IV
+Bergetiger
+Bergepanzer T-34
+Sd.Kfz. 254 tracked artillery tractor
+Saurer RR-7
+Meillerwagen
+V-1 flying bomb
+V-2
+V3 cannon
+Panzer VIII Maus
+FuG 25a Erstling
+Anti-tank bombs SD 4 HL SD 4/HL RS SD 9/HL
+SD 4 HL
+SD 4/HL RS
+SD 9/HL
+SC 10
+SC 10 DW
+PC 1600
+PC 500 RS
+PC 1000 RS
+PC 1800 RS
+PD 500
+PD 1000
+AB 23
+AB 250-2
+AB 250-3
+AB 500-1
+AB 500-1B
+AB 500-3A
+AB 70-D1
+BDC 10
+SB 1000
+SB 1800
+SB 2500
+SC 50
+SC 250
+SC 500
+SC 1200
+SC 2000
+SD 1
+SD 1 FRZ
+SD 2
+SD 10 A
+SD 10 FRZ
+SD 10 C
+SD 15
+SBe 50
+SD 50
+SD 70
+SBe 250
+SD 250
+SD 500
+Henschel Hs 293 anti-ship guided bomb
+Henschel Hs 294 anti-ship guided bomb
+Henschel Hs 298 radio-guided air-to-air missile
+Ruhrstahl X-4 wire-guided air-to-air missile
+Panzergranate 39
+List of World War II firearms of Germany
+German designations of foreign artillery in World War II
+German designations of foreign firearms in World War II
+Rifles
+Mines
+Flamethrowers
+Artillery
+Vehicles
+Tankette
+Tanks
+Trucks
+Motorcycles
+Aircraft
+Radars

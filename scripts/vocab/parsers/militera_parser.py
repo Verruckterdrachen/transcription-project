@@ -337,7 +337,12 @@ def _is_chapter_link(href: str, base_domain: str) -> bool:
     if href.startswith("http") and base_domain not in href:
         return False
     name = href.rstrip("/").split("/")[-1]
-    return bool(re.match(r"^(\d+|[a-z]\d*|chapter\d*)\.html?$", name, re.IGNORECASE))
+    # FIX V2: расширен паттерн для энциклопедий militera:
+    # zal01.html, part02.html, text03.htm — не распознавались ранее
+    return bool(re.match(
+        r"^([a-zA-Z]*\d+|chapter\d*|part\d*|text\d*)\.html?$",
+        name, re.IGNORECASE
+    ))
 
 
 def _extract_author_from_html(soup: BeautifulSoup) -> list[str]:

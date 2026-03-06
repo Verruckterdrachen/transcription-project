@@ -1,0 +1,121 @@
+11 Lancastrian Prince
+12 Esneh
+13 Rodina
+24 Mossovet
+25 Sukhona
+Dervish
+PQ 1
+PQ 2
+PQ 3
+PQ 4
+PQ 5
+PQ 6
+PQ 7a
+PQ 7b
+PQ 8
+PQ 9 / PQ 10
+PQ 11
+PQ 12
+PQ 13
+PQ 14
+PQ 15
+PQ 16
+PQ 17
+PQ 18
+QP 15
+JW 51A
+JW 51B
+JW 52
+JW 53
+JW 54A
+JW 54B
+JW 55A
+JW 55B
+JW 56A
+JW 56B
+JW 57
+JW 58
+JW 59
+JW 60
+JW 61
+JW 61A
+JW 62
+JW 63
+JW 64
+JW 65
+JW 66
+JW 67
+PQ/JW
+Ships
+QP/RA
+Totals
+Outbound
+Return
+Independent
+Port
+Other
+Total
+Ship
+U-boat
+Bomb
+Torpedo
+Mine
+Foundered
+Wrecked
+Sokrushitelny
+Scharnhorst
+Bremse
+Ulm
+U-88
+U-286
+U-277
+U-288
+U-307
+U-314
+U-344
+U-347
+U-354
+U-355
+U-360
+U-361
+U-365
+U-366
+U-387
+U-394
+U-425
+U-457
+U-472
+U-585
+U-589
+U-601
+U-644
+U-655
+U-674
+U-713
+U-742
+U-921
+U-959
+U-961
+U-973
+Canada
+Australia
+Norway
+Panama
+Germany
+Japan
+85 merchant vessels
+16 warships
+4 warships
+30 submarines
+List of merchant ships lost in Convoy PQ 17
+Arctic Ocean operations of World War II
+Pathe Newsreel video of HMS Scylla fighting the Luftwaffe during Convoy PQ 18
+Background
+Aftermath
+Analysis
+Convoy PQ 16
+Convoy PQ 17
+Convoy JW 55B
+Tables
+Deliveries 1941 1945
+U-boats

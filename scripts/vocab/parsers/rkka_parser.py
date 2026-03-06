@@ -126,23 +126,22 @@ def _extract_table_cells(soup: BeautifulSoup) -> list[str]:
     Извлекает термины из <td> ячеек.
     Используется и на Level 0 (заголовки разделов),
     и на Level 1 (таблицы командиров, формирований).
+    FIX V1: убрано `if td.find("a"): continue` —
+    guard.htm/ibibl.htm/hist/f.htm хранят весь контент в <td><a>.
     """
     terms: list[str] = []
     for td in soup.find_all("td"):
-        # Пропускаем ячейки со ссылками — они обработаны отдельно
-        if td.find("a"):
-            continue
         raw = td.get_text(" ", strip=True)
         raw = re.sub(r"\s+", " ", raw).strip()
         if len(raw) < MIN_TERM_LEN or len(raw) > MAX_TERM_LEN:
             continue
-        # Только строки с кириллицей
         if not re.search(r"[а-яёА-ЯЁ]", raw):
             continue
         term = _clean_term(_normalize_caps(raw))
         if term and not _is_stopword_term(term):
             terms.append(term)
     return terms
+
 
 
 def _extract_level0_link_texts(soup: BeautifulSoup) -> list[str]:
