@@ -1,22 +1,37 @@
+World War II
+attacked Poland in September 1939
+8 May 1945
 SSh-36
 SSh-39
 SSh-40
+9 mm
 NR-40
-AVS-36
+Bayonet
 Nagant M1895
+Revolver
 Tokarev TT-33
 Mauser C96
+25 ACP
 Colt M1911
+M1911 pistol
+45 ACP
+Lend-Lease
 Mosin Nagant M1891/30
 Mosin Nagant M1938 Carbine
 Mosin Nagant M1944 Carbine
 Tokarev SVT-38
+SVT-38
 Tokarev SVT-40
+SVT-40
 Simonov AVS-36
+AVS-36
 Tokarev AVT-40
 PPD-34
+PPD-40
+Suomi KP/-31
 PPD-34/38 / PPD-40
 PPSh-41
+CQB
 PPS-42 / PPS-43
 Thompson M1928A1
 M50 Reising
@@ -25,121 +40,190 @@ DS-39
 SG-43 Gorunov
 PM M1910
 DShK 1938
+DShK
+303 British
 Maxim-Tokarev
+AS-44
 Model 1914 grenade
 F1 grenade
 RG-41
 RG-42
 RGD-33 grenade
-RPG-40 / RPG-41
+RPG-40
 RPG-43
 RPG-6
 TM-35 mine
 TM-38
+TM-38 mine
 TM-41 mine
 TM-44 mine
 TMD-40 mine
 TMD-44 / TMD-B mines
-76 K/DRP
+TMD-44 and TMD-B mines
 PTRD-41
 PTRS-41
 M1 Bazooka
+Bazooka
 PIAT
 Panzerschreck
 Panzerfaust
-FOG-2
+Volkssturm
+Flamethrower
 ROKS-2 / ROKS-3
+Spain
 Ampulomyot
+Ampulomet
+ampulla
+Ampoule
 RM-38
 82-BM-37
 M1938 mortar
 107mm M1938 mortar
 BM-8
+BM-13
+BM-31
+ZIS-12
+Studebaker US6 U3
 45mm 20-K tank gun
 57mm ZiS-4 tank gun
-76.2 mm L-10 tank gun
 L-11 76.2 mm tank gun
-F-32 tank gun
+KV-1
 F-34 tank gun
+76 mm tank gun M1940 F-34
 D-5T tank gun
 ZiS-S-53 tank gun
 D-10 tank gun
+SU-100
 76-mm regimental gun model 1927
+76 mm regimental gun M1927
+Plant No. 172
 76 mm regimental gun M1943
 76 mm mountain gun M1909
+France
 76 mm mountain gun M1938
 76 mm divisional gun M1902/30
 107 mm gun M1910/30
 122 mm howitzer M1909/37
+howitzer
 122 mm howitzer M1910/30
 152 mm gun M1910/34
 152 mm howitzer M1909/30
 152 mm howitzer M1910/37
 152 mm gun M1910/30
+PaK 35/36
+3.7 cm Pak 36
 37 mm 70-K gun
 76 mm air defense gun M1938
+Tankette
+T-18 tank
+T-26 tank
+T-37A tank
+Amphibious
+T-38 tank
+T-40 tank
+T-50 tank
+T-60 tank
+T-70 tank
 BT-2
 BT-5
 BT-7
+Gorky
+Omsk
 SMK
-KV-1
+T-100 tank
 KV-2
 KV-85
 IS-1
 IS-2
 ZiS-30
-SU-5-1 / SU-5-2 / SU-5-3
+Komsomolets
+ZiS-2
+SU-5-1
+T-26 variants
 SU-5-3
 SU-14
 SU-100Y
-SU-26
-SU-76 / SU-76M
+SU-100Y Self-Propelled Gun
+130mm Naval Gun B-13
+130 mm/50 B13 Pattern 1936
+SU-76
+AFV
+ZIS-3
 SU-85
-SU-100
+D-5S
+D-10S
 SU-122
+M-30S
 SU-152
+KV-1S
+ML-20S
 ISU-122
+A-19S
 ISU-152
-SU-4
-SU-12
-SU-11
 ZSU-37
 BA-27
+Puteaux SA 18
+D-8 Armored Car
 FAI
 BA-I
 BA-3
+BA-3/6
+45mm gun 20-K
 BA-6
 BA-10
 BA-11
 BA-20
+GAZ-M1
 BA-64
+Sd.Kfz. 221
 BA-30
+Half-tracked
+Half-track
+M5 half-track
+Odessa
 KhTZ-16
+M3 Stuart
 M24 Chaffee
 M4 Sherman
+T48 Gun Motor Carriage
+M3 Half-track
+57mm gun M1
+Ordnance QF 6-pounder
 GAZ-AA
-GAZ-AAA
+Truck
 GAZ-MM
 ZIS-5
 GAZ-64
+BA-64s
 GAZ-67
-GAZ-M1
+car
+Dodge 3/4-ton WC series
 PMZ-A-750
-TIZ-AM-600
+motorcycle
 M-72
+Dnepr M-72
+IMZ
+IMZ-Ural
+GMZ
 S-60
 S-65
+S-65 Stalinets
+Tractor
+T-20 Komsomolets
 Yak-9
-PPD-42
-PPK-42
-AS-44
+Yakovlev Yak-9
+Fighter
+Novosibirsk
+Yak-1
+Yakovlev Yak-1
+Yak-7
+Yakovlev Yak-7
+Yakovlev
 FAB-9000
 FAB-5000
 FAB-500
 FAB-250
-FAB-100
 FAB-50
-FAB-25
 List of World War II weapons
 List of military vehicles of World War II
 List of British military equipment of World War II
@@ -147,15 +231,129 @@ List of equipment of the United States Army during World War II
 List of German military equipment of World War II
 List of Italian Army equipment in World War II
 List of Japanese military equipment of World War II
+ISBN
 Helmets
+Name
+Type
+Origin
+Photo
+Replacement for the SSh-36 helmet
+They only provided limited protection against 9 mm rounds
 Knives
+Soviet combat knife that was produced after the Winter War in 1940
 Handguns
+Cartridge
+7-round cylinder
 Rifles
+5-round internal magazine
+47-round magazine. Most widely used light machine gun by the Red Army
+250-round belt
+50-round belt
+PPD-42
+PPK-42
+Diameter
+45mm
+Limited usage during World War II
+55mm
+5 meter kill radius
+54mm
+10 15 meter kill radius
+RPG-40 / RPG-41
+20 cm
+Effective against tanks up to 20mm of armour
+95mm
+Improved version of the RPG-40. Effective against tanks up to 75mm of armour
+103mm
+Improved version of the RPG-43. Effective against tanks up to 100mm of armour
+40.5mm
 Mines
+Detonation
+Pressure
+2.8 kg of TNT
+2.95 kg of TNT
+3.2 kg of TNT
+9 9.7 kg of Amatol
+Calibre
+76 K/DRP
+76mm
+60 mm
+83mm
+88mm
+FOG-2
+Produced from 1935 to 1945. Used also during the Soviet-Finnish War
 Artillery
+50mm Infantry mortar
+82mm Infantry mortar
+120mm Heavy mortar
+107mm Infantry mortar
+It was a lighter version of the M1938 mortar made for Soviet mountain troops
+82mm Multiple rocket launcher
+Smaller rocket launchers that were mounted on T-40 and T-60 light tanks
+132mm Multiple rocket launcher
+300mm Multiple rocket launcher
+45mm Anti-tank gun
+57mm Anti-tank gun
+76.2 mm L-10 tank gun
+76mm Anti-tank gun
+The main armament of the T-28 tank
+The main armament of the T-34 Model 1940 tank
+F-32 tank gun
+The main armament of the KV-1 Model 1940 tank
+The main armament of T-34 -76 and KV-1 tanks
+85mm Anti-tank gun
+100mm Anti-tank gun
+The main armament of the SU-100 tank destroyer
+Production
+Dec. 1928
+76mm Infantry support gun
+76mm Mountain gun
+76mm Field gun
+100mm Field gun / Anti-tank gun
+107mm Field gun
+122mm Field gun
+122mm Field howitzer
+152mm Field gun
+152mm Heavy gun
+152mm Field howitzer
+Most numerously used 152mm howitzer by the Red Army
+203mm Heavy howitzer
+210mm Heavy howitzer
+280mm Heavy mortar
+305mm Superheavy siege howitzer
+37mm Anti-tank gun
+The gun was closely related to the German PaK 35/36
+100mm Anti-tank gun / Field gun
+25x218mmSR
+200-rounds
 Tankettes
+Quantity
 Tanks
+Replacement of the obsolete T-38 and T-30 tanks
+SU-5-1 / SU-5-2 / SU-5-3
+It was on the T-26 chassis. Equipped with the 152mm mortar M1931
+SU-26
+Equipped with a 76 mm regimental gun M1927
+SU-76 / SU-76M
+Dec. 1942
+A modification of SU-85M that replaced its 85mm gun with 100 mm D-10S
+A rearmed ISU-152 with 122 mm A-19S for ISU-122 and D-25S for ISU-122S
+SU-4
+SU-12
+On the chassis of a GAZ-AAA . It was equipped with a 76 mm regimental gun M1927
+SU-11
+It was equipped with the 37mm automatic air defence gun
+The main armament was the 45mm gun 20-K
 Half-tracks
+Received 450 during World War II through Lend-Lease
+Delivery
+5 were supplied
+2 were supplied in 1944
 Trucks
+Soviet produced vehicle licensed from the Ford AA model of 1930
+GAZ-AAA
 Motorcycles
+TIZ-AM-600
 Aircraft
+Oct. 1942
+FAB-100
+FAB-25

@@ -1,45 +1,97 @@
+Headquarters
+Seltsy
+Warsaw
+Poland
+World War II - Eastern Front
+Aftermath of World War II
+Polish
+World War II
+formalized in 1952
+communist
+Communism
+Soviet
+USSR
+in 1956
+Allied
+Allies of World War II
+Iran
+Berlin
+Lublin
+Katowice
+Jewish
+Jews
+Rogatywka
+Strichtarn
+Wz. 68 Moro
+Wz. 89 Puma
+Medal for Warsaw 1939 1945
 SSh-39/SSh-40
+SSh-39 and SSh-40
 P-64
+FB P-64
 P-83
+FB P-83 Wanad
 P-33
+AKM
+AKMS
 PM-84
 PM-63
+FB PM-63
 7.62 mm pm wz.41
+PPSh-41
 SWD
 SKS
 SG-43 Goryunov
 RPG-7
 PT-76
+T-54/T-55
 IS-2
 IS-3
 SU-57
+T48 Gun Motor Carriage
+USA
 SU-76
 SU-85
 SU-100
 ISU-122S
+ISU-122
 SU-152
 ISU-152
 ASU-85
+2S1 Gvozdika
 wz.77 DANA
+152 mm SpGH DANA
 BWP-1
+BMP-1
 BMP-2
+Angola
 MT-LB
 Topas
+OT-62 Topas
+Czechoslovakia
 SKOT
+OT-64 SKOT
 BTR-60
 BRDM-1
 BRDM-2
 FUG
+D-442 FUG
 Lim-1
+Mikoyan-Gurevich MiG-15
 Lim-2
 Lim-5
+Mikoyan-Gurevich MiG-17
 MiG-19
+Mikoyan-Gurevich MiG-19
 MiG-21
+Mikoyan-Gurevich MiG-21
 MiG-23
+Mikoyan-Gurevich MiG-23
 MiG-29
+Mikoyan MiG-29
 Sukhoi Su-7
 Su-20
-Sukhoi Su- 22
+Sukhoi Su-17
 Ilyushin Il-28
 Antonov An-2
 Antonov An-26
@@ -48,18 +100,17 @@ Mil Mi-8
 Mil Mi-2
 Mil Mi-24
 RM-70
-BM-21 Grad -250 in 1980s
+RM-70 multiple rocket launcher
+BM-21 Grad
 9K52 Luna-M
 R-11 Zemlya
-152 mm gun-howitzer D-20 -166
-2S1 Gvozdika -498
-152 mm SpGH DANA
-2S7 Pion -8
+152 mm gun-howitzer D-20
+2S7 Pion
 2K12 Kub
 2K11 Krug
 9K33 Osa
-ZSU-23-4 Shilka -150 were delivered from USSR until 1991
-ZU-23-2 -252 ZU-23 and 72 ZUR-23-2 series
+ZSU-23-4 Shilka
+ZU-23-2
 Mazur D-350
 ATS-59
 Gaz-67
@@ -67,6 +118,9 @@ Gaz-69
 UAZ-469
 FSC Lublin-51
 Gaz-66
+ZIL-130
+ZIL-131
+ZIL-157
 KrAZ-255
 Star 28/29
 Star 66
@@ -75,14 +129,85 @@ Star 200
 Star 244
 Star 266
 Polish protests of 1970
-Poland
-Communism
+AWL
+ISSN
+ISBN
+doi
+OCLC
+Founded
+May 1943
+Disbanded
+December 1989
+Leadership
+Personnel
 History
-World War II
 Characteristics
 Uniform
 Chaplaincy
 Training
 Equipment
+Helmet
+Origin
+Type
+Photo
+Used during World War II and shortly after
+Standard helmet in 1950-1967
+Standard helmet from 1967 to 1989
+Weapon
+Licensed copy of TT-33
+Standard submachine gun form 1963 till 1989
+Polish PPSh-41 produced domestically
+Tank
+Version
+3 pcs
+53 pcs
+Some of the tanks used after 1945 by the Internal Security Corps
+118 pcs
+328 pcs
+68 pcs
+1258 pcs
+128 pcs
+317 pcs
+50 pcs
+Withdrawn from use in the 1960s
+2 or 3 pcs
+TD/SPG
+SPG
+15 pcs
+Withdrawn from use in the 1950s
+130 pcs
+70 pcs
+At least 3 pcs
+32 pcs
+10 pcs
+20-30 pcs
+Withdrawn from use in the second half of 1970s
+166 pcs
+Licensed production launched in the 1980s at Huta Stalowa Wola
+The first copies appeared in WP in the mid-1980s
+APC/IFV
+IFV
+APC
+120 pcs
+548 pcs
+2 500 total production form Polish Army
+Jointly developed by Poland and Czechoslovakia between 1963 and 1971
+PU-12
+Included with the 9K33 Osa SAM system delivered between 1980 and 1985
+The first ones entered the army in the 1960s
+800 pcs
+Model
+Fighter
+Sukhoi Su- 22
+Bomber
+Transport
+N/A
+Helicopter
 Artillery
+BM-21 Grad -250 in 1980s
+152 mm gun-howitzer D-20 -166
+2S1 Gvozdika -498
+2S7 Pion -8
+ZSU-23-4 Shilka -150 were delivered from USSR until 1991
+ZU-23-2 -252 ZU-23 and 72 ZUR-23-2 series
 Engagements

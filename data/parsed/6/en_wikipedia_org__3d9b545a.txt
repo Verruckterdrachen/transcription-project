@@ -1,13 +1,73 @@
+Luftwaffe
+World War II
+paratroopers
+Paratrooper
+World War I
+Entente
+Allies of World War I
+materiel
+Italy
+static-line
+German
+Tupolev TB-3
+artillery
+Nazi
+Reichswehr
+Hitler
+conscription
+cadre
+Berlin
+1st Parachute Division
+2nd Parachute Division
+Generalleutnant
+Brest
+3rd
+4th
+Rome
+5th Parachute Division
+6th
+7th
+8th
+9th
+10th
+Netherlands
+Stahlhelm
+FG-42
+FG 42
+mortar
+Junkers Ju 52s
+Junkers Ju 52
+Ypenburg
+Crete
+Leros
+Kondomari
+Sola
+Stavanger
+7th Air Division
+22nd Air Landing Division
+Leningrad
+Soviet 79th Naval Infantry Brigade
+Ukraine
+Kirovograd
+Kropyvnytskyi
+11th Panzer Division
+Dniester
+Brandenburgers
+Kiev
+Rapido-Gari
+Liri
+Garigliano
+Cassino
+divisions
+115th Infantry Regiment
 1st Parachute Army
 I Parachute Corps
 II Parachute Corps
-1st Parachute Division
-2nd Parachute Division
 3rd Parachute Division
 4th Parachute Division
-5th Parachute Division
 6th Parachute Division
 7th Parachute Division
+Erdmann
 8th Parachute Division
 9th Parachute Division
 10th Parachute Division
@@ -16,13 +76,22 @@ II Parachute Corps
 21st Parachute Division
 500th SS Parachute Battalion
 600th SS Parachute Battalion
-22nd Air Landing Division
 91st Air Landing Division
+Wehrmacht
+reprisal
+Kandanos
 Japanese marine paratroopers of World War II
-Paratrooper
 Commando
+ISBN
+Active
+January 29 1936
+Country
+Branch
+Type
+Engagements
+Commanders
 Formation
-World War II
 Poland
 Norway
+During 17 January
 Casualties

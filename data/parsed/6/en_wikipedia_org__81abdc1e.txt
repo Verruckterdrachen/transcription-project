@@ -1,8 +1,100 @@
+Panzerfaust
+MG34
+Germany
+Militia
+equipment
+Administration
+indoctrination
+World War II
+Allies of World War II
+Schutzstaffel
+Gau
+Ordnungspolizei
+Prussian
+Landsturm
+Napoleon
+Volksgemeinschaft
+fanaticism
+Gauleiter
+Kreisleiter
+Heer
+battalion
+Panzerfausts
+MG 42
+Kreis
+company
+platoon
+squad
+Vittorio
+Wehrmacht
+Feldgrau
+camouflage
+Rhineland
+Luftwaffe
+World War I
+Major
+Captain
+Lieutenant
+Corporal
+Private
+Gewehr 98s
+Gewehr 98
+Steyr-Mannlicher M1895s
+Mannlicher M1895
+Gewehr 71s
+Mauser Model 1871
+Steyr-Mannlicher M1888s
+Mannlicher M1888
+Dreyse M1907
+MP 3008
+Volkssturmgewehr
+Kolberg
+Breslau
+Oder
+VG 1-5
+Karabiner 98k
+Siemensstadt
+M-20 howitzers
+Friedrichsfelde
+Seerappen
+Schippenbeil
+Gerdauen
+Helgenbeil
+Palmnicken
+Sicherheitsdienst
+typhus
+Mauthausen
+Mittelwerk
+V2 rockets
+V-2 rocket
+Magdeburg
+Mieste
+Celle
+Parchim
+Mecklenburg
+Bocholt
+Downfall
+Netflix
+Fury
 Einstossflammenwerfer 46
 Landwehr
 Volksgrenadier
 Volkspistole
 Wachdienst
 Werwolf
+ISBN
+ASIN
+Volkssturm
+Founded
+18 October 1944
+Disbanded
+8 May 1945
+Country
+Type
+Commander
 Ranks
+Translation
+Insignia
+Bataillonsarzt
+Volkssturmmann
 Citations

@@ -1,121 +1,416 @@
-11 Lancastrian Prince
-12 Esneh
-13 Rodina
-24 Mossovet
-25 Sukhona
-Dervish
-PQ 1
-PQ 2
-PQ 3
-PQ 4
-PQ 5
-PQ 6
-PQ 7a
-PQ 7b
-PQ 8
-PQ 9 / PQ 10
-PQ 11
-PQ 12
-PQ 13
-PQ 14
-PQ 15
-PQ 16
-PQ 17
-PQ 18
-QP 15
-JW 51A
-JW 51B
-JW 52
-JW 53
-JW 54A
-JW 54B
-JW 55A
-JW 55B
-JW 56A
-JW 56B
-JW 57
-JW 58
-JW 59
-JW 60
-JW 61
-JW 61A
-JW 62
-JW 63
-JW 64
-JW 65
-JW 66
-JW 67
-PQ/JW
-Ships
-QP/RA
-Totals
-Outbound
-Return
-Independent
-Port
-Other
-Total
-Ship
-U-boat
-Bomb
-Torpedo
-Mine
-Foundered
-Wrecked
-Sokrushitelny
-Scharnhorst
-Bremse
-Ulm
-U-88
-U-286
-U-277
-U-288
-U-307
-U-314
-U-344
-U-347
-U-354
-U-355
-U-360
-U-361
-U-365
-U-366
-U-387
-U-394
-U-425
-U-457
-U-472
-U-585
-U-589
-U-601
-U-644
-U-655
-U-674
-U-713
-U-742
-U-921
-U-959
-U-961
-U-973
+World War II
+Allied
+Allies of World War II
 Canada
 Australia
 Norway
 Panama
 Germany
+Italy
+until 1943
 Japan
-85 merchant vessels
-16 warships
-4 warships
-30 submarines
-List of merchant ships lost in Convoy PQ 17
-Arctic Ocean operations of World War II
-Pathe Newsreel video of HMS Scylla fighting the Luftwaffe during Convoy PQ 18
-Background
-Aftermath
-Analysis
+convoys
+Convoy
+Arkhangelsk
+Murmansk
+Atlantic
+Arctic
+Lend-Lease
+Kriegsmarine
+Scharnhorst
+U-boats
+U-boat
+Luftwaffe
 Convoy PQ 16
 Convoy PQ 17
+Malta
+Spitsbergen
+Convoy PQ 11
+Luftflotte 2
+Hurricane
+Matilda
+Matilda II
+Radar
+Asdic
+Enigma
+Y-stations
+W/T
+B-Dienst
+Beobachtungsdienst
+Convoy PQ 18
+Tirpitz
+Sonar
+capsizing
+Convoy QP 1
+icebreakers
+Icebreaker
+minesweepers
+Minesweeper
+Alsib
+Gneisenau
+Huff-Duff
+Magnetron
+Convoy PQ 12
+Norwegian
+fjords
+Fjord
+Convoy JW 51B
+Forecastle
+Hvalfjord
+eavesdropped
+Eavesdropping
+RNR
+destroyers
+Destroyer
+Active
+Impulsive
+Macbeth
+Molotovsk
+Severodvinsk
+List of merchant ships lost in Convoy PQ 17
+cruisers
 Convoy JW 55B
+Dervish
+PQ 1
+Convoy PQ 1
+QP 1
+PQ 2
+Convoy PQ 2
+Liverpool
+PQ 3
+Convoy PQ 3
+QP 2
+Convoy QP 2
+Kirkwall
+PQ 4
+Convoy PQ 4
+PQ 5
+Convoy PQ 5
+QP 3
+Convoy QP 3
+PQ 6
+Convoy PQ 6
+PQ 7a
+Convoy PQ 7
+QP 4
+Convoy QP 4
+PQ 7b
+PQ 8
+Convoy PQ 8
+PQ 9
+Convoy PQ 9
+PQ 10
+Convoy PQ 10
+PQ 11
+PQ 12
+PQ 13
+Convoy PQ 13
+PQ 14
+Convoy PQ 14
+Oban
+QP 10
+Convoy QP 10
+PQ 15
+Convoy PQ 15
+QP 11
+Convoy QP 11
+PQ 16
+PQ 17
+QP 13
+Convoy QP 13
+PQ 18
+QP 14
+Convoy QP 14
+QP 15
+Convoy QP 15
+JW 51A
+Convoy JW 51A
+JW 51B
+JW 54A
+Convoy JW 54A
+JW 54B
+Convoy JW 54B
+JW 55A
+Convoy JW 55A
+RA 55A
+Convoy RA 55A
+JW 55B
+RA 55B
+Convoy RA 55B
+JW 56A
+Convoy JW 56A
+JW 56B
+Convoy JW 56B
+JW 57
+Convoy JW 57
+JW 58
+Convoy JW 58
+Clyde
+GRT
+Town-class
+cruiser
+U-456
+German submarine U-456
+Foresight
+U-454
+German submarine U-454
+HMS King George V
+U-703
+German submarine U-703
+A-class
+Sokrushitelny
+U-990
+German submarine U-990
+V-class destroyer
+U and V-class destroyer
+Venus
+sloop
+U-344
+German submarine U-344
+U-968
+German submarine U-968
+Captain-class
+frigate
+Flower-class
+corvette
+U-711
+German submarine U-711
+U-992
+German submarine U-992
+Hipper
+German destroyer Z16 Friedrich Eckoldt
+U-435
+German submarine U-435
+Seagull
+battleship
+Type 1934A-class
+Type 1934A-class destroyer
+Sheffield
+Bremse
+Nigeria
+Aurora
+minelayer
+Marne
+Martin
+Onslaught
+U-88
+German submarine U-88
+Type VII submarine
+Faulknor
+Swordfish
+825 NAS
+825 Naval Air Squadron
+U-286
+German submarine U-286
+Anguilla
+Cotton
+U-277
+German submarine U-277
+U-288
+German submarine U-288
+U-307
+German submarine U-307
+Cygnet
+U-314
+German submarine U-314
+Meteor
+Whitehall
+835 NAS
+835 Naval Air Squadron
+U-347
+German submarine U-347
+Catalina
+210 Squadron
+No. 210 Squadron RAF
+U-354
+German submarine U-354
+Keppel
+Mermaid
+Peacock
+U-355
+German submarine U-355
+Beagle
+Avenger
+Tracker
+U-360
+German submarine U-360
+U-361
+German submarine U-361
+U-365
+German submarine U-365
+813 NAS
+813 Naval Air Squadron
+U-366
+German submarine U-366
+816 NAS
+816 Naval Air Squadron
+U-387
+German submarine U-387
+U-394
+German submarine U-394
+U-425
+German submarine U-425
+Lark
+U-457
+German submarine U-457
+U-472
+German submarine U-472
+U-585
+German submarine U-585
+U-589
+German submarine U-589
+Onslow
+U-601
+German submarine U-601
+U-644
+German submarine U-644
+Tuna
+submarine
+U-655
+German submarine U-655
+Sharpshooter
+U-674
+German submarine U-674
+842 NAS
+842 Naval Air Squadron
+U-713
+German submarine U-713
+U-742
+German submarine U-742
+U-921
+German submarine U-921
+U-959
+German submarine U-959
+U-961
+German submarine U-961
+Starling
+U-973
+German submarine U-973
+Arctic Ocean operations of World War II
+Curtiss P-40 Warhawk
+ISBN
+OCLC
+doi
+ISSN
+S2CID
+HMSO
+LCCN
+Jstor
+Arctic convoys of World War II
+Part of World War II
+Date August 1941
+Date
+August 1941
+Location
+Result
+Belligerents
+85 merchant vessels 16 warships
+85 merchant vessels
+16 warships
+4 warships 30 submarines
+4 warships
+30 submarines
+Background
+column 1
+column 2
+column 3
+column 4
+11 Lancastrian Prince
+21 Alchiba
+Alchiba
+31 Llanstephan Castle
+41 Trehata
+Trehata
+12 Esneh
+Esneh
+22 RFA Black Ranger
+32 Alma-Ata
+Alma-Ata
+42 New Westminster City
+13 Rodina
+Rodina
+23 Stary Bolshevik
+33 Sevzaples
+Sevzaples
+43 Budyonny
+Budyonny
+24 Mossovet
+Mossovet
+25 Sukhona
+Sukhona
+Aftermath
+Analysis
 Tables
+QP 5
+PQ 9 / PQ 10
+QP 6
+QP 7
+QP 8
+QP 9
+QP 12
+Reykjavik
+Arkhangelsk Loch Ewe 13 26 September
+RA 51
+JW 52
+RA 52
+JW 53
+RA 53
+RA 54A
+RA 54B
+RA 56
+RA 57
+RA 58
+RA 59
+JW 59
+RA 59A
+JW 60
+RA 60
+JW 61
+RA 61
+JW 61A
+RA 61A
+JW 62
+RA 62
+JW 63
+RA 63
+JW 64
+RA 64
+JW 65
+RA 65
+JW 66
+RA 66
+JW 67
+RA 67
+Convoy sailings ceased at midnight 28/29 May 1945
+Total
+Tonnage
+PQ/JW
+Ships
+QP/RA
 Deliveries 1941 1945
-U-boats
+Route
+Totals
+Sunk
+USSR
+Holland
+Outbound
+Return
+Independent
+Port
+Other
+Cause
+Out
+Escorted
+Ship
+Bomb
+Torpedo
+Mine
+Foundered
+Wrecked
+Straggler
+Name
+Flag
+Type
+Mined 12 December 1944
+Ulm
+Pathe Newsreel video of HMS Scylla fighting the Luftwaffe during Convoy PQ 18

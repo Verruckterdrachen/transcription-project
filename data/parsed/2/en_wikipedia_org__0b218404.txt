@@ -1,11 +1,88 @@
-Grenzschutz-Abschnittskommando 15
-Grenzschutz-Abschnittskommando 2
-Grenzschutz-Abschnittskommando 12
+German
+Heer
+Wehrmacht
+World War II
+2nd Army
+3rd Army
+4th Army
+10th Panzer Division
+73rd Infantry Division
+206th Infantry Division
+208th Infantry Division
+Pomerania
+XXI Army Corps
+228th Infantry Division
+21st Infantry Division
+I Army Corps
+11th Infantry Division
+61st Infantry Division
+1st Infantry Division
+12th Infantry Division
+217th Infantry Division
+2nd Infantry Division
+20th Infantry Division
+3rd Panzer Division
+II Army Corps
+3rd Infantry Division
+32nd Infantry Division
+III Army Corps
+50th Infantry Division
+23rd Infantry Division
+218th Infantry Division
+Leningrad
+flank
+Daugavpils
+Kholm
 18th Army
 4th Panzer Group
 16th Army
+Tallinn
+counter-offensives
+Counter-offensive
+12th Army
+Heiligenbeil
+Mamonovo
+Danzig
+Generalfeldmarschall
+Generaloberst
+ISBN
+Active
+2 September 1939
+Country
+Branch
+Size
+Commanders
+Army
+Corps
+Division
+Grenzschutz-Abschnittskommando 15
+Grenzschutz-Abschnittskommando 1
+Grenzschutz-Abschnittskommando 2
+Grenzschutz-Abschnittskommando 12
 Army-Group signals regiment 537
 11th Army
+December 1942
+March 1944
+October 1944
+November 1944
 18 Armee
-4th Army
-Commanders
+December 1944
+Portrait
+Commander
+27 August 1939
+20 June 1941
+17 January 1942
+211 days
+9 January 1944
+31 March 1944
+82 days
+4 July 1944
+95 days
+23 July 1944
+19 days
+27 January 1945
+188 days
+12 March 1945
+44 days
+2 April 1945
+21 days

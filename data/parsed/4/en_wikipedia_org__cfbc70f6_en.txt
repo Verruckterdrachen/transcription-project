@@ -1,123 +1,165 @@
+German military of World War II
+Wehrmacht
 Seitengewehr 42
+bayonet
 S84/98 III bayonet
 Seitengewehr 98
+Mauser M1898 rifle
+Gewehr 98
 Bodeo M1889
+Bodeo Model 1889
+Revolver
+Sidearm
+8mm French Ordnance
 Beretta M1934
+Pistol
+Close-quarters
+Blowback-operated
+Beretta
+380 ACP
 Beretta M1935
+32 ACP
+455 Webley
+45 ACP
 Pistole vz. 22
+Czechoslovakia
 Pistole vz. 24
 Nagant M1895
+Belgium
+7.62x25mm Tokarev
+9x19mm Parabellum
 Dreyse M1907
+Rheinmetall
+Volkssturm
+Volksgrenadier
 Luger P08
+Luger P08 pistol
+Borchardt C-93
+Mauser
 Lange Pistole 08
+carbine
 Luger M1900 Carbine
 Mauser C96
+government
 Mauser M1914
+Mauser Model 1914
+25 ACP
+Ordnungspolizei
+Kriegsmarine
 Sauer 38H
+Sauer
 Steyr M1912
+Recoil-operated
+Austria-Hungary
+Roth Steyr M1907
+Steyr
+9mm Luger
+9mm Steyr
 Radom vz. 35 Vis
+Poland
 Volkspistole
+Walther
+Gustloff
 Walther P38
-Walther Model 7
+Spreewerk
+22 LR
+Luftwaffe
+Waffen-SS
 Walther Model 8
 Walther Model 9
 Astra 300
+Blowback
 Astra 400
+9mm Largo
 Astra 600
 Astra 900
+Astra Model 900
+9x19 Parabellum
+Frommer 29M
+Spain
 FN M1910
+FN Model 1910
 FN M1922
 Kongsberg M1914 Colt
+Norway
+France
+7.65x20mm Long
 Colt M1911/A1
+M1911 pistol
 M1917 Revolver
+Double-action
 EMP 44
 MAS-38
+7.65mm Longue
 Astra 902
 Astra 904
 Mauser M712 Schnellfeuer
 Beretta Model 38
 MP 18
+open-bolt
 MP 28
+Feldgendarmerie
 MP 34
+Austria
 MP 35
 MP 38
 MP 40
+Steyr-Mannlicher
 MP 41
 MP 3008
 Suomi KP/-31
+Finland
+Tikkakoski
 Danuvia 39M
+Danuvia 43M submachine gun
 ZK-383
 PPD-34/38
 PPD-40
 PPSh-41
+Gewehr 41
+Front-line
+assault
+Bolt-action
+Gas-operated
+rotating-bolt
 Gewehr 43
 Gewehr 43 sniper rifle
-Gewehr 98
 Karabiner 98a
 Karabiner 98b
 Gewehr 98 sniper rifle
 Karabiner 98k
 Karabiner 98k sniper rifle
 M30 Luftwaffe drilling
+shotgun
+9.3x74mmR
+12 Gauge
+12-gauge shotgun
+35M rifle
+vz. 24
+StG 44
+tilting-bolt
+vz. 33
 Gewehr-Granatpatrone 40
+RDX
 Gewehr-Panzergranate
 Gewehr-Sprenggranate
+PETN
 Hafthohlladung
 Kampfpistole
 Leuchtpistole 34
 Leuchtpistole 42
 Model 24 Grenade
+Stielhandgranate
 Model 39 grenade
+amatol
 Model 43
+HEAT
 Panzerwurfmine
+Fuze
 Schiessbecher
 Sprengpatrone
 Sturmpistole
 Wurfgranate Patrone 326
-FG 42
-StG 44
-Knorr-Bremse 1935/36
-MG 08
-MG 13
-MG 15
-MG 30
-MG 34
-MG 42
-MG 45
-MG 39 Rh
-MG 81
-Schwarzlose MG M.07/12
-VMG 1927
-Sturmgewehr 45K
-ZB vz. 26
-ZB vz. 30
-ZB-53
-MG 17
-MG 131
-MG 151/15
-MG 151/20
-Mauser MG 213
-Mauser MK 213
-MK 101
-MK 103
-MK 108
-MK 214A
-BK 3.7
-BK 5
-BK 7.5
-Stridsvagn L-5
-Leichttraktor
-Grosstraktor
-Panzer I
-Panzer II
-VK 16.02 Leopard
-Neubaufahrzeug
-Panzer III
-Panzerbeobachtungswagen III
-Panzer IV
-Panther
-Tiger I
-Tiger II
 Glasmine 43
 Hohl-Sprung mine 4672
 Holzmine 42
@@ -125,45 +167,111 @@ Panzer stab 43
 Riegel mine 43
 Schu-mine 42
 S-mine
+Topfmine
 Panzerfaust
 Panzerschreck
 Einstossflammenwerfer 46
 Flammenwerfer 35
 Flammenwerfer 41
 Abwehrflammenwerfer 42
+suppression
+defense
+FG 42
+Knorr-Bremse 1935/36
+Kg m/40 automatic rifle
+Sweden
+MG 08
+7x57mm Mauser
+13.2mm TuF
+MG 13
+MG 15
+MG 30
+Anti-aircraft
+Switzerland
+MG 34
+MG 42
+roller-locked
+Steyr-Daimler-Puch
+MG 45
+MG 39 Rh
+MG 81
+Schwarzlose MG M.07/12
+303 British
+VMG 1927
+ZB vz. 26
+ZB vz. 30
+ZB-53
+MG 17
+Rheinmetall-Borsig
+MG 131
+MG 151/15
+MG 151
+Autocannon
+MG 151/20
+Mauser MG 213
+Mauser MK 213
+MK 101
 Henschel Hs 129
-Henschel Hs 129 B-1
+Heinkel He 177
+MK 103
 Dornier Do 335
+MK 108
 Messerschmitt Bf 110G-2 bomber destroyers
+Messerschmitt Bf 110
 Messerschmitt Bf 109G-6/U4
+Messerschmitt Bf 109
+MK 112
+MK 214A
+MK 214A cannon
+BK 3.7
+Anti-tank
+BK 5
+BK 7.5
+7.5 cm Pak 40
 Stielgranate 41
 Stielgranate 42
-5 cm Granatwerfer 40
-8 cm Granatwerfer 73
+5 cm Granatwerfer 36
+M19 Maschinengranatwerfer
+8 cm Granatwerfer 34
+Kz 8 cm GrW 42
 8 cm minomet vz. 36
-8 cm Granatwerfer 33
 10 cm Nebelwerfer 35
+Granatwerfer 42
 Reihenwerfer
 10 cm Nebelwerfer 40
+15 cm Nebelwerfer 41
+Panzerwerfer
 20 cm leichter Ladungswerfer
+21 cm Nebelwerfer 42
 21 cm heavy mortar 69
+21 cm GrW 69
+28/32 cm Nebelwerfer 41
+Wurfrahmen 40
+30 cm Nebelwerfer 42
+30 cm Raketenwerfer 56
 38 cm schwerer Ladungswerfer
 2 cm KwK 30
+Panzer II
 3.7 cm KwK 36
+Panzer III
 Skoda 37 mm A7
 5 cm KwK 38
 5 cm KwK 39
 7.5 cm FK 16 nA
 7.5 cm FK 18
 7.5 cm FK 38
-7.5 cm FK 7M59
+7.5 cm FK 7M85
 7.5 cm KwK 37
+Panzer IV
 7.5 cm KwK 40
 7.5 cm KwK 42
 Ehrhardt 7.5 cm Model 1901
+Obice da 75/18 modello 34
 8 cm kanon vz. 30
 8.8 cm KwK 36
+Tiger I
 8.8 cm KwK 43
+Tiger II
 10 cm K 17
 10 cm M. 14 Feldhaubitze
 10 cm schwere Kanone 18
@@ -171,39 +279,64 @@ Canon de 105 mle 1913 Schneider
 10.5 cm Gebirgshaubitze 40
 10.5 cm hruby kanon vz. 35
 10.5 cm leFH 16
+10.5 cm leFH 18
 10.5 cm leFH 18/40
 10.5 cm leFH 18M
 15 cm Kanone 18
 15 cm Kanone 39
+15 cm sFH 13
+15 cm sFH 18
+15 cm sIG 33
 152 mm gun M1910/34
+17 cm Kanone 18
 Obice da 210/22
 Canon de 220 L mle 1917
+Rheinbote
 V-3 cannon
+12.7 cm SK C/34 naval gun
+15 cm Kanone 16
+15 cm SK C/28
+15 cm Autokanone M. 15/16
+Canon de 155mm GPF
 21 cm Kanone 38
 21 cm Kanone 39
+Skoda 220 mm howitzer
 24 cm Haubitze 39
 24 cm Kanone 3
 24 cm Kanone M. 16
 28 cm Haubitze L/12
+Krupp K5
 35.5 cm Haubitze M1
+38 cm SK C/34 naval gun
+40.6 cm SK C/34 gun
 42 cm Haubitze M. 14/16
+25 mm Hotchkiss anti-tank gun
 2.8 cm sPzB 41
+PaK 36
+Bofors 37 mm
 4.2 cm Pak 41
-M35 Bohler and Breda 47mm guns of unclear origin
-Austrian 4.7 cm IG 35/36
+47 mm APX anti-tank gun
+M35 Bohler and Breda 47mm guns
+Cannone da 47/32
+47 mm kanon P.U.V. vz. 36
 5 cm Pak 38
 7.5 cm Pak 39
-7.5 cm Pak 40
 7.5 cm Pak 41
-8 cm PAW 600 Panzerwurfkanone 10H64
+7.5 cm Pak 97/38
+8 cm PAW 600
 Panzerwurfkanone 10H64
-8.8 cm Flak 18/36/37/41 AT/AA gun 8.8 cm Pak 43
+8.8 cm Raketenwerfer 43
+8.8 cm Flak 18/36/37/41
 8.8 cm Pak 43
+Cannone da 90/53
 12.8 cm Pak 44
-Solothurn S-18/1000 Solothurn S-18/1100
+Wz. 35 anti-tank rifle
+Solothurn S-18/1000
 Solothurn S-18/1100
+Fliegerfaust
 2 cm Flak 30/38/Flakvierling
 Gebirgsflak 38
+25 mm Hotchkiss anti-aircraft gun
 3 cm MK 303 Flak
 3.7 cm Flak 18/36/37/43
 3.7 cm SK C/30
@@ -211,100 +344,158 @@ Gebirgsflak 38
 5 cm FlaK 41
 Jagdfaust
 Henschel Hs 297
-8.8 cm Flak 18/36/37/41 AT/AA gun
+Solothurn ST-5
+Rheintochter
+Cannone da 75/46 C.A. modello 34
+76 mm air defense gun M1938
 10.5 cm FlaK 38
 12.8 cm FlaK 40
+List of foreign vehicles used by Nazi Germany in World War II
 AMR 35
+Stridsvagn L-5
+Landsverk L-5
+Leichttraktor
+Krupp
+Grosstraktor
+Daimler
+Daimler-Benz
+Panzer I
+Henschel
+MAN
+MG 13 machine guns
+MG13
+2 cm KwK 30 L/55
+7.92 mm
+7.92 x 57 mm Mauser
+Maschinengewehr 34
+Slovakia
+VK 16.02 Leopard
+MIAG
+Neubaufahrzeug
+Panzerbeobachtungswagen III
+Tauchpanzer III
+Vomag
+Nibelungenwerk
+Panther
+7.5 cm KwK 42 L/70
+8.8 cm KwK 36 L/56
+MG34
 Flakpanzer I
 Wirbelwind
 Ostwind
 Kugelblitz
 5 cm PaK 38 auf Fahrgestell Panzerkampfwagen II
+Marder I
+Marder II
+Marder III
 Jagdpanzer IV
-Panzer IV/70
+Jagdpanther
+Nashorn
+Jagdtiger
+Elefant
+Sturmpanzer I
 Sturmtiger
 Wespe
 Hummel
-7.7 cm FK WD Schlepper 50PS
-8.8 cm Flak 18 auf Zgkw 12
-8.8 cm Flak 18 auf Zgkw 18
+Heuschrecke 10
+Panhard 178
+Sd.Kfz. 8
+Sd.Kfz. 9
 Sd.Kfz. 221
 Sd.Kfz. 222
 Sd.Kfz. 223
 Sd.Kfz. 231
 Sd.Kfz. 232
 Sd.Kfz. 233
+Sd.Kfz. 263
 Sd.Kfz. 234
-Sd.Kfz. 252 half-track ammunition carrier
-Borgward B III
+Sd.Kfz. 250
+Sd.Kfz. 251
+ADGZ
+M39 Pantserwagen
+Unic P107
+P107
+Sd.Kfz. 252
+Borgward IV
+Panzerbefehlswagen III
 Kugelpanzer
 Sd.Kfz. 247
-Sd.Kfz. 253 half-track artillery observer
+Sd.Kfz. 253
+Maultier
 Mercedes-Benz L3000
-Krupp Protze Kfz.19
-Kfz.19
-Kfz.21
-Kfz.68
-Kfz.69
-Kfz.70
-Kfz.81
-Kfz.83
 Borgward B 3000
-Sd.Kfz. 4 half-track
+Sd.Kfz. 4
 Polski Fiat 621
 Tatra 111
 Zis-5
+BMW 325
 Mercedes-Benz W31
-Trippel SG6 amphibious car
+Trippel SG6
 BMW R75
-NSU
+BMW R 17
 DKW NZ 350
-Sd.Kfz. 6 half-track
-Sd.Kfz. 7 half-track
-Sd.Kfz. 8 half-track
-Sd.Kfz. 9 half-track
-Sd.Kfz. 10 light half-track
-Sd.Kfz. 11 half-track
+DKW
+Landwasserschlepper
+Sd.Kfz. 2
+Sd.Kfz. 6
+Sd.Kfz. 7
+Sd.Kfz. 10
+Sd.Kfz. 11
 Bergepanzer III
+PzKpfw III
 Bergepanzer IV
+PzKpfw IV
+PzKpfw V Panther
 Bergetiger
-Bergepanzer T-34
-Sd.Kfz. 254 tracked artillery tractor
-Saurer RR-7
+PzKpfw VI Tiger I
+Tiger I tank
+Jagdpanzer 38
+Hetzer
+Sd.Kfz. 254
 Meillerwagen
+List of World War II military aircraft of Germany
+Wunderwaffe
 V-1 flying bomb
 V-2
 V3 cannon
 Panzer VIII Maus
 FuG 25a Erstling
-Anti-tank bombs SD 4 HL SD 4/HL RS SD 9/HL
 SD 4 HL
-SD 4/HL RS
-SD 9/HL
+AB 250-2
 SC 10
+BDC 10
 SC 10 DW
+PC 500
+PC 1000
 PC 1600
 PC 500 RS
 PC 1000 RS
 PC 1800 RS
 PD 500
-PD 1000
 AB 23
-AB 250-2
 AB 250-3
 AB 500-1
 AB 500-1B
 AB 500-3A
 AB 70-D1
-BDC 10
 SB 1000
-SB 1800
 SB 2500
 SC 50
+SC50 bomb
 SC 250
+SC250 bomb
 SC 500
+SC500 bomb
+SC 1000
+SC1000 bomb
 SC 1200
+SC1200 bomb
+SC 1800
+SC1800 bomb
 SC 2000
+SC2000 bomb
+SC 2500
+SC2500 bomb
 SD 1
 SD 1 FRZ
 SD 2
@@ -317,23 +508,117 @@ SD 50
 SD 70
 SBe 250
 SD 250
+SD 1700
+R4M
+Werfer-Granate 21
+Henschel Hs 293
+Henschel Hs 294
+Henschel Hs 298
+Ruhrstahl X-4
+Kramer Rk 344
+Panzergranate 39
+List of World War II firearms of Germany
+German designations of foreign artillery in World War II
+German designations of foreign firearms in World War II
+ISBN
+Image
+Name/designation
+Type
+Role/s
+Length
+First incorporated into the German army as a bayonet for the Mauser M1898 rifle
+Action
+Origin
+Variant/s
+Manufacturer/s
+Cartridge/s
+10.35mm Ordinanza Italiana
+Various
+7.62x25mm Tokarev 9x19mm Parabellum
+Used by the Volkssturm and the Volksgrenadier units in 1943 1945
+Model 1910 and Model 1934
+Doppelpistole M1912 and Repetierpistole M1912/P16
+and Repetierpistole M1912/P16
+Converted to 9mm Parabellum as the P12
+Standard issue pistol during World War II
+Walther Model 7
+Colt M1911
+Type I and Type II
+Rifles
+Rifle
+Main German rifle during World War II
+Hunting/self-defence
+Front-line/assault
+Warhead
+Donarit
+Mines
+Flamethrowers
+Sturmgewehr 45K
+Unknown
+Application/s
+aircraft
+30x184B
+Henschel Hs 129 B-1
+Messerschmitt Bf 110G-2 bomber destroyers Messerschmitt Bf 109G-6/U4
+55mm
+Artillery
+5 cm Granatwerfer 40
+8 cm Granatwerfer 73
+8 cm Granatwerfer 33
+7.5 cm FK 7M59
+M35 Bohler and Breda 47mm guns of unclear origin
+Austrian 4.7 cm IG 35/36
+8 cm PAW 600 Panzerwurfkanone 10H64
+8.8 cm Flak 18/36/37/41 AT/AA gun 8.8 cm Pak 43
+Solothurn S-18/1000 Solothurn S-18/1100
+8.8 cm Flak 18/36/37/41 AT/AA gun
+Vehicles
+Tankette
+Tanks
+37mm cannon
+2 x 7.92mm MG 13 light machine guns
+3.7 cm KwK L/45
+75 mm KwK
+Slovak alternative to the Panzer II . 5 prototypes built
+1 x 7.5 cm KwK 42 L/70
+Anti-Air
+Panzer IV/70
+7.7 cm FK WD Schlepper 50PS
+8.8 cm Flak 18 auf Zgkw 12
+8.8 cm Flak 18 auf Zgkw 18
+Sd.Kfz. 252 half-track ammunition carrier
+Borgward B III
+Sd.Kfz. 253 half-track artillery observer
+Trucks
+Krupp Protze Kfz.19
+Kfz.19
+Kfz.21
+Kfz.68
+Kfz.69
+Kfz.70
+Kfz.81
+Kfz.83
+Sd.Kfz. 4 half-track
+Trippel SG6 amphibious car
+Motorcycles
+NSU
+Sd.Kfz. 6 half-track
+Sd.Kfz. 7 half-track
+Sd.Kfz. 8 half-track
+Sd.Kfz. 9 half-track
+Sd.Kfz. 10 light half-track
+Sd.Kfz. 11 half-track
+Bergepanzer T-34
+Sd.Kfz. 254 tracked artillery tractor
+Saurer RR-7
+Radars
+Anti-tank bombs SD 4 HL SD 4/HL RS SD 9/HL
+SD 4/HL RS
+SD 9/HL
+PD 1000
+SB 1800
 SD 500
 Henschel Hs 293 anti-ship guided bomb
 Henschel Hs 294 anti-ship guided bomb
 Henschel Hs 298 radio-guided air-to-air missile
 Ruhrstahl X-4 wire-guided air-to-air missile
-Panzergranate 39
-List of World War II firearms of Germany
-German designations of foreign artillery in World War II
-German designations of foreign firearms in World War II
-Rifles
-Mines
-Flamethrowers
-Artillery
-Vehicles
-Tankette
-Tanks
-Trucks
-Motorcycles
-Aircraft
-Radars

@@ -5,17 +5,21 @@ scripts/vocab/parsers/wiki_parser.py
 
 Стратегия:
   1. Wikipedia REST API (action=parse&prop=text) → чистый HTML
-  2. ru.wikipedia: structure (wikitable → ul/li → h2/h3) + NARRATIVE (rank_names, unit_names, quoted)
-  3. en.wikipedia: cyrillic_from_cells + useful_latin (техника/аббревиатуры)
-  4. Нормализация: убираем [[...]], сноски[1], скобки кроме латиницы
-  5. Язык определяется автоматически из домена URL
+  2. Обработка redirects: если API вернул redirect → запрос реальной страницы
+  3. UNIVERSAL CONTENT WALKER: обходим ВСЕ текстовые элементы + <a> теги
+  4. ru.wikipedia: 
+     - links (<a href>) — самый точный источник терминов
+     - паттерны militera_parser (rank_names, unit_names, quoted)
+     - прямые термины из коротких элементов
+  5. en.wikipedia: кириллица из скобок + useful_latin (техника/аббревиатуры)
+  6. Нормализация: убираем [[...]], сноски[1], скобки кроме латиницы
 
-FIX V3: добавлена _extract_narrative_terms() для статей-повествований (операции, битвы)
+FIX V5: обработка Wikipedia redirects (двухэтапный запрос)
 
 Запуск:
   python scripts/vocab/parsers/wiki_parser.py \
-      --url "https://ru.wikipedia.org/wiki/Список_Маршалов_Советского_Союза" \
-      --category 1 \
+      --url "https://ru.wikipedia.org/wiki/Наступательная_операция_на_реке_Миус" \
+      --category 7 \
       --output-dir data/parsed
 """
 
@@ -53,11 +57,13 @@ WIKI_API_PARAMS = {
     "disablelimitreport": "1",
     "disableeditsection": "1",
     "disabletoc": "1",
+    "redirects": "1",
     "format": "json",
 }
 
 MIN_TERM_LEN = 3
 MAX_TERM_LEN = 80
+MAX_TERM_WORDS = 6  # максимум слов в прямом термине
 
 _RE_WIKI_LINK   = re.compile(r"\[\[.*?\]\]")
 _RE_FOOTNOTE    = re.compile(r"\[\d+\]")
@@ -67,10 +73,6 @@ _RE_DIGITS_ONLY = re.compile(r"^\d[\d\s\-–—.,]*$")
 _RE_SPACES      = re.compile(r"\s{2,}")
 _RE_HTML_ENTITY = re.compile(r"&[a-zA-Z]+;|&#\d+;")
 _RE_CYRILLIC    = re.compile(r"[А-ЯЁа-яё]{2,}")
-
-_NOISE_TAGS = ["sup", "span.reference", "span.mw-editsection"]
-
-_MAX_COL_SCAN = 3
 
 # ─────────────────────────────────────────────
 # ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
@@ -86,11 +88,6 @@ def _get_page_title(url: str) -> str:
     title = path.split("/wiki/", 1)[-1]
     return unquote(title)
 
-
-def _remove_noise(tag: BeautifulSoup) -> None:
-    for selector in _NOISE_TAGS:
-        for el in tag.select(selector):
-            el.decompose()
 
 def _clean_term(raw: str) -> str | None:
     t = raw.strip()
@@ -207,82 +204,92 @@ def _is_useful_latin(term: str) -> bool:
     return False
 
 # ─────────────────────────────────────────────
-# СТРАТЕГИИ ИЗВЛЕЧЕНИЯ
+# FIX V4: ИЗВЛЕЧЕНИЕ ИЗ <a> ТЕГОВ
 # ─────────────────────────────────────────────
 
-def _extract_from_tables(soup: BeautifulSoup) -> list[str]:
+_RE_CYRILLIC_IN_PARENS = re.compile(
+    r"\(\s*([А-ЯЁа-яё][А-ЯЁа-яё\s\-\.]{3,})\s*\)"
+)
+
+def _extract_from_links(soup: BeautifulSoup, lang: str) -> list[str]:
     """
-    Извлекает термины из wikitable.
-
-    FIX A: Сканирует cells[0], [1], [2] — берёт первый валидный термин
-    в строке. Решает проблему нумерованных таблиц где имя в cells[1].
-    """
-    terms: list[str] = []
-    for table in soup.select("table.wikitable"):
-        for row in table.select("tr"):
-            cells = row.select("td")
-            if not cells:
-                continue
-            for idx in range(min(_MAX_COL_SCAN, len(cells))):
-                cell = cells[idx]
-                _remove_noise(cell)
-                raw = cell.get_text(" ", strip=True)
-                term = _clean_term(raw)
-                if term:
-                    terms.append(term)
-                    break
-    return terms
-
-
-def _extract_from_lists(soup: BeautifulSoup) -> list[str]:
-    terms: list[str] = []
-    for noise in soup.select(".toc, .navbox, .mw-jump-link, nav"):
-        noise.decompose()
-
-    for li in soup.select("ul > li"):
-        _remove_noise(li)
-        raw = li.get_text(" ", strip=True)
-        for sep in (" — ", " - ", " – "):
-            if sep in raw:
-                raw = raw.split(sep)[0]
-                break
-        term = _clean_term(raw)
-        if term:
-            terms.append(term)
-    return terms
-
-
-def _extract_from_headings(soup: BeautifulSoup) -> list[str]:
-    terms: list[str] = []
-    SKIP_HEADINGS = {
-        "содержание", "примечания", "ссылки", "литература",
-        "источники", "см. также", "references", "notes",
-        "external links", "further reading", "contents",
-    }
-    for tag in soup.select("h2, h3"):
-        _remove_noise(tag)
-        raw = tag.get_text(" ", strip=True)
-        if raw.lower() in SKIP_HEADINGS:
-            continue
-        term = _clean_term(raw)
-        if term:
-            terms.append(term)
-    return terms
-
-
-# ─────────────────────────────────────────────
-# FIX V3: НАРРАТИВНАЯ ЭКСТРАКЦИЯ ДЛЯ ru.wikipedia
-# ─────────────────────────────────────────────
-
-def _extract_narrative_terms(soup: BeautifulSoup) -> list[str]:
-    """
-    FIX V3: извлекает термины из нарративного текста (параграфы).
-    Используется для статей-повествований (операции, битвы, события).
+    FIX V4: извлекает термины из <a> тегов основного контента.
     
-    Применяет паттерны из militera_parser:
-      - _extract_rank_names (генерал Жуков, маршал Василевский)
-      - _extract_unit_names (24-я армия, Западный фронт)
-      - _extract_quoted_terms (термины в кавычках)
+    Wikipedia: каждая ссылка = намеренно выделенный термин.
+    Это САМЫЙ ТОЧНЫЙ источник — ловит:
+    - топонимы (Оппельн, Ратибор, Бреслау)
+    - имена без званий (Шёрнер, Конев)
+    - любые именованные сущности
+    
+    Берём:
+    - text content ссылки (видимый текст)
+    - атрибут title (полное имя: "Шёрнер, Фердинанд" → "Фердинанд Шёрнер")
+    
+    Пропускаем:
+    - служебные ссылки (Special:, Help:, File:, Category:)
+    - навигационные блоки (уже decompose)
+    """
+    terms: list[str] = []
+    
+    for a in soup.select("a[href]"):
+        href = a.get("href", "")
+        
+        # Пропускаем не-wiki ссылки
+        if not href.startswith("/wiki/"):
+            continue
+        
+        # Пропускаем служебные страницы
+        skip_prefixes = (
+            "/wiki/Special:", "/wiki/Help:", "/wiki/File:",
+            "/wiki/Wikipedia:", "/wiki/Категория:", "/wiki/Шаблон:",
+            "/wiki/Обсуждение:", "/wiki/Участник:", "/wiki/Category:",
+            "/wiki/Template:", "/wiki/Portal:",
+        )
+        if any(href.startswith(p) for p in skip_prefixes):
+            continue
+        
+        # 1. Берём text content ссылки (видимый текст)
+        link_text = a.get_text(" ", strip=True)
+        if link_text:
+            term = _clean_term(link_text)
+            if term:
+                if lang == "ru" and _is_cyrillic_term(term):
+                    terms.append(term)
+                elif lang == "en" and _is_useful_latin(term):
+                    terms.append(term)
+        
+        # 2. Берём title атрибут (часто более полный: "Шёрнер, Фердинанд")
+        title_attr = a.get("title", "").strip()
+        if title_attr and title_attr != link_text:
+            # "Фамилия, Имя" → "Имя Фамилия"
+            if ", " in title_attr:
+                parts = title_attr.split(", ", 1)
+                if len(parts) == 2:
+                    title_attr = f"{parts[1]} {parts[0]}"
+            
+            title_term = _clean_term(title_attr)
+            if title_term:
+                if lang == "ru" and _is_cyrillic_term(title_term):
+                    terms.append(title_term)
+                elif lang == "en" and _is_useful_latin(title_term):
+                    terms.append(title_term)
+    
+    return terms
+
+# ─────────────────────────────────────────────
+# FIX V4: УНИВЕРСАЛЬНЫЙ CONTENT WALKER
+# ─────────────────────────────────────────────
+
+def _extract_from_elements(soup: BeautifulSoup, lang: str) -> list[str]:
+    """
+    FIX V4: УНИВЕРСАЛЬНЫЙ экстрактор — обходит ВСЕ текстовые элементы статьи.
+    
+    Стратегия:
+    1. Удаляем навигацию/служебные блоки
+    2. Для каждого текстового элемента (<p>, <li>, <td>, <th>, <h2>, <h3>):
+       - ru: применяем паттерны (rank_names, unit_names, quoted) + прямые термины
+       - en: кириллица из скобок + useful_latin
+    3. Извлекаем ВСЕ вложенные элементы рекурсивно
     """
     from scripts.vocab.parsers.militera_parser import (
         _extract_rank_names,
@@ -290,59 +297,90 @@ def _extract_narrative_terms(soup: BeautifulSoup) -> list[str]:
         _extract_quoted_terms,
     )
     
-    # Удаляем навигацию, сноски, боксы
-    for noise in soup.select("nav, .navbox, .reflist, .reference, sup, .infobox"):
+    terms: list[str] = []
+    
+    # Обходим ВСЕ текстовые контейнеры
+    # FIX: используем "ul li" вместо "ul > li" — включает вложенные списки
+    text_elements = soup.select(
+        "p, "              # параграфы (основной текст статьи)
+        "ul li, "          # списки (ВСЕ li, включая вложенные) ← FIX!
+        "ol li, "          # нумерованные списки
+        "td, th, "         # ячейки таблиц (включая infobox)
+        "h2, h3, "         # заголовки секций
+        ".infobox td, "    # явно infobox
+        ".vevent td"       # карточки событий
+    )
+    
+    for elem in text_elements:
+        # Берём текст ВСЕГО элемента со всеми вложенными тегами
+        raw_text = elem.get_text(" ", strip=True)
+        
+        if not raw_text or len(raw_text) < MIN_TERM_LEN:
+            continue
+        
+        if lang == "ru":
+            # Применяем паттерны из militera_parser (ловят имена, формирования)
+            terms.extend(_extract_rank_names(raw_text))
+            terms.extend(_extract_unit_names(raw_text))
+            terms.extend(_extract_quoted_terms(raw_text))
+            
+            # Также пробуем извлечь как готовый термин (короткие элементы)
+            # Отрезаем описания после " — ", " - ", " – "
+            clean_text = raw_text
+            for sep in (" — ", " - ", " – "):
+                if sep in clean_text:
+                    clean_text = clean_text.split(sep)[0]
+                    break
+            
+            term = _clean_term(clean_text)
+            if term and len(term.split()) <= MAX_TERM_WORDS:
+                terms.append(term)
+        
+        elif lang == "en":
+            # Кириллица из скобок (приоритет)
+            for m in _RE_CYRILLIC_IN_PARENS.finditer(raw_text):
+                term = _clean_term(m.group(1))
+                if term and len(term) >= 4:
+                    terms.append(term)
+            
+            # Useful latin (техника/аббревиатуры)
+            clean_text = raw_text
+            for sep in (" — ", " - ", " – "):
+                if sep in clean_text:
+                    clean_text = clean_text.split(sep)[0]
+                    break
+            
+            term = _clean_term(clean_text)
+            if term and _is_useful_latin(term):
+                terms.append(term)
+    
+    return terms
+
+def _extract_all_content(soup: BeautifulSoup, lang: str) -> list[str]:
+    """
+    Полная экстракция из статьи:
+    1. Удаляем служебные блоки
+    2. Извлекаем из <a> тегов (САМЫЙ ТОЧНЫЙ источник)
+    3. Извлекаем из текстовых элементов (паттерны + прямые термины)
+    4. Дедупликация
+    """
+    # Удаляем служебные блоки (навигация, сноски, метаданные)
+    for noise in soup.select(
+        "nav, .navbox, .reflist, .reference, "
+        "script, style, .printfooter, .catlinks, "
+        "#toc, .mw-jump-link, .mw-editsection"
+    ):
         noise.decompose()
     
-    # Берём текст всех <p> параграфов основной статьи
-    text_blocks = [p.get_text(" ", strip=True) for p in soup.select("p")]
-    full_text = " ".join(text_blocks)
+    # 1. Извлекаем из <a> тегов (топонимы, имена без званий)
+    link_terms = _extract_from_links(soup, lang)
     
-    terms: list[str] = []
-    terms.extend(_extract_rank_names(full_text))
-    terms.extend(_extract_unit_names(full_text))
-    terms.extend(_extract_quoted_terms(full_text))
+    # 2. Извлекаем из текстовых элементов (паттерны + прямые термины)
+    element_terms = _extract_from_elements(soup, lang)
     
-    return terms
-
-
-# ─────────────────────────────────────────────
-# FIX БАГ 2: _extract_cyrillic_from_cells — только кириллица в скобках
-# ─────────────────────────────────────────────
-
-_RE_CYRILLIC_IN_PARENS = re.compile(
-    r"\(\s*([А-ЯЁа-яё][А-ЯЁа-яё\s\-\.]{3,})\s*\)"
-)
-
-
-def _extract_cyrillic_from_cells(soup: BeautifulSoup) -> list[str]:
-    """
-    FIX БАГ 2: ищет кириллицу ТОЛЬКО внутри скобок в ячейках таблиц и li.
-    Паттерн: 'Georgy Zhukov (Георгий Жуков)' → 'Георгий Жуков'
-    Одиночные кириллические слова вне скобок (Выстрел, etc.) — игнорируются.
-    """
-    terms: list[str] = []
-
-    for table in soup.select("table.wikitable"):
-        for row in table.select("tr"):
-            cells = row.select("td")
-            for cell in cells[:_MAX_COL_SCAN]:
-                _remove_noise(cell)
-                raw = cell.get_text(" ", strip=True)
-                for m in _RE_CYRILLIC_IN_PARENS.finditer(raw):
-                    term = _clean_term(m.group(1))
-                    if term and len(term) >= 4:
-                        terms.append(term)
-
-    for li in soup.select("ul > li"):
-        _remove_noise(li)
-        raw = li.get_text(" ", strip=True)
-        for m in _RE_CYRILLIC_IN_PARENS.finditer(raw):
-            term = _clean_term(m.group(1))
-            if term and len(term) >= 4:
-                terms.append(term)
-
-    return terms
+    # Объединяем + дедупликация
+    all_terms = link_terms + element_terms
+    return _dedupe_ordered(all_terms)
 
 # ─────────────────────────────────────────────
 # WIKI PARSER
@@ -352,8 +390,7 @@ class WikiParser(BaseParser):
     """
     Парсер Wikipedia (ru + en).
 
-    ru.wikipedia: structure (table → list → heading) + narrative (rank_names, unit_names, quoted)
-    en.wikipedia: кириллица из ячеек (primary) + латиница-техника (secondary, _en.txt)
+    FIX V5: обработка Wikipedia redirects + универсальный content walker + извлечение из <a> тегов
     """
 
     def fetch(self) -> str:
@@ -382,82 +419,99 @@ class WikiParser(BaseParser):
         if "parse" not in data:
             raise ValueError(f"Wikipedia API: неожиданный ответ для {title!r}")
 
-        html = data["parse"]["text"]["*"]
-        self.logger.info(f"fetch OK — {len(html):,} символов")
+        # FIX V5: обработка redirects
+        # Если API вернул redirect, парсим реальный title и делаем второй запрос
+        parse_data = data["parse"]
+        html = parse_data["text"]["*"]
+        
+        # Проверяем на короткий HTML (признак redirect)
+        if len(html) < 5000:
+            # Ищем реальный title в redirects или в самом HTML
+            redirected_title = None
+            
+            # Способ 1: проверяем redirects в JSON
+            if "redirects" in parse_data:
+                redirected_title = parse_data["redirects"][-1]["to"]
+                self.logger.info(f"redirect обнаружен в JSON: {title!r} → {redirected_title!r}")
+            
+            # Способ 2: парсим HTML на наличие текста "(перенаправлено с"
+            elif "перенаправлено с" in html.lower() or "redirected from" in html.lower():
+                # Извлекаем реальный title из HTML
+                soup = BeautifulSoup(html, "html.parser")
+                # Ищем первую ссылку в контенте (обычно это цель redirect)
+                first_link = soup.select_one("a[href^='/wiki/']")
+                if first_link:
+                    href = first_link.get("href", "")
+                    redirected_title = href.split("/wiki/", 1)[-1]
+                    self.logger.info(f"redirect обнаружен в HTML: {title!r} → {redirected_title!r}")
+            
+            # Если нашли redirect — делаем второй запрос
+            if redirected_title:
+                self.logger.info(f"fetch → перезапрос реальной страницы: {redirected_title!r}")
+                params["page"] = redirected_title
+                self.rate_limiter.wait(self.domain)
+                resp = self.session.get(api_url, params=params, timeout=self.timeout)
+                resp.raise_for_status()
+                data = resp.json()
+                
+                if "parse" in data:
+                    html = data["parse"]["text"]["*"]
+                    self.logger.info(f"fetch OK (после redirect) — {len(html):,} символов")
+                else:
+                    self.logger.warning(f"⚠️ Не удалось получить реальную страницу после redirect")
+            else:
+                self.logger.warning(
+                    f"⚠️ HTML слишком короткий ({len(html)} символов), "
+                    f"но redirect не обнаружен — возможно stub-статья"
+                )
+        else:
+            self.logger.info(f"fetch OK — {len(html):,} символов")
+
         save_cache(self.url, html)
         return html
 
     def extract_terms(self, html: str) -> list[str]:
         """
+        FIX V4: универсальный экстрактор
+        
+        1. Извлекает из <a> тегов (топонимы, имена без званий)
+        2. Обходит ВСЕ элементы (<p>, <li>, <td>, <th>, <h2>, <h3>)
+        3. Применяет паттерны (rank_names, unit_names, quoted)
+        4. Извлекает прямые термины (≤ 6 слов)
+        
         ru.wikipedia:
-          structure: table → list → heading
-          narrative: rank_names, unit_names, quoted (FIX V3)
+          - <a> теги: Оппельн, Ратибор, Бреслау, Шёрнер
+          - Паттерны: rank_names, unit_names, quoted
+          - Прямые термины: города, топонимы, операции
           
         en.wikipedia:
-          Primary   → кириллица из ячеек (имена в скобках)
-          Secondary → латиница ТОЛЬКО если это техника/аббревиатура
-          Discard   → транслитерированные русские имена (Georgy Zhukov и т.п.)
+          - <a> теги: useful_latin
+          - Кириллица из скобок "(Георгий Жуков)"
+          - Useful latin (техника/аббревиатуры)
         """
         soup = BeautifulSoup(html, "html.parser")
         lang = _get_lang(self.url)
 
-        table_terms   = _extract_from_tables(soup)
-        list_terms    = _extract_from_lists(soup)
-        heading_terms = _extract_from_headings(soup)
-
-        if lang == "ru":
-            # FIX V3: добавляем нарративную экстракцию для статей-повествований
-            narrative_terms = _extract_narrative_terms(soup)
+        # FIX V4: универсальная экстракция (links + elements)
+        all_terms = _extract_all_content(soup, lang)
+        
+        # Разделяем кириллицу и латиницу для en.wikipedia
+        if lang == "en":
+            cyrillic_terms = [t for t in all_terms if _is_cyrillic_term(t)]
+            latin_terms = [t for t in all_terms if not _is_cyrillic_term(t)]
             
-            self.logger.info(
-                f"extract [ru]: tables={len(table_terms)}, "
-                f"lists={len(list_terms)}, headings={len(heading_terms)}, "
-                f"narrative={len(narrative_terms)}"
-            )
-            
-            combined = table_terms + list_terms + heading_terms + narrative_terms
-            result = _dedupe_ordered(combined)
-
-        elif lang == "en":
-            cyrillic_terms = _dedupe_ordered(
-                [t for t in _extract_cyrillic_from_cells(soup)
-                 if _is_cyrillic_term(t)]
-            )
-
-            useful_latin = _dedupe_ordered(
-                [t for t in (table_terms + list_terms + heading_terms)
-                 if not _is_cyrillic_term(t) and _is_useful_latin(t)]
-            )
-
-            discarded = [
-                t for t in (table_terms + list_terms + heading_terms)
-                if not _is_cyrillic_term(t) and not _is_useful_latin(t)
-            ]
-
             self.logger.info(
                 f"extract [en]: cyrillic={len(cyrillic_terms)}, "
-                f"useful_latin={len(useful_latin)}, "
-                f"discarded_transliterations={len(discarded)}"
+                f"latin={len(latin_terms)}"
             )
-
-            if cyrillic_terms:
-                self.logger.info(
-                    f"✅ Primary: кириллица ({len(cyrillic_terms)} терминов)"
-                )
-            else:
-                self.logger.warning(
-                    "⚠️ Кириллица не найдена — только техника/аббревиатуры"
-                )
-
-            if useful_latin:
-                self._save_latin(useful_latin)
-
-            result = _dedupe_ordered(cyrillic_terms + useful_latin)
-
+            
+            if latin_terms:
+                self._save_latin(latin_terms)
+            
+            result = all_terms
         else:
-            # Fallback для других языков
-            combined = table_terms + list_terms + heading_terms
-            result = _dedupe_ordered(combined)
+            self.logger.info(f"extract [ru]: total={len(all_terms)}")
+            result = all_terms
 
         self.logger.info(f"extract total (after dedup): {len(result)}")
         return result
@@ -500,8 +554,8 @@ def main() -> None:
     terms = parser.run()
     print(f"\n✅ Извлечено терминов: {len(terms)}")
     if terms:
-        print("  Первые 15:")
-        for t in terms[:15]:
+        print("  Первые 30:")
+        for t in terms[:30]:
             print(f"    {t}")
 
 

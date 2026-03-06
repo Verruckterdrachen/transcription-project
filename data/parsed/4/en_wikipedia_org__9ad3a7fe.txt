@@ -1,99 +1,203 @@
+Wehrmacht
+Luftwaffe
+Waffen-SS
+Volkssturm
+World War II
+Seitengewehr 42
+Seitengewehr 98
+S84/98 III bayonet
 Astra 300
+32 ACP
+380 ACP
 Astra 400
 Astra 600
 Astra 900
+Astra Model 900
+7.65 mm Browning/.32 ACP
+Gestapo
 Dreyse M1907
+Rheinmetall
+WW2
 FN Model 1910
 FN Model 1922
+11.43x23mm ACP
+45 ACP
 Luger P08 pistol
+Mauser-Werke
+Mauser
 Luger M1902 Carbine
+9x19mm Parabellum
+Kriegsmarine
+Kriminalpolizei
 Mauser C96
 Radom wz.35 Vis
+Feldgendarmerie
 Steyr M1912
 Sauer 38H
-Volkspistole
-Walther P38
-Walther Model 8
-Walther Model 9
 Colt M1911
+M1911 pistol
+Volkspistole
+Gustloff-Werke
+Walther P38
+Spreewerk
+Walther Model 8
+25 ACP
+Panzerwaffe
+Walther Model 9
+M1917 Revolver
 Colt M1917
 Bodeo M1889 Revolver
+Bodeo Model 1889
+WW1
+FG 42
+Rheinmetall-Borsig
+Vz. 24
 Gewehr 29/40
+Karabinek wz. 1929
+Vz. 33
+Gewehr 41
 Gewehr 43 Sniper Rifle
+Gewehr 43
+7.92x57mm Mauser
 Gewehr 43/Karabiner 43
 Gewehr 88
+Gewehr 1888
+Steyr-Mannlicher
 Gewehr 98
 Gewehr 98 Sniper Rifle
 Gewehr 98/40
+35M rifle
 Karabiner 98a
 Karabiner 98b
 Karabiner 98k
 Karabiner 98k Sniper Rifle
 M30 Luftwaffe drilling
+9.3x74mmR
+12 Gauge
 Sturmgewehr 44
+StG 44
+Volksgrenadier
 Volkssturmgewehr/Gewehr 1-5
+Volkssturmgewehr
 Sturmgewehr 1-5
+7.92x33mm Kurz
 Volksgewehr VG-1
 Volkssturmgewehr VG-2
 Volkssturmgewehr VG-3
+StG-44
 Volkssturmgewehr VG-4
+Erma-Werke
 VK-98
 Gewehr 43K
+Knorr-Bremse
+Kummersdorf
 Mauser StG 45 Kurz
 Rheinmetall VG45K
 Maschinengewehr 08
+MG 08
+DWM
 Maschinengewehr 15
+MG 15
 Maschinengewehr 30
+MG 30
+Steyr-Daimler-Puch
 ZB vz. 30
 Maschinengewehr 34
+MG 34
 Maschinengewehr 42
+MG 42
 MG 45
 MG 81
 Kg m/40 Automatic Rifle
 Maschinengewehr 13
+MG 13
+Dreyse
 Maschinengewehr 39 Rh
+MG 39 Rh
 Maschinengewehr M. 7
+Steyr
+Heer
 ZB vz. 26
 ZB-53
 Beretta Model 38/42
+Beretta Model 38
+Beretta
 Beretta Model 38/44
 Mauser M712 Schnellfeuer
 MP18
+MP 18
 MP28
 MP34
+MP 34
 MP35
+MP 35
 MP38
+MP 40
 MP40
 MP41
 MP3008
+MP 3008
 Suomi KP/-31
 ZK-383
 MAS-38
+7.65mm Longue
 Danuvia 39M/43M
+Danuvia 43M submachine gun
+Danuvia
 Astra 902
 Astra 904
+PPSh-41
 TZ-45
 EMP 44
 Sten
 Panzerfaust
+Panzerschreck
+M1A1 Bazooka
+Bazooka
 Solothurn S-18/1000
 Solothurn S-18/1100
 Sturmpistole
 Karabin przeciwpancerny wz.35
-PzB M.SS.41
+Wz. 35 anti-tank rifle
+Czechoslovakia
+Fliegerfaust
+Solothurn ST-5
+2 cm Flak 30/38/Flakvierling
+Flak 38 and Flakvierling 38 2 cm Flak 30
+USSR
+25 mm Hotchkiss anti-aircraft gun
+Gebirgsflak 38
+3.7 cm SK C/30
+3.7 cm FlaK 43
+3.7 cm Flak 18/36/37/43
+5 cm FlaK 41
+Henschel Hs 297
+Jagdfaust
+Rheintochter
+Cannone da 75/46 C.A. modello 34
+76 mm air defense gun M1938
+8.8 cm Flak 18/36/37/41
+10.5 cm FlaK 38
+12.8 cm FlaK 40
+Cannone da 90/53 AA/AT gun
+Cannone da 90/53
 Stielhandgranate Model 1924
+Stielhandgranate
 Stielhandgranate Model 1943
 Gewehr-Granatpatrone 40
 Gewehr-Panzergranate
 Gewehr-Sprenggranate
 Hafthohlladung
 Eihandgranate Model 39
+Model 39 grenade
 Panzerwurfmine
+Schiessbecher
 Sprengpatrone
 Wurfgranate Patrone 326
 Tellermine
 Topfmine
 Schrapnellmine
+S-mine
 Schu-mine 42
 Riegel mine 43
 Panzer stab 43
@@ -101,12 +205,55 @@ Holzmine 42
 List of equipment used in World War II
 List of German military equipment of World War II
 List of World War II Luftwaffe aircraft weapons
+List of weapons of military aircraft of Germany during World War II
 List of aircraft of the World War II Luftwaffe
 List of common World War II infantry weapons
 List of secondary and special issue World War II infantry weapons
+List of secondary and special-issue World War II infantry weapons
 Glossary of World War II German military terms
 Captured US firearms in Axis use in World War II
 German designations of foreign firearms in World War II
+ISBN
+Ian V. Hogg
 Knives
 Sidearms
+Picture
+Name
+Manufacturer
+Cartridge
+Note
+Only a few thousands of the pistols were produced during WW2
+A few were seen used by the Wehrmacht and Waffen-SS in 1944
+Similar to the PP but shorter version used mostly by Kriminalpolizei during WW2
+298 pistols were delivered to the Wehrmacht in 1940-1945
+10.35mm Ordinanza Italiana
 Rifles
+A sniper variant of the Gewehr 43 rifle
+The Gewehr 88 was the first rifle adopted by Germany that used Smokeless powder
+Sniper version of the Gewehr 98 Rifle
+Sniper version of the Karabiner 98k with Sniper Scope
+Produced a few of this rifle in 1944-1945 issued to Volkssturm
+A bolt action rifle with a 10 round detachable box magazine
+A bolt action rifle with a 5 round internal magazine
+A bolt action rifle with a 10 round internal magazine
+A bullpup assault rifle designed in 1945
+Standard machine gun of World War I. Saw limited use in World War II
+Czechoslovak ZB vz. 30 produced under German occupation for Waffen-SS use
+n/a
+Proposed MG42 replacement using an unusual delayed blowback operation
+Improved version of MP18
+Bergmann
+Produced from 1935 to 1944. Used primarily by the Waffen-SS
+Used primarily by the Feldgendarmerie in World War II
+Haenel
+Some of this guns were delivered to the Wehrmacht in WW2
+Numerous
+100mm anti-tank grenade
+88mm rocket
+Solothurn
+Full-automatic version of the Solothurn S-18/1000
+PzB M.SS.41
+Various
+The standard grenade of the Wehrmacht and germany army during WW2
+An anti-tank variant of the Stielhandgranate Model 1924
+The wurfgranate patrone 326 was designed to be fired from a Leuchtpistole

@@ -1,9 +1,176 @@
-Captain-Commandant
-SS-Hauptmann
-Unknown
-Major
-Waffen-SS Divisions 1939-45 by Chris Bishop
+Waffen-SS
+1st SS Panzer Division Leibstandarte SS Adolf Hitler
+2nd SS Panzer Division Das Reich
+3rd SS Panzer Division Totenkopf
 4th SS Polizei Panzergrenadier Division
+5th SS Panzer Division Wiking
+6th SS Mountain Division Nord
+7th SS Volunteer Mountain Division Prinz Eugen
+8th SS Cavalry Division Florian Geyer
+9th SS Panzer Division Hohenstaufen
+10th SS Panzer Division Frundsberg
+11th SS Volunteer Panzergrenadier Division Nordland
+12th SS Panzer Division Hitlerjugend
+18th SS Volunteer Panzergrenadier Division Horst Wessel
+21st Waffen Mountain Division of the SS Skanderbeg
+22nd SS Volunteer Cavalry Division Maria Theresia
+Captain-Commandant
+Hauptmann
+30th Waffen Grenadier Division of the SS
+31st SS Volunteer Grenadier Division
 32nd SS Volunteer Grenadier Division 30 January
+33rd Waffen Grenadier Division of the SS Charlemagne
+34th SS Volunteer Grenadier Division Landstorm Nederland
 35th SS-Police Grenadier Division
 36th Waffen Grenadier Division of the SS
+Rank
+Name
+15 August 1938
+7 April 1943
+20 August 1944
+6 February 1945
+19 October 1939
+14 October 1941
+31 December 1941
+19 April 1942
+10 February 1943
+18 March 1943
+29 March 1943
+23 October 1943
+24 July 1944
+28 July 1944
+23 October 1944
+20 January 1945
+9 March 1945
+13 April 1945
+1 November 1939
+7 July 1941
+18 July 1941
+19 September 1941
+26 February 1943
+27 April 1943
+15 May 1943
+22 October 1943
+21 June 1944
+1 September 1940
+8 September 1940
+10 November 1940
+16 August 1941
+18 August 1941
+15 December 1941
+15 May 1942
+19 July 1942
+10 June 1943
+5 July 1943
+18 August 1943
+20 October 1943
+7 May 1944
+22 July 1944
+16 August 1944
+22 August 1944
+27 November 1944
+1 December 1940
+1 May 1943
+20 July 1944
+11 August 1944
+9 October 1944
+28 February 1941
+25 May 1941
+21 April 1942
+15 June 1942
+15 December 1943
+20 May 1944
+1 September 1944
+2 April 1945
+30 January 1942
+30 January 1944
+15 February 1943
+20 April 1943
+14 May 1943
+13 September 1943
+1 January 1944
+14 April 1944
+1 July 1944
+29 June 1944
+10 July 1944
+31 July 1944
+29 August 1944
+10 October 1944
+15 November 1943
+27 April 1944
+28 April 1945
+22 March 1943
+27 July 1944
+25 April 1945
+31 July 1943
+14 June 1944
+6 September 1944
+24 October 1944
+13 November 1944
+13 February 1943
+9 March 1943
+1 August 1943
+1 June 1944
+30 June 1943
+20 November 1943
+5 September 1944
+25 February 1943
+17 February 1944
+21 July 1944
+26 January 1945
+15 February 1945
+3 October 1943
+16 June 1944
+18 June 1944
+1 August 1944
+30 August 1944
+21 October 1944
+15 November 1944
+9 January 1945
+21 January 1945
+22 March 1945
+24 March 1945
+27 March 1945
+25 January 1944
+3 January 1945
+15 March 1944
+13 April 1944
+20 March 1945
+1 May 1944
+21 April 1944
+20 April 1944
+5 December 1944
+10 February 1945
+2 November 1944
+23 January 1945
+29 January 1945
+21 March 1945
+24 September 1941
+Hallmann
+20 June 1942
+11 July 1942
+SS-Hauptmann
+13 February 1944
+30 January 1945
+Unknown
+17 June 1944
+18 August 1944
+28 June 1944
+1 October 1944
+SS-Commanders
+5 February 1945
+17 February 1945
+15 March 1945
+Major
+LaCroix/Demessine
+1 April 1942
+September 1944
+28 February 1945
+11 May 1943
+Deurheit
+1 April 1944
+5 November 1944
+18 March 1945
+20 February 1945
+12 April 1945
+Waffen-SS Divisions 1939-45 by Chris Bishop
