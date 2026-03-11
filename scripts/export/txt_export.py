@@ -13,7 +13,7 @@ from core.utils import seconds_to_hms
 # ─────────────────────────────────────────────────────────────────────────────
 # [?]-МЕТКИ: пороги для определения спорных сегментов
 # ─────────────────────────────────────────────────────────────────────────────
-SUSPICIOUS_CONFIDENCE   = -0.25   # confidence ниже → спорный
+SUSPICIOUS_CONFIDENCE   = -0.20   # confidence ниже → спорный
 SUSPICIOUS_MAX_WORDS    = 5       # триггер 1: короткий сегмент (≤ N слов)
 SUSPICIOUS_MIN_SENTENCES = 3      # триггер 2: merged-диалог (≥ N предложений)
 
@@ -214,7 +214,6 @@ def export_to_txt(txt_path, segments, speaker_surname):
             # 🆕 v17.20: [?]-метка
             susp, reason = is_suspicious_segment(seg)
             if susp:
-                prefix = "[?] "
                 suspicious_list.append({
                     "time": time, "speaker": speaker,
                     "text": text, "reason": reason
@@ -222,7 +221,7 @@ def export_to_txt(txt_path, segments, speaker_surname):
             else:
                 prefix = ""
 
-            f.write(f"{prefix}{time} {speaker}: {text_with_timestamps}\n")
+            f.write(f"{time} {speaker}: {text_with_timestamps}\n")
 
         # 🆕 v17.20: Footer-реестр спорных реплик
         if suspicious_list:
@@ -304,7 +303,6 @@ def jsons_to_txt(json_files, txt_path, speaker_surname):
                 # 🆕 v17.20: [?]-метка
                 susp, reason = is_suspicious_segment(seg)
                 if susp:
-                    prefix = "[?] "
                     suspicious_list.append({
                         "file":    current_file,
                         "time":    seg["time"],
@@ -315,7 +313,7 @@ def jsons_to_txt(json_files, txt_path, speaker_surname):
                 else:
                     prefix = ""
 
-                f.write(f"{prefix}{seg['time']} {seg['speaker']}: {text_with_timestamps}\n")
+                f.write(f"{seg['time']} {seg['speaker']}: {text_with_timestamps}\n")
 
         # 🆕 v17.20: Глобальный footer-реестр
         if suspicious_list:

@@ -594,16 +594,6 @@ def main():
 	# Инициализация
 	login(token=HF_TOKEN)
 
-	print(f"🔥 ПАЙПЛАЙН v{VERSION}: {VERSION_NAME}")
-	print(f"GPU: {'✅ CUDA' if torch.cuda.is_available() else '⚠️ CPU'}")
-	print("=" * 70)
-	print()
-	print("🔴 v17.1 DEBUG:")
-	print("   🐛 БАГ #15: Отслеживание пропуска 'прорыв блокады' на 00:02:26")
-	print("   🔍 DEBUG checkpoint на каждом этапе пайплайна")
-	print("   📝 Полный вывод текста сегмента для целевого timestamp")
-	print()
-
 	# Запрос пути к папке
 	folder_path = input("📂 Путь к папке спикера (\\\\ или /): ").strip().replace('"', '')
 	folder = Path(folder_path)
@@ -626,7 +616,7 @@ def main():
 	print(f"📁 txt/:   {txt_dir}")
 
 	# Выбор режима
-	mode = input("\n⚙️ Режим [точный]: ").strip().lower() or "точный"
+	mode = "точный"
 	print(f"\n🚀 Режим: {mode} (v{VERSION})")
 
 	# Загрузка Whisper
