@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-corrections/hallucinations.py - Удаление галлюцинаций Whisper v16.19
+corrections/hallucinations.py - Удаление галлюцинаций Whisper
 
-🆕 v16.19: КРИТИЧЕСКИЙ FIX - Удаление дублей + "Продолжение следует"
+🆕 v17.25: remove_leading_hallucinations() — немецкие ZDF/copyright паттерны в начале
+🆕 v16.19: Удаление дублей + "Продолжение следует"
 - Детекция дублированных фраз (similarity >95%)
 - Удаление Whisper hallucination в конце файла ("Продолжение следует", "Спасибо за внимание")
 - Удаление дублей с разным регистром ("логичным Логичным")
@@ -90,10 +91,6 @@ def is_duplicate_phrase(text, debug=False):
             next_sent = sentences[i + 1]
 
             # ── 🔧 v17.5: SUFFIX-MATCH ──────────────────────────────────
-            # Случай: "А на момент начала Искра о нем просто ничего не знали.
-            #          ничего не знали."
-            # next_sent — хвост current, similarity низкая (~30%),
-            # но это всё равно дубль.
             cur_words = current.lower().split()
             nxt_words = next_sent.lower().split()
 
@@ -106,7 +103,7 @@ def is_duplicate_phrase(text, debug=False):
                         f"  🔍 SUFFIX-ДУБЛЬ: \"{next_sent}\" "
                         f"— хвост \"{current}\""
                     )
-                cleaned_sentences.append(current)  # берём полную версию
+                cleaned_sentences.append(current)
                 skip_next = True
                 duplicates_found += 1
                 continue
@@ -146,12 +143,7 @@ def is_duplicate_phrase(text, debug=False):
 def remove_ending_hallucinations(text, debug=False):
     """
     🆕 v16.19: Удаляет типичные Whisper hallucination в конце текста
-    
-    Whisper часто добавляет в конце файла:
-    - "Продолжение следует"
-    - "Спасибо за внимание"
-    - "До новых встреч"
-    - "Подписывайтесь на наш канал"
+    🆕 v17.25: Добавлены немецкие ZDF/copyright паттерны
     
     Args:
         text: Текст сегмента
@@ -161,11 +153,18 @@ def remove_ending_hallucinations(text, debug=False):
         Очищенный текст
     """
     hallucination_patterns = [
+        # Русские паттерны
         r'продолжение\s+следует[.!?]*\s*$',
         r'спасибо\s+за\s+внимание[.!?]*\s*$',
         r'до\s+новых\s+встреч[.!?]*\s*$',
         r'подписывайтесь\s+на\s+наш\s+канал[.!?]*\s*$',
         r'ставьте\s+лайки[.!?]*\s*$',
+        # 🆕 v17.25: Немецкие Whisper-галлюцинации (ZDF/ARD/funk copyright)
+        r'untertitelung\s+des\s+zdf[^.]*[.!?]*\s*$',
+        r'untertitel\s+von\s+[^.\n]*[.!?]*\s*$',
+        r'vielen\s+dank\s+fürs\s+zuschauen[.!?]*\s*$',
+        r'bis\s+zum\s+nächsten\s+mal[.!?]*\s*$',
+        r'untertitel\s+im\s+auftrag[^.\n]*[.!?]*\s*$',
     ]
     
     text_lower = text.lower()
@@ -176,21 +175,64 @@ def remove_ending_hallucinations(text, debug=False):
             
             if debug:
                 removed = text[len(cleaned):].strip()
-                print(f"  🗑️ HALLUCINATION: удалена фраза \"{removed}\"")
+                print(f"  🗑️ HALLUCINATION (ending): удалена фраза \"{removed}\"")
             
             return cleaned
     
     return text
 
+
+def remove_leading_hallucinations(text, debug=False):
+    """
+    🆕 v17.25: Удаляет типичные Whisper hallucination В НАЧАЛЕ текста
+    
+    Whisper иногда вставляет в НАЧАЛО сегмента (особенно при тишине/шуме):
+    - "Untertitelung des ZDF, 2020"         ← DE copyright artifact
+    - "Untertitelung des ZDF für funk, 2017" ← DE copyright artifact
+    - "Untertitel von ..."
+    
+    Отличие от remove_ending_hallucinations: паттерны привязаны к ^ (начало),
+    а не к $ (конец).
+    
+    Args:
+        text: Текст сегмента
+        debug: Показывать debug output
+    
+    Returns:
+        Очищенный текст
+    """
+    leading_patterns = [
+        # 🆕 v17.25: Немецкие Whisper copyright в начале
+        r'^\s*untertitelung\s+des\s+zdf[^.]*[.!?,]*\s*',
+        r'^\s*untertitel\s+von\s+[^.\n]*[.!?,]*\s*',
+        r'^\s*untertitel\s+im\s+auftrag[^.\n]*[.!?,]*\s*',
+        r'^\s*copyright\s+[^\n]*[.!?,]*\s*',
+    ]
+    
+    text_check = text  # сохраняем оригинал для debug
+    
+    for pattern in leading_patterns:
+        cleaned = re.sub(pattern, '', text, flags=re.IGNORECASE).strip()
+        if cleaned != text:
+            if debug:
+                removed = text[:len(text) - len(cleaned)].strip()
+                print(f"  🗑️ HALLUCINATION (leading): удалена фраза \"{removed}\"")
+            text = cleaned
+    
+    return text
+
+
 def clean_hallucinations_from_text(text, speaker=None, debug=False):
     """
     🆕 v16.19: Комплексная очистка текста от галлюцинаций
     🔧 v17.5: suffix-match дубли через is_duplicate_phrase
+    🆕 v17.25: remove_leading_hallucinations() — немецкие ZDF паттерны
 
     Выполняет:
-    1. Удаление дублированных фраз (sentence-level + suffix-match)
-    2. Удаление ending hallucinations
-    3. Очистка multiple пробелов и пунктуации
+    1. Удаление leading hallucinations (🆕 v17.25)
+    2. Удаление дублированных фраз (sentence-level + suffix-match)
+    3. Удаление ending hallucinations
+    4. Очистка multiple пробелов и пунктуации
 
     ВАЖНО: clean_intra_loops здесь НЕ вызывается.
     В разговорной речи повтор 3-граммы — норма, не баг.
@@ -209,13 +251,16 @@ def clean_hallucinations_from_text(text, speaker=None, debug=False):
 
     original_text = text
 
-    # 1. Удаление дублей (sentence-level + suffix-match)
+    # 1. 🆕 v17.25: Удаление leading hallucinations (ZDF и др.)
+    text = remove_leading_hallucinations(text, debug=debug)
+
+    # 2. Удаление дублей (sentence-level + suffix-match)
     has_dupl, text = is_duplicate_phrase(text, debug=debug)
 
-    # 2. Удаление ending hallucinations
+    # 3. Удаление ending hallucinations
     text = remove_ending_hallucinations(text, debug=debug)
 
-    # 3. Очистка пробелов и пунктуации
+    # 4. Очистка пробелов и пунктуации
     text = re.sub(r'\s+', ' ', text)
     text = re.sub(r'([.!?]){2,}', r'\1', text)
     text = text.strip()
@@ -289,7 +334,6 @@ def mark_low_confidence_words(text: str, words: list, prob_threshold: float = 0.
             if not prev_nrzb:
                 out.append("[нрзб]")
                 prev_nrzb = True
-            # если подряд несколько low_conf — схлопываем в один [нрзб]
         else:
             if wtxt:
                 out.append(wtxt)

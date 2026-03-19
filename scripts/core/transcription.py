@@ -7,6 +7,7 @@ core/transcription.py - Транскрибация аудио с Whisper
 🆕 v16.5: Smart GAP Attribution - умная атрибуция GAP_FILLED по семантическому сходству
 🆕 v16.3.2: Gap speaker detection - определение спикера по окружению
 🆕 v16.2: Исправлен синтаксис itertracks() в force_transcribe_diar_gaps
+🆕 v17.25: language параметр проброшен в force_transcribe_diar_gaps (DE support)
 """
 
 import whisper
@@ -290,17 +291,18 @@ def _find_dominant_speaker_in_pyannote(seg_start, seg_end, diarization, speaker_
 
 def force_transcribe_diar_gaps(
     model, wav_path, gaps, existing_segments, speaker_surname=None,
-    diarization=None, speaker_roles=None  # 🆕 v17.7: FIX БАГ #25
+    diarization=None, speaker_roles=None, language="ru"  # 🆕 v17.25: language для DE support
 ):
     """
     🔥 v17.12: FIX BAG_C/#18 - overlap removal вызывается ВСЕГДА (не только при adjusted boundary)
+    🆕 v17.25: language параметр для поддержки немецкого (DE)
     🆕 v17.7: FIX БАГ #25 - GAP pyannote overlap attribution + text-based override
     🔧 v17.5: убрано ограничение (seg_end - seg_start) <= 7.0 в restart check
     🔥 v17.4: FIX БАГ #18/#20 - prev overlap removal + restart detection
     🔥 v17.4: FIX БАГ #19 - [нрзб] маркировка низкоуверенных слов
     🔥 v17.2: FIX БАГ #15 - Удаление overlap GAP текста с next segment
     🆕 v16.8: GAP Overlap Protection - обрезка при пересечении с соседними
-    🆕 v16.5: Smart GAP Attribution - умная атрибуция по семантическому сходству
+    🆕 v16.5: Smart GAP Attribution - умная атрибуция GAP_FILLED по семантическому сходству
     🆕 v16.3.2: Gap speaker detection добавлен
     🔧 v16.2: Force-transcribe gaps с исправленным itertracks
     """
@@ -331,7 +333,7 @@ def force_transcribe_diar_gaps(
         try:
             result = model.transcribe(
                 str(gap_audio_path),
-                language="ru",
+                language=language,  # 🆕 v17.25: было "ru", теперь параметр
                 temperature=0.0,
                 beam_size=5,
                 no_speech_threshold=0.2,
@@ -396,8 +398,6 @@ def force_transcribe_diar_gaps(
 
                     # ═══════════════════════════════════════════════════════
                     # 🔥 v17.12: FIX BAG_C — NEXT overlap removal ВСЕГДА
-                    # Было: if next_existing and seg_end != original_end
-                    # Стало: if next_existing (убрано условие на изменение границы)
                     # ═══════════════════════════════════════════════════════
 
                     if next_existing:
@@ -420,8 +420,6 @@ def force_transcribe_diar_gaps(
 
                     # ═══════════════════════════════════════════════════════
                     # 🔥 v17.12: FIX BAG_C/#18 — PREV overlap removal ВСЕГДА
-                    # Было: if prev_existing (уже было unconditional, но ==)
-                    # Стало: fuzzy matching в _remove_gap_overlap_with_prev()
                     # ═══════════════════════════════════════════════════════
 
                     if prev_existing:
@@ -433,8 +431,6 @@ def force_transcribe_diar_gaps(
 
                     # ═══════════════════════════════════════════════════════
                     # 🔥 v17.12: FIX BAG_C — restart check ВСЕГДА
-                    # Было: if next_existing and seg_end != original_end
-                    # Стало: if next_existing (убрано условие на изменение границы)
                     # ═══════════════════════════════════════════════════════
 
                     if next_existing:
@@ -518,4 +514,3 @@ def force_transcribe_diar_gaps(
         print(f"  ⚠️ Gaps не дали новых сегментов")
 
     return added_segments
-

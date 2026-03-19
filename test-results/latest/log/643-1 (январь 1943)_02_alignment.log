@@ -1,0 +1,178 @@
+
+🔄 Cross-speaker deduplication...
+✅ После cross-speaker dedup: 69 сегментов
+
+🔍 CHECKPOINT [AFTER CROSS-SPEAKER DEDUP]: 69 сегментов
+
+🔄 Дедупликация сегментов...
+✅ После дедупликации: 62 сегментов
+
+🔍 CHECKPOINT [AFTER DEDUPLICATION]: 62 сегментов
+
+🔍 ГАПЫ WHISPER:
+   🚨 GAP 00:00:29–00:00:48 (18.8s)
+   🚨 GAP 00:00:53–00:02:31 (97.7s)
+   🚨 GAP 00:02:51–00:02:58 (6.5s)
+   🚨 GAP 00:03:11–00:03:16 (4.8s)
+   🚨 GAP 00:03:32–00:03:38 (5.9s)
+   🚨 GAP 00:04:09–00:04:16 (7.0s)
+   🚨 GAP 00:04:20–00:04:28 (8.3s)
+   🚨 GAP 00:04:31–00:04:40 (8.4s)
+   🚨 GAP 00:04:42–00:04:59 (17.1s)
+   🚨 GAP 00:05:17–00:05:46 (28.6s)
+   🚨 GAP 00:05:54–00:06:30 (36.5s)
+   🚨 GAP 00:06:35–00:06:41 (5.4s)
+   🚨 GAP 00:06:56–00:07:07 (11.7s)
+   🚨 GAP 00:07:16–00:07:28 (11.8s)
+   🚨 GAP 00:07:30–00:07:43 (12.8s)
+   🚨 GAP 00:07:51–00:08:12 (21.8s)
+   🚨 GAP 00:08:15–00:08:23 (7.8s)
+   🚨 GAP 00:08:32–00:08:47 (15.0s)
+   🚨 GAP 00:08:55–00:09:01 (5.8s)
+   🚨 GAP 00:09:06–00:09:11 (5.9s)
+   🚨 GAP 00:09:14–00:09:27 (12.4s)
+   🚨 GAP 00:09:29–00:09:34 (4.4s)
+   🚨 GAP 00:09:38–00:09:49 (10.9s)
+   🚨 GAP 00:09:52–00:10:12 (19.3s)
+   🚨 GAP 00:10:22–00:10:36 (14.2s)
+
+🔄 Force-transcribe gaps...
+  🚨 GAP 00:00:29–00:00:48 (18.8s)
+     ✅ [00:00:33] Bilda!...
+  🚨 GAP 00:00:53–00:02:31 (97.7s)
+     🔧 [v17.12] Removed 4 leading overlap words vs prev (exact): Heimat an die Front.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+     ⚠️ GAP too short after adjustment (0.06s), skipping
+     ✅ [00:01:55] Die [нрзб]...
+     ⚠️ GAP too short after adjustment (0.50s), skipping
+     ⚠️ GAP too short after adjustment (0.10s), skipping
+     ⚠️ GAP too short after adjustment (0.12s), skipping
+     ⚠️ GAP too short after adjustment (0.06s), skipping
+     ✅ [00:02:26] Die [нрзб]...
+     ⚠️ GAP overlap с предыдущим GAP, adjusted start: 148.16s
+     🔧 Adjusted: 148.34-149.44 → 148.16-149.44
+     🔧 [v17.12] Removed 2 leading overlap words vs prev (exact): Die Front.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+     ⚠️ GAP overlap с next existing, adjusted end: 151.44s
+     ⚠️ GAP too short after adjustment (-0.42s), skipping
+  🚨 GAP 00:02:51–00:02:58 (6.5s)
+     ⚠️ GAP too short after adjustment (0.96s), skipping
+     ✅ [00:02:52] Ankomstig...
+  🚨 GAP 00:03:11–00:03:16 (4.8s)
+     ⚠️ GAP too short after adjustment (0.96s), skipping
+  🚨 GAP 00:03:32–00:03:38 (5.9s)
+     🔧 [v17.12] Removed 1 leading overlap words vs prev (exact): Herzlichkeit.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:04:09–00:04:16 (7.0s)
+     🔧 [v17.12] Removed 4 leading overlap words vs prev (1 ASR mismatch): [нрзб] wird es bekämpft.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:04:20–00:04:28 (8.3s)
+     🔧 [v17.12] Removed 4 leading overlap words vs prev (1 ASR mismatch): Alarm für die Bevölkerung.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:04:31–00:04:40 (8.4s)
+     🔧 Removed fragment from GAP end: 'auf.' (likely cut-off or hallucination)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (substring match at pos 5): gegen den Feind
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:04:42–00:04:59 (17.1s)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (1 ASR mismatch): Schütze werden gerichtet.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+     ✅ [00:04:45] Feuern!...
+     ✅ [00:04:48] Feuern!...
+     ✅ [00:04:54] Feuern!...
+     ⚠️ GAP полностью неразборчив → skipping
+     ⚠️ GAP too short after adjustment (0.44s), skipping
+     ⚠️ GAP too short after adjustment (0.44s), skipping
+     ⚠️ GAP overlap с next existing, adjusted end: 299.96s
+     ⚠️ GAP too short after adjustment (-1.04s), skipping
+     ⚠️ GAP overlap с next existing, adjusted end: 299.96s
+     ⚠️ GAP too short after adjustment (-1.62s), skipping
+  🚨 GAP 00:05:17–00:05:46 (28.6s)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (exact): in die Batteriestellung.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+     ⚠️ GAP overlap с next existing, adjusted end: 346.52s
+     ⚠️ GAP too short after adjustment (-1.42s), skipping
+  🚨 GAP 00:05:54–00:06:30 (36.5s)
+     🔧 [v17.12] Removed 5 leading overlap words vs prev (exact): Die leichte Flak greift rein.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+     ✅ [00:06:24] Die [нрзб]...
+  🚨 GAP 00:06:35–00:06:41 (5.4s)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (1 ASR mismatch): [нрзб] schwere Verluste.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:06:56–00:07:07 (11.7s)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (exact): ihrer arbeit nach
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+     ⚠️ GAP overlap с next existing, adjusted end: 427.78s
+     ⚠️ GAP too short after adjustment (-0.86s), skipping
+  🚨 GAP 00:07:16–00:07:28 (11.8s)
+     ✅ [00:07:16] im Raum von Thiburba....
+     ⚠️ GAP overlap с next existing, adjusted end: 448.08s
+     ⚠️ GAP too short after adjustment (-1.24s), skipping
+  🚨 GAP 00:07:30–00:07:43 (12.8s)
+     🔧 [v17.12] Removed 4 leading overlap words vs prev (exact): mit den einzelnen Abschnittsführern.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+     ⚠️ GAP overlap с next existing, adjusted end: 463.09s
+     ⚠️ GAP too short after adjustment (-1.31s), skipping
+  🚨 GAP 00:07:51–00:08:12 (21.8s)
+     🔧 [v17.12] Removed 2 leading overlap words vs prev (exact): Angriff vernichtet.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+     ⚠️ GAP overlap с next existing, adjusted end: 492.93s
+     ⚠️ GAP too short after adjustment (-0.26s), skipping
+  🚨 GAP 00:08:15–00:08:23 (7.8s)
+     🔧 Removed fragment from GAP end: 'ein.' (likely cut-off or hallucination)
+     ✅ [00:08:15] [нрзб] Fliegerbombe...
+  🚨 GAP 00:08:32–00:08:47 (15.0s)
+     🔧 [v17.12] Removed 2 leading overlap words vs prev (exact): erste Niederlage.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:08:55–00:09:01 (5.8s)
+     ⚠️ GAP overlap с next existing, adjusted end: 541.53s
+     🔧 Adjusted: 535.69-543.45 → 535.69-541.53
+     🔧 Removed 1 overlapping words from GAP: Stellungsbau
+     🔧 [v17.12] Removed 2 leading overlap words vs prev (exact): Wälder Kareliens
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:09:06–00:09:11 (5.9s)
+     ✅ [00:09:06] Spitzhacker aufgebrochen....
+  🚨 GAP 00:09:14–00:09:27 (12.4s)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (exact): sichern den Stellungsbau.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:09:29–00:09:34 (4.4s)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (exact): wieder erneuert werden.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+     ⚠️ GAP overlap с next existing, adjusted end: 574.25s
+     ⚠️ GAP too short after adjustment (-1.10s), skipping
+  🚨 GAP 00:09:38–00:09:49 (10.9s)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (1 ASR mismatch): Helme weiß gestrichen.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:09:52–00:10:12 (19.3s)
+     🔧 [v17.12] Removed 2 leading overlap words vs prev (exact): günstige Gelegenheit.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:10:22–00:10:36 (14.2s)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (exact): längere Zeit deckt.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  ✅ Добавлено из gaps: 11 сегментов
+  ✅ Добавлено из gaps: 11 сегментов
+
+🔍 CHECKPOINT [AFTER GAP FILLING]: 73 сегментов
+
+🔧 Исправление сдвига timestamp после gap filling...
+  ⏭️ ПРОПУСКАЕМ: 00:03:41 → 00:03:40 (сдвиг назад -0.1s)
+  ⏭️ ПРОПУСКАЕМ: 00:03:43 → 00:03:43 (сдвиг назад -0.2s)
+  ⏭️ ПРОПУСКАЕМ: 00:03:47 → 00:03:47 (сдвиг назад -0.1s)
+  ⏭️ ПРОПУСКАЕМ: 00:03:50 → 00:03:49 (сдвиг назад -0.3s)
+  ⏭️ ПРОПУСКАЕМ: 00:03:54 → 00:03:53 (сдвиг назад -0.4s)
+  ⏭️ ПРОПУСКАЕМ: 00:03:57 → 00:03:57 (сдвиг назад -0.3s)
+  ⏭️ ПРОПУСКАЕМ: 00:04:03 → 00:04:03 (сдвиг назад -0.4s)
+  ⏭️ ПРОПУСКАЕМ: 00:04:06 → 00:04:06 (сдвиг назад -0.3s)
+  ⏭️ ПРОПУСКАЕМ: 00:04:18 → 00:04:17 (сдвиг назад -0.2s)
+  ⏭️ ПРОПУСКАЕМ: 00:05:50 → 00:05:50 (сдвиг назад -0.4s)
+  ⏭️ ПРОПУСКАЕМ: 00:05:53 → 00:05:52 (сдвиг назад -0.3s)
+  ⏭️ ПРОПУСКАЕМ: 00:06:32 → 00:06:32 (сдвиг назад -0.2s)
+  ⏭️ ПРОПУСКАЕМ: 00:06:50 → 00:06:49 (сдвиг назад -0.3s)
+  ⏭️ ПРОПУСКАЕМ: 00:07:13 → 00:07:13 (сдвиг назад -0.5s)
+  ⏭️ ПРОПУСКАЕМ: 00:07:49 → 00:07:48 (сдвиг назад -0.1s)
+  ⏭️ ПРОПУСКАЕМ: 00:08:27 → 00:08:27 (сдвиг назад -0.3s)
+  ⏭️ ПРОПУСКАЕМ: 00:09:03 → 00:09:02 (сдвиг назад -0.5s)
+  ⏭️ ПРОПУСКАЕМ: 00:09:36 → 00:09:35 (сдвиг назад -0.3s)
+✅ Исправлено timestamp: 13
+⏭️ Пропущено (назад): 18
+
+🔍 CHECKPOINT [AFTER TIMESTAMP CORRECTION]: 73 сегментов

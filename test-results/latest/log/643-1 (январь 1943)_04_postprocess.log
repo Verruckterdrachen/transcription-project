@@ -1,0 +1,310 @@
+
+✂️ Разделение mixed-speaker сегментов...
+
+✂️ Разделение mixed-speaker сегментов (v17.6)...
+  🔗 Маппинг: "Диктор" → SPEAKER_00
+  📋 Reverse roles: {'Диктор': 'SPEAKER_00'}
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:02:31 (Диктор) — 3 предложений
+    [1] "In seiner Rede gab der Reichsmarschall den jungen Offizieren..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Er umriss in seinen Ausführungen die Grundpflichten des deut..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 17 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Ankomstig..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 47 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:03:16 (Диктор) — 2 предложений
+    [1] "Marschall Cavallero, der Chef des italienischen Generalstabe..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Die unerschütterliche Freundschaft und Waffenbrüderschaft de..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 14 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:03:38 (Диктор) — 8 предложений
+    [1] "Vom Einsatz unserer Flak-Artillerie..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Ein Feinflugzeug nähert sich über See dem Reichsgebiet..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 4 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Es hat den Beobachtungskreis eines der vielen Vorpostenboote..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 12 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [4] "Das Vorpostenboot gibt sofort Funkmeldung an die nächsten Fl..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 31 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [5] "Die bedrohten Sperrkreise werden in Alarmbereitschaft gesetz..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 42 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [6] "Beim Einflug in diese Kreise wird auch in den benachbarten S..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 49 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [7] "Das Feinflugzeug bleibt jetzt ständig erfasst..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 67 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [8] "Wo es Flak-Sperren passiert, wird es bekämpft...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 73 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:04:16 (Диктор) — 2 предложений
+    [1] "Alarm für die Flak-Artillerie..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Sirenen geben Fliegeralarm für die Bevölkerung...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 4 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:04:59 (Диктор) — 2 предложений
+    [1] "Lichtzeichen am Richtgerät..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Brand- und Sprengbomben fallen in die Batteriestellung...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 3 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:05:46 (Диктор) — 3 предложений
+    [1] "Die Flak-Artillerie Das Feindflugzeug kommt aus den Scheinwe..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Der Feind erhält Treffer und muss tiefer gehen..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 11 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Die leichte Flak greift rein...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 19 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:06:24 (Диктор) — 2 предложений
+    [1] "Die [нрзб] Brennen stürzt der Bomber zu Boden..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Jeder Angriff auf deutsches Gebiet kostet den Feind schwere ..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 8 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:06:45 (Диктор) — 2 предложений
+    [1] "Der tunesische Bauer kann bei sommerlicher Witterung sein Fe..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Trotz der Kampfhandlungen geht die Bevölkerung in den von un..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 10 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:07:07 (Диктор) — 2 предложений
+    [1] "Dritter Kreuzträger General Fischer, dem inzwischen vom Führ..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "im Raum von Thiburba...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 24 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:07:43 (Диктор) — 3 предложений
+    [1] "Blick in die Ausläufer des Atlasgebirges..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Zerschossene USA-Panzer..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 6 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Sie wurden bei ihrem ersten Angriff vernichtet...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 8 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:08:12 (Диктор) — 2 предложений
+    [1] "Hier schlug eine deutsche Fliegerbombe ein..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "[нрзб] Fliegerbombe..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 6 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:08:23 (Диктор) — 2 предложений
+    [1] "Auch diesem Tiger wurden sehr schnell die Zähne ausgebrochen..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Bei Temburba erlitten die angloamerikanischen Landungstruppe..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 9 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:09:01 (Диктор) — 3 предложений
+    [1] "Stellungsbau..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Der tiefgefrorene Boden wird mit der Spitzhacke aufgebrochen..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 1 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "aufgebrochen...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 9 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:09:34 (Диктор) — 2 предложений
+    [1] "Ersatz ist eingetroffen..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Als erstes werden die Stahlhelme weiß gestrichen...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 3 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:10:12 (Диктор) — 2 предложений
+    [1] "Und hier wird Holzkohle für den Bunkerofen gewonnen..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Fachkundige Kameraden haben nach allen Regeln der Kunst eine..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 8 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+✅ Mixed сегментов не найдено
+
+🔍 CHECKPOINT [AFTER SPLIT]: 33 сегментов
+
+🕒 Вставка промежуточных timestamp (interval=30.0s, mode=v17.17)...
+
+  ── Сегмент [00:03:38] Диктор ──
+     длит=30.6s | слов(post)=80 | режим=🎯 REAL (sub_segments)
+     sub_segments: 10 шт | words(pre-clean)=80 | scale=1.000
+       sub[0]: [00:03:38-00:03:40] words=4
+       sub[1]: [00:03:41-00:03:43] words=8
+       sub[2]: [00:03:43-00:03:47] words=9
+       sub[3]: [00:03:47-00:03:49] words=10
+       sub[4]: [00:03:50-00:03:53] words=11
+       sub[5]: [00:03:54-00:03:57] words=7
+       sub[6]: [00:03:57-00:04:00] words=11
+       sub[7]: [00:04:00-00:04:03] words=7
+       sub[8]: [00:04:03-00:04:06] words=6
+       sub[9]: [00:04:06-00:04:09] words=7
+     🔧 gap_fixer_v2 [00:03:38–00:04:09] dur=31s words=80 threshold=45.0s
+       gaps > 45.0s не найдено ✅
+
+────────────────────────────────────────────────────────────
+✅ Вставлено timestamp : 0
+✅ Блоков >30s не найдено
+
+🔍 CHECKPOINT [AFTER TIMESTAMP INJECTION]: 33 сегментов
+
+🧹 Очистка hallucinations из 33 сегментов...
+  ✅ Очищено: 268 → 267 символов
+  ✅ Очищено: 588 → 587 символов
+  ✅ Очищено: 79 → 78 символов
+  ✅ Очищено: 84 → 83 символов
+  ✅ Очищено: 168 → 167 символов
+  ✅ Очищено: 117 → 116 символов
+  ✅ Очищено: 192 → 191 символов
+  ✅ Очищено: 196 → 195 символов
+  ✅ Очищено: 115 → 114 символов
+  ✅ Очищено: 147 → 146 символов
+  ✅ Очищено: 90 → 89 символов
+  ✅ Очищено: 75 → 74 символов
+  ✅ Очищено: 171 → 170 символов
+✅ Очистка завершена: 33 сегментов (удалено 0)
+
+🔍 CHECKPOINT [AFTER HALLUCINATION REMOVAL]: 33 сегментов
+
+🔍 Validation: Adjacent same speaker...
+  ⚠️ Найдено 32 соседних реплик одного спикера!
+     🔴 [00:00:33] Диктор (пауза 13.82s)
+        Конец: '...Bilda!'
+        [00:00:48] Начало: 'Bilder aus der Messestadt Leipzig, ein Gruß der Heimat an die Front....'
+     🔴 [00:00:48] Диктор (пауза 62.26s)
+        Конец: '...Bilder aus der Messestadt Leipzig, ein Gruß der Heimat an die Front.'
+        [00:01:55] Начало: 'Die [нрзб]...'
+     🔴 [00:01:55] Диктор (пауза 27.92s)
+        Конец: '...Die [нрзб]'
+        [00:02:26] Начало: 'Die [нрзб]...'
+
+🔧 Auto-merge adjacent same speaker (SAFE)...
+  🛡️ SKIP MERGE: 00:00:33-00:00:48 (разные raw_speaker_id)
+  🛡️ SKIP MERGE: 00:00:48-00:01:55 (разные raw_speaker_id)
+  🛡️ SKIP MERGE: 00:02:26-00:02:31 (разные raw_speaker_id)
+  🔧 [00:02:31] Слито 4 сегментов Диктор
+  🛡️ SKIP MERGE: 00:04:40-00:04:45 (разные raw_speaker_id)
+  🛡️ SKIP MERGE: 00:04:54-00:04:59 (разные raw_speaker_id)
+  🔧 [00:06:41] Слито 2 сегментов Диктор
+  🔧 [00:08:47] Слито 2 сегментов Диктор
+  🔧 [00:09:01] Слито 2 сегментов Диктор
+  🔧 [00:09:27] Слито 2 сегментов Диктор
+  ✅ Auto-merge: 7 сегментов объединено
+
+🔍 Validation: Adjacent same speaker...
+  ⚠️ Найдено 25 соседних реплик одного спикера!
+     🔴 [00:00:33] Диктор (пауза 13.82s)
+        Конец: '...Bilda!'
+        [00:00:48] Начало: 'Bilder aus der Messestadt Leipzig, ein Gruß der Heimat an die Front....'
+     🔴 [00:00:48] Диктор (пауза 62.26s)
+        Конец: '...Bilder aus der Messestadt Leipzig, ein Gruß der Heimat an die Front.'
+        [00:01:55] Начало: 'Die [нрзб]...'
+     🔴 [00:01:55] Диктор (пауза 27.92s)
+        Конец: '...Die [нрзб]'
+        [00:02:26] Начало: 'Die [нрзб]...'
+
+🕒 Вставка промежуточных timestamp (interval=30.0s, mode=v17.17)...
+
+  ── Сегмент [00:02:31] Диктор ──
+     длит=61.3s | слов(post)=97 | режим=📐 ESTIMATED (word proportion)
+     📌 [ESTIMATED ⚠️] inject=00:03:01 | Δ=+0.0s | word#48/97 | gap=30.3s
+        ↳ 'Ankunft des königlich-italienischen Außenministers Graf Cian...'
+     🔧 gap_fixer_v2 [00:02:31–00:03:32] dur=61s words=97 threshold=45.0s
+       gaps > 45.0s не найдено ✅
+
+  ── Сегмент [00:03:38] Диктор ──
+     длит=30.6s | слов(post)=80 | режим=🎯 REAL (sub_segments)
+     sub_segments: 10 шт | words(pre-clean)=80 | scale=1.000
+       sub[0]: [00:03:38-00:03:40] words=4
+       sub[1]: [00:03:41-00:03:43] words=8
+       sub[2]: [00:03:43-00:03:47] words=9
+       sub[3]: [00:03:47-00:03:49] words=10
+       sub[4]: [00:03:50-00:03:53] words=11
+       sub[5]: [00:03:54-00:03:57] words=7
+       sub[6]: [00:03:57-00:04:00] words=11
+       sub[7]: [00:04:00-00:04:03] words=7
+       sub[8]: [00:04:03-00:04:06] words=6
+       sub[9]: [00:04:06-00:04:09] words=7
+     🔧 gap_fixer_v2 [00:03:38–00:04:09] dur=31s words=80 threshold=45.0s
+       gaps > 45.0s не найдено ✅
+
+────────────────────────────────────────────────────────────
+✅ Вставлено timestamp : 1
+
+🔍 CHECKPOINT [AFTER AUTO-MERGE]: 26 сегментов
+
+🔍 CHECKPOINT [BEFORE EXPORT (FINAL)]: 26 сегментов
+ ✅ 643-1 (январь 1943).json (v17.19, lang=de)
+
+✅ JSON: 1/1
+
+📄 1 JSON → De.txt
+
+📄 1 JSON → De.txt
+ ✅ TXT: De.txt (v17.20 — [?]-метки: 7)
+✅ TXT: ..\interview\De\txt\De.txt (v17.19)
+
+✅ Готово! 🚀 (v17.19, lang=de)
+
+📂 Результаты:
+   JSON: ..\interview\De\json
+   TXT:  ..\interview\De\txt
