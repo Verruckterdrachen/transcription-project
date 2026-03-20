@@ -1,0 +1,1171 @@
+{
+  "file": "619-3 (июль 1942).wav",
+  "duration": 363.84550084889645,
+  "speaker": "Диктор",
+  "diarization_model": "pyannote/speaker-diarization-3.1",
+  "model": "large-v3-turbo",
+  "vad_threshold_used": 0.7,
+  "gaps_detected": 19,
+  "gaps_final": 19,
+  "retry_added": 23,
+  "speaker_identification": "v16.0-modular",
+  "pipeline_version": "17.19",
+  "params": {
+    "model_name": "large-v3-turbo",
+    "language": "de",
+    "min_speakers": 1,
+    "max_speakers": 1
+  },
+  "segments_count": 46,
+  "merged_count": 16,
+  "speaker_stats": {
+    "SPEAKER_00": 109.16808149405762
+  },
+  "speaker_roles": {
+    "SPEAKER_00": "Диктор"
+  },
+  "corrections_log": {
+    "journalist_commands_detected": 0,
+    "journalist_commands_details": []
+  },
+  "validation": {
+    "adjacent_same_speaker_count": 15,
+    "adjacent_same_speaker_list": [
+      {
+        "time": "00:00:00",
+        "speaker": "Диктор",
+        "next_time": "00:00:28",
+        "pause": 20.3,
+        "text_end": "enden Truppe. Der Nachschub muss pausenlos rollen.",
+        "text_start": "Rumänische Verbände rücken vor."
+      },
+      {
+        "time": "00:00:28",
+        "speaker": "Диктор",
+        "next_time": "00:00:51",
+        "pause": 21.06,
+        "text_end": "Rumänische Verbände rücken vor.",
+        "text_start": "Sturmgeschütze übernehmen neue Munition."
+      },
+      {
+        "time": "00:00:51",
+        "speaker": "Диктор",
+        "next_time": "00:01:02",
+        "pause": 8.06,
+        "text_end": "Sturmgeschütze übernehmen neue Munition.",
+        "text_start": "Die Geschwader unserer Luftwaffe sind pausenlos am"
+      },
+      {
+        "time": "00:01:02",
+        "speaker": "Диктор",
+        "next_time": "00:01:45",
+        "pause": 34.58,
+        "text_end": "nem vernichtenden Bombenhagel. in den Bombenhagel.",
+        "text_start": "Übergang über den Ostkoll. Pioniere entfernen im l"
+      },
+      {
+        "time": "00:01:45",
+        "speaker": "Диктор",
+        "next_time": "00:02:27",
+        "pause": 25.24,
+        "text_end": "n Verlusten für den Feind erweitert. Sprengladung.",
+        "text_start": "Sprengladung"
+      },
+      {
+        "time": "00:02:27",
+        "speaker": "Диктор",
+        "next_time": "00:02:50",
+        "pause": 21.8,
+        "text_end": "Sprengladung",
+        "text_start": "Auch weiter südlich ist der Oskol erreicht. Stoßtr"
+      },
+      {
+        "time": "00:02:50",
+        "speaker": "Диктор",
+        "next_time": "00:03:18",
+        "pause": 19.86,
+        "text_end": "wingen im Morgengrauen den Übergang. Sprengladung.",
+        "text_start": "Jetzt wird der Fluss in breiter Front überschritte"
+      },
+      {
+        "time": "00:03:18",
+        "speaker": "Диктор",
+        "next_time": "00:03:29",
+        "pause": 8.26,
+        "text_end": "tzt wird der Fluss in breiter Front überschritten.",
+        "text_start": "Sprengladung Stuka greifen die Fluchtstraßen der S"
+      },
+      {
+        "time": "00:03:29",
+        "speaker": "Диктор",
+        "next_time": "00:03:47",
+        "pause": 12.94,
+        "text_end": "chtstraßen der Sowjets in ununterbrochenem Einsatz",
+        "text_start": "Sprengladung Volltreffer auf eine Brücke über den "
+      },
+      {
+        "time": "00:03:47",
+        "speaker": "Диктор",
+        "next_time": "00:04:18",
+        "pause": 6.16,
+        "text_end": "de. Hier wurde der Feind schonungslos zerschlagen.",
+        "text_start": "Sprengladung"
+      },
+      {
+        "time": "00:04:18",
+        "speaker": "Диктор",
+        "next_time": "00:04:41",
+        "pause": 23.06,
+        "text_end": "Sprengladung",
+        "text_start": "Sprengladung"
+      },
+      {
+        "time": "00:04:41",
+        "speaker": "Диктор",
+        "next_time": "00:04:53",
+        "pause": 10.44,
+        "text_end": "Sprengladung",
+        "text_start": "Volltreffer in Fabriken und Bahnanlagen."
+      },
+      {
+        "time": "00:04:53",
+        "speaker": "Диктор",
+        "next_time": "00:05:08",
+        "pause": 12.86,
+        "text_end": "Volltreffer in Fabriken und Bahnanlagen.",
+        "text_start": "Sprengladung Flug über Wörnisch. Unter uns einmars"
+      },
+      {
+        "time": "00:05:08",
+        "speaker": "Диктор",
+        "next_time": "00:06:52",
+        "pause": 47.54,
+        "text_end": "toßen unsere Truppen dem geschlagenen Feinde nach.",
+        "text_start": "Sprengladung"
+      },
+      {
+        "time": "00:06:52",
+        "speaker": "Диктор",
+        "next_time": "00:07:15",
+        "pause": 21.68,
+        "text_end": "Sprengladung",
+        "text_start": "Sprengladung"
+      }
+    ],
+    "short_segments_under_2s": [
+      {
+        "time": "00:00:28",
+        "speaker": "Диктор",
+        "duration": 1.84,
+        "text": "Rumänische Verbände rücken vor."
+      },
+      {
+        "time": "00:02:27",
+        "speaker": "Диктор",
+        "duration": 1.04,
+        "text": "Sprengladung"
+      },
+      {
+        "time": "00:04:18",
+        "speaker": "Диктор",
+        "duration": 0.08,
+        "text": "Sprengladung"
+      },
+      {
+        "time": "00:04:41",
+        "speaker": "Диктор",
+        "duration": 1.4,
+        "text": "Sprengladung"
+      },
+      {
+        "time": "00:06:52",
+        "speaker": "Диктор",
+        "duration": 1.4,
+        "text": "Sprengladung"
+      }
+    ],
+    "potential_missed_interruptions": [],
+    "long_pauses_over_10s": [
+      {
+        "time": "00:00:00",
+        "speaker": "Диктор",
+        "next_time": "00:00:28",
+        "next_speaker": "Диктор",
+        "pause": 20.3
+      },
+      {
+        "time": "00:00:28",
+        "speaker": "Диктор",
+        "next_time": "00:00:51",
+        "next_speaker": "Диктор",
+        "pause": 21.06
+      },
+      {
+        "time": "00:01:02",
+        "speaker": "Диктор",
+        "next_time": "00:01:45",
+        "next_speaker": "Диктор",
+        "pause": 34.58
+      },
+      {
+        "time": "00:01:45",
+        "speaker": "Диктор",
+        "next_time": "00:02:27",
+        "next_speaker": "Диктор",
+        "pause": 25.24
+      },
+      {
+        "time": "00:02:27",
+        "speaker": "Диктор",
+        "next_time": "00:02:50",
+        "next_speaker": "Диктор",
+        "pause": 21.8
+      },
+      {
+        "time": "00:02:50",
+        "speaker": "Диктор",
+        "next_time": "00:03:18",
+        "next_speaker": "Диктор",
+        "pause": 19.86
+      },
+      {
+        "time": "00:03:29",
+        "speaker": "Диктор",
+        "next_time": "00:03:47",
+        "next_speaker": "Диктор",
+        "pause": 12.94
+      },
+      {
+        "time": "00:04:18",
+        "speaker": "Диктор",
+        "next_time": "00:04:41",
+        "next_speaker": "Диктор",
+        "pause": 23.06
+      },
+      {
+        "time": "00:04:41",
+        "speaker": "Диктор",
+        "next_time": "00:04:53",
+        "next_speaker": "Диктор",
+        "pause": 10.44
+      },
+      {
+        "time": "00:04:53",
+        "speaker": "Диктор",
+        "next_time": "00:05:08",
+        "next_speaker": "Диктор",
+        "pause": 12.86
+      },
+      {
+        "time": "00:05:08",
+        "speaker": "Диктор",
+        "next_time": "00:06:52",
+        "next_speaker": "Диктор",
+        "pause": 47.54
+      },
+      {
+        "time": "00:06:52",
+        "speaker": "Диктор",
+        "next_time": "00:07:15",
+        "next_speaker": "Диктор",
+        "pause": 21.68
+      }
+    ]
+  },
+  "segments_raw": [
+    {
+      "start": 0.0,
+      "end": 5.6,
+      "start_hms": "00:00:00",
+      "end_hms": "00:00:05",
+      "text": "Männer des Reichsarbeitsdienstes beim Straßenbau unmittelbar hinter der kämpfenden Truppe.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.18614086650666736
+    },
+    {
+      "start": 5.94,
+      "end": 8.14,
+      "start_hms": "00:00:05",
+      "end_hms": "00:00:08",
+      "text": "Der Nachschub muss pausenlos rollen.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.18614086650666736
+    },
+    {
+      "start": 28.440000000000005,
+      "end": 30.28,
+      "start_hms": "00:00:28",
+      "end_hms": "00:00:30",
+      "text": "Rumänische Verbände rücken vor.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.10329965750376384
+    },
+    {
+      "start": 51.34,
+      "end": 53.76,
+      "start_hms": "00:00:51",
+      "end_hms": "00:00:53",
+      "text": "Sturmgeschütze übernehmen neue Munition.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.26686245600382485
+    },
+    {
+      "start": 53.76,
+      "end": 54.78,
+      "start_hms": "00:00:53",
+      "end_hms": "00:00:54",
+      "text": "Wir nehmen neue Munition.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.3471291595035129,
+      "from_gap": true,
+      "time": "00:00:53"
+    },
+    {
+      "start": 62.84,
+      "end": 70.1,
+      "start_hms": "00:01:02",
+      "end_hms": "00:01:10",
+      "text": "Die Geschwader unserer Luftwaffe sind pausenlos am Feind und treffen die zurückflutenden Kolonnen der Sowjets mit einem vernichtenden Bombenhagel.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.05911790756952195
+    },
+    {
+      "start": 70.1,
+      "end": 71.11999999999999,
+      "start_hms": "00:01:10",
+      "end_hms": "00:01:11",
+      "text": "in den Bombenhagel.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.32835299318486993,
+      "from_gap": true,
+      "time": "00:01:10"
+    },
+    {
+      "start": 105.7,
+      "end": 107.3,
+      "start_hms": "00:01:45",
+      "end_hms": "00:01:47",
+      "text": "Übergang über den Ostkoll.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.165335294362661
+    },
+    {
+      "start": 107.88,
+      "end": 112.16,
+      "start_hms": "00:01:47",
+      "end_hms": "00:01:52",
+      "text": "Pioniere entfernen im letzten Augenblick eine von den Sowjets gelegte Sprengladung.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.165335294362661
+    },
+    {
+      "start": 112.16,
+      "end": 113.22,
+      "start_hms": "00:01:52",
+      "end_hms": "00:01:53",
+      "text": "gelegte Spenkladung.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.5008013645807902,
+      "from_gap": true,
+      "time": "00:01:52"
+    },
+    {
+      "start": 115.16000000000001,
+      "end": 120.64,
+      "start_hms": "00:01:55",
+      "end_hms": "00:02:00",
+      "text": "Die gewonnenen Brückenköpfe werden in erbitterten Kämpfen unter blutigen Verlusten für den Feind erweitert.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.1640712377187368
+    },
+    {
+      "start": 122.6,
+      "end": 122.64,
+      "start_hms": "00:02:02",
+      "end_hms": "00:02:02",
+      "text": "Sprengladung",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.5302586555480957
+    },
+    {
+      "start": 147.88,
+      "end": 148.92,
+      "start_hms": "00:02:27",
+      "end_hms": "00:02:28",
+      "text": "Sprengladung",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.08198661027952682
+    },
+    {
+      "start": 170.71999999999997,
+      "end": 176.66,
+      "start_hms": "00:02:50",
+      "end_hms": "00:02:56",
+      "text": "Auch weiter südlich ist der Oskol erreicht. Stoßtrupps erzwingen im Morgengrauen den Übergang.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.13318572725568498,
+      "from_gap": true
+    },
+    {
+      "start": 178.28,
+      "end": 179.02,
+      "start_hms": "00:02:58",
+      "end_hms": "00:02:59",
+      "text": "Sprengladung",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.04527151433727409
+    },
+    {
+      "start": 198.88,
+      "end": 201.4,
+      "start_hms": "00:03:18",
+      "end_hms": "00:03:21",
+      "text": "Jetzt wird der Fluss in breiter Front überschritten.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.14610917427960565,
+      "from_gap": true
+    },
+    {
+      "start": 209.66,
+      "end": 209.7,
+      "start_hms": "00:03:29",
+      "end_hms": "00:03:29",
+      "text": "Sprengladung",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.05196459939546674
+    },
+    {
+      "start": 209.7,
+      "end": 214.35999999999999,
+      "start_hms": "00:03:29",
+      "end_hms": "00:03:34",
+      "text": "Stuka greifen die Fluchtstraßen der Sowjets in ununterbrochenem Einsatz",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.06210903823375702,
+      "from_gap": true,
+      "time": "00:03:29"
+    },
+    {
+      "start": 227.3,
+      "end": 229.64,
+      "start_hms": "00:03:47",
+      "end_hms": "00:03:49",
+      "text": "Sprengladung",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.05196459939546674
+    },
+    {
+      "start": 229.64,
+      "end": 240.38,
+      "start_hms": "00:03:49",
+      "end_hms": "00:04:00",
+      "text": "Volltreffer auf eine Brücke über den Don. Der Don ist erreicht. Überall stoßen unsere vorrückenden Truppen auf Trümmerfelder von riesigen Ausmaßen.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.09149254979314031,
+      "from_gap": true,
+      "time": "00:03:49"
+    },
+    {
+      "start": 240.38,
+      "end": 244.7,
+      "start_hms": "00:04:00",
+      "end_hms": "00:04:04",
+      "text": "An den Flussübergängen stauten sich die zurückflutenden Kolonnen der Sowjets und boten ein willkommenes Ziel.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.09149254979314031,
+      "from_gap": true,
+      "time": "00:04:00"
+    },
+    {
+      "start": 244.7,
+      "end": 245.98,
+      "start_hms": "00:04:04",
+      "end_hms": "00:04:05",
+      "text": "Sprengladung",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.04535888793856599,
+      "time": "00:04:04"
+    },
+    {
+      "start": 245.98,
+      "end": 251.98,
+      "start_hms": "00:04:05",
+      "end_hms": "00:04:11",
+      "text": "willkommenes Ziel für unsere Stuka und Kampffliegerverbände. Hier wurde der Feind schonungslos zerschlagen.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.12494151822982295,
+      "from_gap": true,
+      "time": "00:04:05"
+    },
+    {
+      "start": 258.14,
+      "end": 258.22,
+      "start_hms": "00:04:18",
+      "end_hms": "00:04:18",
+      "text": "Sprengladung",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.07995646550105168
+    },
+    {
+      "start": 281.28000000000003,
+      "end": 282.68,
+      "start_hms": "00:04:41",
+      "end_hms": "00:04:42",
+      "text": "Sprengladung",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.07637853092617458
+    },
+    {
+      "start": 293.12,
+      "end": 296.12,
+      "start_hms": "00:04:53",
+      "end_hms": "00:04:56",
+      "text": "Volltreffer in Fabriken und Bahnanlagen.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.12292152245839437,
+      "from_gap": true
+    },
+    {
+      "start": 308.98,
+      "end": 310.38,
+      "start_hms": "00:05:08",
+      "end_hms": "00:05:10",
+      "text": "Sprengladung",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.06555380319294177
+    },
+    {
+      "start": 310.38,
+      "end": 314.86,
+      "start_hms": "00:05:10",
+      "end_hms": "00:05:14",
+      "text": "Flug über Wörnisch. Unter uns einmarschierende deutsche Verbände.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.23978482122006622,
+      "from_gap": true,
+      "time": "00:05:10"
+    },
+    {
+      "start": 314.86,
+      "end": 317.08,
+      "start_hms": "00:05:14",
+      "end_hms": "00:05:17",
+      "text": "Am 7. Juli gab das Oberkommando der Wehrmacht die Einnahme dieser [нрзб]",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.23978482122006622,
+      "from_gap": true,
+      "time": "00:05:14"
+    },
+    {
+      "start": 317.08,
+      "end": 319.5,
+      "start_hms": "00:05:17",
+      "end_hms": "00:05:19",
+      "text": "Sprengladung",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.06555380319294177,
+      "time": "00:05:17"
+    },
+    {
+      "start": 319.5,
+      "end": 328.84,
+      "start_hms": "00:05:19",
+      "end_hms": "00:05:28",
+      "text": "[нрзб] bekannt. Dieses wichtige Industriezentrum liegt an der großen Eisenbahnlinie, die Moskau",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.11675119400024414,
+      "from_gap": true,
+      "time": "00:05:19"
+    },
+    {
+      "start": 328.84,
+      "end": 330.44,
+      "start_hms": "00:05:28",
+      "end_hms": "00:05:30",
+      "text": "mit seinen wichtigen Rohstoffgebieten im Süden verbindet.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.11675119400024414,
+      "from_gap": true,
+      "time": "00:05:28"
+    },
+    {
+      "start": 330.44,
+      "end": 331.12,
+      "start_hms": "00:05:30",
+      "end_hms": "00:05:31",
+      "text": "Sprengladung",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.058014121011038804,
+      "time": "00:05:30"
+    },
+    {
+      "start": 331.12,
+      "end": 337.06,
+      "start_hms": "00:05:31",
+      "end_hms": "00:05:37",
+      "text": "verbindet. Durch die Einnahme von Voronezh wurde diese Eisenbahnlinie unterbrochen und damit",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.08152035549954251,
+      "from_gap": true,
+      "time": "00:05:31"
+    },
+    {
+      "start": 337.06,
+      "end": 341.18,
+      "start_hms": "00:05:37",
+      "end_hms": "00:05:41",
+      "text": "Truppen - und Materialverschiebung zwischen den bolschewistischen Heeresgruppen der Mitte und",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.08152035549954251,
+      "from_gap": true,
+      "time": "00:05:37"
+    },
+    {
+      "start": 341.18,
+      "end": 346.14,
+      "start_hms": "00:05:41",
+      "end_hms": "00:05:46",
+      "text": "Südens unterbunden. Über eine Woche lang versuchten die Sowjets diesen schwerwiegenden Verlust",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.08152035549954251,
+      "from_gap": true,
+      "time": "00:05:41"
+    },
+    {
+      "start": 346.14,
+      "end": 350.94,
+      "start_hms": "00:05:46",
+      "end_hms": "00:05:50",
+      "text": "abzustreifen. Am 11. Juli gab das Oberkommando der Wehrmacht durch Sondermeldung bekannt, dass",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.08152035549954251,
+      "from_gap": true,
+      "time": "00:05:46"
+    },
+    {
+      "start": 350.94,
+      "end": 351.3,
+      "start_hms": "00:05:50",
+      "end_hms": "00:05:51",
+      "text": "Sprengladung",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.04966521519486622,
+      "time": "00:05:50"
+    },
+    {
+      "start": 351.3,
+      "end": 356.0,
+      "start_hms": "00:05:50",
+      "end_hms": "00:05:56",
+      "text": "bekannt, dass der Feind vernichtend geschlagen und der Don südlich",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.17130420247062308,
+      "from_gap": true,
+      "time": "00:05:51"
+    },
+    {
+      "start": 356.0,
+      "end": 361.40000000000003,
+      "start_hms": "00:05:56",
+      "end_hms": "00:06:01",
+      "text": "Voronezh in einer Breite von 350 Kilometern erreicht sei. In rastloser",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.17130420247062308,
+      "from_gap": true,
+      "time": "00:05:56"
+    },
+    {
+      "start": 361.40000000000003,
+      "end": 364.76,
+      "start_hms": "00:06:01",
+      "end_hms": "00:06:04",
+      "text": "Verfolgung stoßen unsere Truppen dem geschlagenen Feinde nach.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.17130420247062308,
+      "from_gap": true,
+      "time": "00:06:01"
+    },
+    {
+      "start": 383.96000000000004,
+      "end": 387.06,
+      "start_hms": "00:06:23",
+      "end_hms": "00:06:27",
+      "text": "Untertitelung des ZDF, 2020",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.2723083129295936,
+      "from_gap": true
+    },
+    {
+      "start": 387.06,
+      "end": 387.28,
+      "start_hms": "00:06:27",
+      "end_hms": "00:06:27",
+      "text": "Sprengladung",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.07709862204159007,
+      "time": "00:06:27"
+    },
+    {
+      "start": 405.44,
+      "end": 408.28,
+      "start_hms": "00:06:45",
+      "end_hms": "00:06:48",
+      "text": "Untertitelung des ZDF, 2020",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.17087716322678786,
+      "from_gap": true
+    },
+    {
+      "start": 412.3,
+      "end": 413.7,
+      "start_hms": "00:06:52",
+      "end_hms": "00:06:53",
+      "text": "Sprengladung",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.042837605476379395
+    },
+    {
+      "start": 435.38,
+      "end": 435.78,
+      "start_hms": "00:07:15",
+      "end_hms": "00:07:15",
+      "text": "Sprengladung",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.0612412122922523
+    }
+  ],
+  "segments_merged": [
+    {
+      "speaker": "Диктор",
+      "time": "00:00:00",
+      "start": 0.0,
+      "end": 8.14,
+      "text": "Männer des Reichsarbeitsdienstes beim Straßenbau unmittelbar hinter der kämpfenden Truppe. Der Nachschub muss pausenlos rollen.",
+      "confidence": -0.18614086650666736,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 0.0,
+          "end": 5.6,
+          "words": 10
+        },
+        {
+          "start": 5.94,
+          "end": 8.14,
+          "words": 5
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:00:28",
+      "start": 28.440000000000005,
+      "end": 30.28,
+      "text": "Rumänische Verbände rücken vor.",
+      "confidence": -0.10329965750376384,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 28.440000000000005,
+          "end": 30.28,
+          "words": 4
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:00:51",
+      "start": 51.34,
+      "end": 54.78,
+      "text": "Sturmgeschütze übernehmen neue Munition.",
+      "confidence": -0.26686245600382485,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 51.34,
+          "end": 53.76,
+          "words": 4
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:01:02",
+      "start": 62.84,
+      "end": 71.11999999999999,
+      "text": "Die Geschwader unserer Luftwaffe sind pausenlos am Feind und treffen die zurückflutenden Kolonnen der Sowjets mit einem vernichtenden Bombenhagel. in den Bombenhagel.",
+      "confidence": -0.05911790756952195,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 62.84,
+          "end": 70.1,
+          "words": 19
+        },
+        {
+          "start": 70.1,
+          "end": 71.11999999999999,
+          "words": 3
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:01:45",
+      "start": 105.7,
+      "end": 122.64,
+      "text": "Übergang über den Ostkoll. Pioniere entfernen im letzten Augenblick eine von den Sowjets gelegte Sprengladung. gelegte Spenkladung. Die gewonnenen Brückenköpfe werden in erbitterten Kämpfen unter blutigen Verlusten für den Feind erweitert. Sprengladung.",
+      "confidence": -0.165335294362661,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 105.7,
+          "end": 107.3,
+          "words": 4
+        },
+        {
+          "start": 107.88,
+          "end": 112.16,
+          "words": 11
+        },
+        {
+          "start": 112.16,
+          "end": 113.22,
+          "words": 2
+        },
+        {
+          "start": 115.16000000000001,
+          "end": 120.64,
+          "words": 14
+        },
+        {
+          "start": 122.6,
+          "end": 122.64,
+          "words": 1
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:02:27",
+      "start": 147.88,
+      "end": 148.92,
+      "text": "Sprengladung",
+      "confidence": -0.08198661027952682,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 147.88,
+          "end": 148.92,
+          "words": 1
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:02:50",
+      "start": 170.71999999999997,
+      "end": 179.02,
+      "text": "Auch weiter südlich ist der Oskol erreicht. Stoßtrupps erzwingen im Morgengrauen den Übergang. Sprengladung.",
+      "confidence": -0.13318572725568498,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 170.71999999999997,
+          "end": 176.66,
+          "words": 13
+        },
+        {
+          "start": 178.28,
+          "end": 179.02,
+          "words": 1
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:03:18",
+      "start": 198.88,
+      "end": 201.4,
+      "text": "Jetzt wird der Fluss in breiter Front überschritten.",
+      "confidence": -0.14610917427960565,
+      "raw_speaker_id": "GAP_FILLED",
+      "sub_segments": [
+        {
+          "start": 198.88,
+          "end": 201.4,
+          "words": 8
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:03:29",
+      "start": 209.66,
+      "end": 214.35999999999999,
+      "text": "Sprengladung Stuka greifen die Fluchtstraßen der Sowjets in ununterbrochenem Einsatz",
+      "confidence": -0.05196459939546674,
+      "raw_speaker_id": "GAP_FILLED",
+      "sub_segments": [
+        {
+          "start": 209.66,
+          "end": 209.7,
+          "words": 1
+        },
+        {
+          "start": 209.7,
+          "end": 214.35999999999999,
+          "words": 9
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:03:47",
+      "start": 227.3,
+      "end": 251.98,
+      "text": "Sprengladung Volltreffer auf eine Brücke über den Don. Der Don ist erreicht. Überall stoßen unsere vorrückenden Truppen auf Trümmerfelder von riesigen Ausmaßen. An den Flussübergängen stauten sich die zurückflutenden Kolonnen der Sowjets und boten ein willkommenes Ziel. Sprengladung willkommenes Ziel für unsere Stuka und Kampffliegerverbände. Hier wurde der Feind schonungslos zerschlagen.",
+      "confidence": -0.05196459939546674,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 227.3,
+          "end": 229.64,
+          "words": 1
+        },
+        {
+          "start": 229.64,
+          "end": 240.38,
+          "words": 21
+        },
+        {
+          "start": 240.38,
+          "end": 244.7,
+          "words": 15
+        },
+        {
+          "start": 244.7,
+          "end": 245.98,
+          "words": 1
+        },
+        {
+          "start": 245.98,
+          "end": 251.98,
+          "words": 13
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:04:18",
+      "start": 258.14,
+      "end": 258.22,
+      "text": "Sprengladung",
+      "confidence": -0.07995646550105168,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 258.14,
+          "end": 258.22,
+          "words": 1
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:04:41",
+      "start": 281.28000000000003,
+      "end": 282.68,
+      "text": "Sprengladung",
+      "confidence": -0.07637853092617458,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 281.28000000000003,
+          "end": 282.68,
+          "words": 1
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:04:53",
+      "start": 293.12,
+      "end": 296.12,
+      "text": "Volltreffer in Fabriken und Bahnanlagen.",
+      "confidence": -0.12292152245839437,
+      "raw_speaker_id": "GAP_FILLED",
+      "sub_segments": [
+        {
+          "start": 293.12,
+          "end": 296.12,
+          "words": 5
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:05:08",
+      "start": 308.98,
+      "end": 364.76,
+      "text": "Sprengladung Flug über Wörnisch. Unter uns einmarschierende deutsche Verbände. Am 7. Juli gab das Oberkommando der Wehrmacht die Einnahme dieser [нрзб] Sprengladung [нрзб] bekannt. Dieses wichtige Industriezentrum liegt an der großen Eisenbahnlinie, die Moskau mit seinen wichtigen Rohstoffgebieten im Süden verbindet. Sprengladung verbindet. Durch die Einnahme von Voronezh wurde diese Eisenbahnlinie unterbrochen und damit Truppen - und Materialverschiebung zwischen den bolschewistischen Heeresgruppen der Mitte und Südens unterbunden. 00:05:42 Über eine Woche lang versuchten die Sowjets diesen schwerwiegenden Verlust abzustreifen. 11. Juli gab Oberkommando der Wehrmacht durch Sondermeldung bekannt, dass Sprengladung bekannt, dass der Feind vernichtend geschlagen und der Don südlich Voronezh in einer Breite von 350 Kilometern erreicht sei. In rastloser Verfolgung stoßen unsere Truppen dem geschlagenen Feinde nach.",
+      "confidence": -0.06555380319294177,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 308.98,
+          "end": 310.38,
+          "words": 1
+        },
+        {
+          "start": 310.38,
+          "end": 314.86,
+          "words": 8
+        },
+        {
+          "start": 314.86,
+          "end": 317.08,
+          "words": 12
+        },
+        {
+          "start": 317.08,
+          "end": 319.5,
+          "words": 1
+        },
+        {
+          "start": 319.5,
+          "end": 328.84,
+          "words": 12
+        },
+        {
+          "start": 328.84,
+          "end": 330.44,
+          "words": 7
+        },
+        {
+          "start": 330.44,
+          "end": 331.12,
+          "words": 1
+        },
+        {
+          "start": 331.12,
+          "end": 337.06,
+          "words": 12
+        },
+        {
+          "start": 337.06,
+          "end": 341.18,
+          "words": 11
+        },
+        {
+          "start": 341.18,
+          "end": 346.14,
+          "words": 12
+        },
+        {
+          "start": 346.14,
+          "end": 350.94,
+          "words": 13
+        },
+        {
+          "start": 350.94,
+          "end": 351.3,
+          "words": 1
+        },
+        {
+          "start": 351.3,
+          "end": 356.0,
+          "words": 10
+        },
+        {
+          "start": 356.0,
+          "end": 361.40000000000003,
+          "words": 11
+        },
+        {
+          "start": 361.40000000000003,
+          "end": 364.76,
+          "words": 8
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:06:52",
+      "start": 412.3,
+      "end": 413.7,
+      "text": "Sprengladung",
+      "confidence": -0.042837605476379395,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 412.3,
+          "end": 413.7,
+          "words": 1
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:07:15",
+      "start": 435.38,
+      "end": 435.78,
+      "text": "Sprengladung",
+      "confidence": -0.0612412122922523,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 435.38,
+          "end": 435.78,
+          "words": 1
+        }
+      ]
+    }
+  ]
+}

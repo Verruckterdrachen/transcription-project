@@ -1,0 +1,1299 @@
+{
+  "file": "619-2 (июль 1942).wav",
+  "duration": 601.0271646859082,
+  "speaker": "Диктор",
+  "diarization_model": "pyannote/speaker-diarization-3.1",
+  "model": "large-v3-turbo",
+  "vad_threshold_used": 0.75,
+  "gaps_detected": 28,
+  "gaps_final": 28,
+  "retry_added": 7,
+  "speaker_identification": "v16.0-modular",
+  "pipeline_version": "17.19",
+  "params": {
+    "model_name": "large-v3-turbo",
+    "language": "de",
+    "min_speakers": 1,
+    "max_speakers": 1
+  },
+  "segments_count": 55,
+  "merged_count": 24,
+  "speaker_stats": {
+    "SPEAKER_00": 169.1001697792874
+  },
+  "speaker_roles": {
+    "SPEAKER_00": "Диктор"
+  },
+  "corrections_log": {
+    "journalist_commands_detected": 0,
+    "journalist_commands_details": []
+  },
+  "validation": {
+    "adjacent_same_speaker_count": 23,
+    "adjacent_same_speaker_list": [
+      {
+        "time": "00:00:00",
+        "speaker": "Диктор",
+        "next_time": "00:00:48",
+        "pause": 24.12,
+        "text_end": "herung durchbrochen und Schiff um Schiff versenkt.",
+        "text_start": "Tagelang tobt dieser Kampf. Durch immer neue Angri"
+      },
+      {
+        "time": "00:00:48",
+        "speaker": "Диктор",
+        "next_time": "00:01:06",
+        "pause": 6.8,
+        "text_end": " seinen Bestimmungshafen. [нрзб] Bestimmungshafen.",
+        "text_start": "Rund 260.000 Brotoregistertonnen feindlichen Schif"
+      },
+      {
+        "time": "00:01:06",
+        "speaker": "Диктор",
+        "next_time": "00:02:00",
+        "pause": 26.4,
+        "text_end": "leitzug sei unversehrt angekommen. hat angekommen.",
+        "text_start": "Deutsche Kampfflugzeuge. Kampfflugzeuge kehren nac"
+      },
+      {
+        "time": "00:02:00",
+        "speaker": "Диктор",
+        "next_time": "00:02:19",
+        "pause": 11.76,
+        "text_end": " in ihre Feldflughäfen an der Murman-Küste zurück.",
+        "text_start": "Hier wird zugleich ein hundertster Feindflug gefei"
+      },
+      {
+        "time": "00:02:19",
+        "speaker": "Диктор",
+        "next_time": "00:02:40",
+        "pause": 18.24,
+        "text_end": " wird zugleich ein hundertster Feindflug gefeiert.",
+        "text_start": "Generaloberst Stumpf, der Befehlshaber der deutsch"
+      },
+      {
+        "time": "00:02:40",
+        "speaker": "Диктор",
+        "next_time": "00:03:07",
+        "pause": 18.98,
+        "text_end": "ände und zeichnet besonders verdiente Flieger aus.",
+        "text_start": "Feldwebel Müller. Er hatte am Murman-Front bisher "
+      },
+      {
+        "time": "00:03:07",
+        "speaker": "Диктор",
+        "next_time": "00:03:38",
+        "pause": 21.48,
+        "text_end": "erreicht ihm das Ritterkreuz des Eisernen Kreuzes.",
+        "text_start": "Generaloberst Stumpf trifft auf einem Feldflugplat"
+      },
+      {
+        "time": "00:03:38",
+        "speaker": "Диктор",
+        "next_time": "00:03:55",
+        "pause": 13.74,
+        "text_end": "rifft auf einem Feldflugplatz im hohen Norden ein.",
+        "text_start": "Bei einer Abteilung des Reichsarbeitsdienstes. Die"
+      },
+      {
+        "time": "00:03:55",
+        "speaker": "Диктор",
+        "next_time": "00:04:18",
+        "pause": 9.68,
+        "text_end": "reibungslosen Nachschub. treibungslosen Nachschub.",
+        "text_start": "Hier unterhält sich der Generaloberst mit besonder"
+      },
+      {
+        "time": "00:04:18",
+        "speaker": "Диктор",
+        "next_time": "00:04:54",
+        "pause": 23.18,
+        "text_end": "eimarsch verschiedener Einheiten der Wehrmacht ab.",
+        "text_start": "Minenräumboote im finnischen Meerbusen. Sowjetisch"
+      },
+      {
+        "time": "00:04:54",
+        "speaker": "Диктор",
+        "next_time": "00:05:21",
+        "pause": 17.94,
+        "text_end": "Meerbusen. Sowjetische Bomber versuchen zu stören.",
+        "text_start": "Bombeneinschlag an der Küste."
+      },
+      {
+        "time": "00:05:21",
+        "speaker": "Диктор",
+        "next_time": "00:05:28",
+        "pause": 6.36,
+        "text_end": "Bombeneinschlag an der Küste.",
+        "text_start": "Auch diese Bombe verfehlte ihr Ziel."
+      },
+      {
+        "time": "00:05:28",
+        "speaker": "Диктор",
+        "next_time": "00:05:47",
+        "pause": 16.86,
+        "text_end": "Auch diese Bombe verfehlte ihr Ziel.",
+        "text_start": "Der Bomber ist getroffen. Sinkrecht stürzt er ins "
+      },
+      {
+        "time": "00:05:47",
+        "speaker": "Диктор",
+        "next_time": "00:05:57",
+        "pause": 6.82,
+        "text_end": "omber ist getroffen. Sinkrecht stürzt er ins Meer.",
+        "text_start": "Spuren der Bordwaffen des sowjetischen Bombers. Di"
+      },
+      {
+        "time": "00:05:57",
+        "speaker": "Диктор",
+        "next_time": "00:06:23",
+        "pause": 7.04,
+        "text_end": "hnellboote versuchen einen Durchbruch nach Westen.",
+        "text_start": "Unsere Bewachungsfahrzeuge nehmen den Kampf sofort"
+      },
+      {
+        "time": "00:06:23",
+        "speaker": "Диктор",
+        "next_time": "00:06:33",
+        "pause": 7.14,
+        "text_end": "e Bewachungsfahrzeuge nehmen den Kampf sofort auf.",
+        "text_start": "Im laufenden Gefecht wird der Feind nach Osten zur"
+      },
+      {
+        "time": "00:06:33",
+        "speaker": "Диктор",
+        "next_time": "00:07:03",
+        "pause": 27.2,
+        "text_end": " Gefecht wird der Feind nach Osten zurückgedrängt.",
+        "text_start": "Die Angriffsoperationen der Bordwaffen. der deutsc"
+      },
+      {
+        "time": "00:07:03",
+        "speaker": "Диктор",
+        "next_time": "00:07:41",
+        "pause": 13.28,
+        "text_end": "der in hervorragender Weise die Kämpfe des Heeres.",
+        "text_start": "Stuka und Artillerie zerschlagen die feindlichen S"
+      },
+      {
+        "time": "00:07:41",
+        "speaker": "Диктор",
+        "next_time": "00:07:56",
+        "pause": 11.28,
+        "text_end": "Artillerie zerschlagen die feindlichen Stellungen.",
+        "text_start": "Sturmgeschütze und Panzerkampfwagen bringen zusamm"
+      },
+      {
+        "time": "00:07:56",
+        "speaker": "Диктор",
+        "next_time": "00:08:16",
+        "pause": 16.08,
+        "text_end": "zusammen mit der Infanterie in eine Ortschaft ein.",
+        "text_start": "Unsere Truppen haben hier 10 Widerstand zu überwin"
+      },
+      {
+        "time": "00:08:16",
+        "speaker": "Диктор",
+        "next_time": "00:08:46",
+        "pause": 17.62,
+        "text_end": "s einem Schützenpanzerwagen. Schützenpanzer lagen.",
+        "text_start": "Bunker auf Bunker. Schützenloch um Schützenloch. W"
+      },
+      {
+        "time": "00:08:46",
+        "speaker": "Диктор",
+        "next_time": "00:09:47",
+        "pause": 27.22,
+        "text_end": "n Eilmärschen herangeführt. Märschen herangeführt.",
+        "text_start": "Bunker auf Bunker."
+      },
+      {
+        "time": "00:09:47",
+        "speaker": "Диктор",
+        "next_time": "00:09:55",
+        "pause": 7.32,
+        "text_end": "Bunker auf Bunker.",
+        "text_start": "Überall sind unsere Pioniere sofort zur Stelle. Ni"
+      }
+    ],
+    "short_segments_under_2s": [
+      {
+        "time": "00:05:21",
+        "speaker": "Диктор",
+        "duration": 0.78,
+        "text": "Bombeneinschlag an der Küste."
+      },
+      {
+        "time": "00:09:47",
+        "speaker": "Диктор",
+        "duration": 0.64,
+        "text": "Bunker auf Bunker."
+      }
+    ],
+    "potential_missed_interruptions": [],
+    "long_pauses_over_10s": [
+      {
+        "time": "00:00:00",
+        "speaker": "Диктор",
+        "next_time": "00:00:48",
+        "next_speaker": "Диктор",
+        "pause": 24.12
+      },
+      {
+        "time": "00:01:06",
+        "speaker": "Диктор",
+        "next_time": "00:02:00",
+        "next_speaker": "Диктор",
+        "pause": 26.4
+      },
+      {
+        "time": "00:02:00",
+        "speaker": "Диктор",
+        "next_time": "00:02:19",
+        "next_speaker": "Диктор",
+        "pause": 11.76
+      },
+      {
+        "time": "00:02:19",
+        "speaker": "Диктор",
+        "next_time": "00:02:40",
+        "next_speaker": "Диктор",
+        "pause": 18.24
+      },
+      {
+        "time": "00:02:40",
+        "speaker": "Диктор",
+        "next_time": "00:03:07",
+        "next_speaker": "Диктор",
+        "pause": 18.98
+      },
+      {
+        "time": "00:03:07",
+        "speaker": "Диктор",
+        "next_time": "00:03:38",
+        "next_speaker": "Диктор",
+        "pause": 21.48
+      },
+      {
+        "time": "00:03:38",
+        "speaker": "Диктор",
+        "next_time": "00:03:55",
+        "next_speaker": "Диктор",
+        "pause": 13.74
+      },
+      {
+        "time": "00:04:18",
+        "speaker": "Диктор",
+        "next_time": "00:04:54",
+        "next_speaker": "Диктор",
+        "pause": 23.18
+      },
+      {
+        "time": "00:04:54",
+        "speaker": "Диктор",
+        "next_time": "00:05:21",
+        "next_speaker": "Диктор",
+        "pause": 17.94
+      },
+      {
+        "time": "00:05:28",
+        "speaker": "Диктор",
+        "next_time": "00:05:47",
+        "next_speaker": "Диктор",
+        "pause": 16.86
+      },
+      {
+        "time": "00:06:33",
+        "speaker": "Диктор",
+        "next_time": "00:07:03",
+        "next_speaker": "Диктор",
+        "pause": 27.2
+      },
+      {
+        "time": "00:07:03",
+        "speaker": "Диктор",
+        "next_time": "00:07:41",
+        "next_speaker": "Диктор",
+        "pause": 13.28
+      },
+      {
+        "time": "00:07:41",
+        "speaker": "Диктор",
+        "next_time": "00:07:56",
+        "next_speaker": "Диктор",
+        "pause": 11.28
+      },
+      {
+        "time": "00:07:56",
+        "speaker": "Диктор",
+        "next_time": "00:08:16",
+        "next_speaker": "Диктор",
+        "pause": 16.08
+      },
+      {
+        "time": "00:08:16",
+        "speaker": "Диктор",
+        "next_time": "00:08:46",
+        "next_speaker": "Диктор",
+        "pause": 17.62
+      },
+      {
+        "time": "00:08:46",
+        "speaker": "Диктор",
+        "next_time": "00:09:47",
+        "next_speaker": "Диктор",
+        "pause": 27.22
+      }
+    ]
+  },
+  "segments_raw": [
+    {
+      "start": 0.0,
+      "end": 3.38,
+      "start_hms": "00:00:00",
+      "end_hms": "00:00:03",
+      "text": "Es greifen auch starke Kampffliegerverbände des Generaloberst Stumpf den Geleitzug an.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.15503787021247709
+    },
+    {
+      "start": 4.02,
+      "end": 5.74,
+      "start_hms": "00:00:04",
+      "end_hms": "00:00:05",
+      "text": "Dort die Küste von Spitzbergen.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.15503787021247709
+    },
+    {
+      "start": 5.74,
+      "end": 6.74,
+      "start_hms": "00:00:05",
+      "end_hms": "00:00:06",
+      "text": "Der [нрзб] von Spitzbergen.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.5923352241516113,
+      "from_gap": true,
+      "time": "00:00:05"
+    },
+    {
+      "start": 11.340000000000002,
+      "end": 12.72,
+      "start_hms": "00:00:11",
+      "end_hms": "00:00:12",
+      "text": "Der Geleitzug.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.15503787021247709
+    },
+    {
+      "start": 12.72,
+      "end": 13.72,
+      "start_hms": "00:00:12",
+      "end_hms": "00:00:13",
+      "text": "Der Gleitzug.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.29488976796468097,
+      "from_gap": true,
+      "time": "00:00:12"
+    },
+    {
+      "start": 16.12,
+      "end": 19.48,
+      "start_hms": "00:00:16",
+      "end_hms": "00:00:19",
+      "text": "Die Flak der begleitenden Kriegsschiffe feuert aus allen Rohren.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.15503787021247709
+    },
+    {
+      "start": 19.96,
+      "end": 24.1,
+      "start_hms": "00:00:19",
+      "end_hms": "00:00:24",
+      "text": "In kühnem Anflug wird die Sicherung durchbrochen und Schiff um Schiff versenkt.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.15503787021247709
+    },
+    {
+      "start": 48.22,
+      "end": 49.74,
+      "start_hms": "00:00:48",
+      "end_hms": "00:00:49",
+      "text": "Tagelang tobt dieser Kampf.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.12497589588165284
+    },
+    {
+      "start": 50.7,
+      "end": 55.32,
+      "start_hms": "00:00:50",
+      "end_hms": "00:00:55",
+      "text": "Durch immer neue Angriffe unserer Flieger und Unterseeboote wird der Geleitzug völlig zersprengt und vernichtet.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.12497589588165284
+    },
+    {
+      "start": 56.16,
+      "end": 59.06,
+      "start_hms": "00:00:56",
+      "end_hms": "00:00:59",
+      "text": "Von diesen Transportern erreicht keiner seinen Bestimmungshafen.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.12497589588165284
+    },
+    {
+      "start": 59.06,
+      "end": 60.080000000000005,
+      "start_hms": "00:00:59",
+      "end_hms": "00:01:00",
+      "text": "[нрзб] seinem Bestimmungshafen.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.6763273239135742,
+      "from_gap": true,
+      "time": "00:00:59"
+    },
+    {
+      "start": 66.88,
+      "end": 78.04,
+      "start_hms": "00:01:06",
+      "end_hms": "00:01:18",
+      "text": "Rund 260.000 Brotoregistertonnen feindlichen Schiffsraumes mit gewaltigen Mengen von Panzern, Flugzeugen und Lebensmitteln für die Sowjets sinken auf dem Meeresgrund.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.1316248997148261
+    },
+    {
+      "start": 81.80000000000001,
+      "end": 87.3,
+      "start_hms": "00:01:21",
+      "end_hms": "00:01:27",
+      "text": "Unsere Kampfflugzeuge und Unterseeboote haben dem Feind damit eine neue schwere Niederlage bereitet.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.1316248997148261
+    },
+    {
+      "start": 87.3,
+      "end": 93.3,
+      "start_hms": "00:01:27",
+      "end_hms": "00:01:33",
+      "text": "Moskau behauptete allerdings, der Geleitzug sei unversehrt angekommen.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.09744526863098145,
+      "time": "00:01:27"
+    },
+    {
+      "start": 93.3,
+      "end": 94.3,
+      "start_hms": "00:01:33",
+      "end_hms": "00:01:34",
+      "text": "Sie hat angekommen.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.6311751008033752,
+      "from_gap": true,
+      "time": "00:01:33"
+    },
+    {
+      "start": 120.69999999999999,
+      "end": 123.0,
+      "start_hms": "00:02:00",
+      "end_hms": "00:02:03",
+      "text": "Deutsche Kampfflugzeuge.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.430664612696721
+    },
+    {
+      "start": 123.0,
+      "end": 127.4,
+      "start_hms": "00:02:03",
+      "end_hms": "00:02:07",
+      "text": "Kampfflugzeuge kehren nach siegreichem Einsatz in ihre Feldflughäfen an der Murman-Küste zurück.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.2954886224534776,
+      "time": "00:02:03"
+    },
+    {
+      "start": 139.16,
+      "end": 142.58,
+      "start_hms": "00:02:19",
+      "end_hms": "00:02:22",
+      "text": "Hier wird zugleich ein hundertster Feindflug gefeiert.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.20213570594787597
+    },
+    {
+      "start": 160.82,
+      "end": 168.7,
+      "start_hms": "00:02:40",
+      "end_hms": "00:02:48",
+      "text": "Generaloberst Stumpf, der Befehlshaber der deutschen Luftstreitkräfte im hohen Norden, besichtigt einen seiner Verbände und zeichnet besonders verdiente Flieger aus.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.034834095409938266
+    },
+    {
+      "start": 187.68,
+      "end": 192.8,
+      "start_hms": "00:03:07",
+      "end_hms": "00:03:12",
+      "text": "Feldwebel Müller. Er hatte am Murman-Front bisher 48 feindliche Flugzeuge abgeschossen.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.14598220189412434
+    },
+    {
+      "start": 192.8,
+      "end": 196.9,
+      "start_hms": "00:03:12",
+      "end_hms": "00:03:16",
+      "text": "Generaloberst Stumpf überreicht ihm das Ritterkreuz des Eisernen Kreuzes.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.20321042721088117,
+      "time": "00:03:12"
+    },
+    {
+      "start": 218.38,
+      "end": 221.64,
+      "start_hms": "00:03:38",
+      "end_hms": "00:03:41",
+      "text": "Generaloberst Stumpf trifft auf einem Feldflugplatz im hohen Norden ein.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.22036796569824219
+    },
+    {
+      "start": 235.38,
+      "end": 237.64,
+      "start_hms": "00:03:55",
+      "end_hms": "00:03:57",
+      "text": "Bei einer Abteilung des Reichsarbeitsdienstes.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.08117734232256489
+    },
+    {
+      "start": 239.04,
+      "end": 247.58,
+      "start_hms": "00:03:59",
+      "end_hms": "00:04:07",
+      "text": "Diese Arbeitsmänner schufen in harter, zäher Arbeit neue Straßen in der fast völlig wegelosen Tundra und ermöglichten damit einen reibungslosen Nachschub.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.08117734232256489
+    },
+    {
+      "start": 247.58,
+      "end": 248.58,
+      "start_hms": "00:04:07",
+      "end_hms": "00:04:08",
+      "text": "treibungslosen Nachschub.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.6421355406443278,
+      "from_gap": true,
+      "time": "00:04:07"
+    },
+    {
+      "start": 258.26,
+      "end": 263.56,
+      "start_hms": "00:04:18",
+      "end_hms": "00:04:23",
+      "text": "Hier unterhält sich der Generaloberst mit besonders bewährten Frontarbeitern der Organisation Tord.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.20492652893066407
+    },
+    {
+      "start": 265.71999999999997,
+      "end": 271.42,
+      "start_hms": "00:04:25",
+      "end_hms": "00:04:31",
+      "text": "Zum Abschluss der Besichtigung nimmt Generaloberst Dietl den Vorbeimarsch verschiedener Einheiten der Wehrmacht ab.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.08574285226709702
+    },
+    {
+      "start": 294.59999999999997,
+      "end": 296.52,
+      "start_hms": "00:04:54",
+      "end_hms": "00:04:56",
+      "text": "Minenräumboote im finnischen Meerbusen.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.28004664844936794
+    },
+    {
+      "start": 301.1,
+      "end": 303.44,
+      "start_hms": "00:05:01",
+      "end_hms": "00:05:03",
+      "text": "Sowjetische Bomber versuchen zu stören.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.38810157775878906
+    },
+    {
+      "start": 321.38,
+      "end": 322.16,
+      "start_hms": "00:05:21",
+      "end_hms": "00:05:22",
+      "text": "Bombeneinschlag an der Küste.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.34357030575092024
+    },
+    {
+      "start": 328.52,
+      "end": 330.52,
+      "start_hms": "00:05:28",
+      "end_hms": "00:05:30",
+      "text": "Auch diese Bombe verfehlte ihr Ziel.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.2196364262524773
+    },
+    {
+      "start": 347.38,
+      "end": 350.7,
+      "start_hms": "00:05:47",
+      "end_hms": "00:05:50",
+      "text": "Der Bomber ist getroffen. Sinkrecht stürzt er ins Meer.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.2196364262524773
+    },
+    {
+      "start": 357.52,
+      "end": 360.02,
+      "start_hms": "00:05:57",
+      "end_hms": "00:06:00",
+      "text": "Spuren der Bordwaffen des sowjetischen Bombers.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.15705181912678043
+    },
+    {
+      "start": 360.32,
+      "end": 364.74,
+      "start_hms": "00:06:00",
+      "end_hms": "00:06:04",
+      "text": "Diese Bombe traf das Oberdeck. Sie richtete jedoch keinen größeren Schaden an.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.15705181912678043
+    },
+    {
+      "start": 365.64000000000004,
+      "end": 368.34,
+      "start_hms": "00:06:05",
+      "end_hms": "00:06:08",
+      "text": "Die Räumboote setzen ihre Arbeit fort.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.14637197946247302
+    },
+    {
+      "start": 373.04,
+      "end": 376.8,
+      "start_hms": "00:06:13",
+      "end_hms": "00:06:16",
+      "text": "Neuer Alarm. Sowjetische Schnellboote versuchen einen Durchbruch nach Westen.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.14637197946247302
+    },
+    {
+      "start": 383.84,
+      "end": 386.52,
+      "start_hms": "00:06:23",
+      "end_hms": "00:06:26",
+      "text": "Unsere Bewachungsfahrzeuge nehmen den Kampf sofort auf.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.21365148593217897
+    },
+    {
+      "start": 393.66,
+      "end": 396.62,
+      "start_hms": "00:06:33",
+      "end_hms": "00:06:36",
+      "text": "Im laufenden Gefecht wird der Feind nach Osten zurückgedrängt.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.21365148593217897
+    },
+    {
+      "start": 423.82000000000005,
+      "end": 426.6,
+      "start_hms": "00:07:03",
+      "end_hms": "00:07:06",
+      "text": "Die Angriffsoperationen der Bordwaffen.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.6710639595985413
+    },
+    {
+      "start": 426.6,
+      "end": 433.34,
+      "start_hms": "00:07:06",
+      "end_hms": "00:07:13",
+      "text": "der deutschen Wehrmacht und ihrer Verbündeten im Raume westlich des Don werden mit unverminderter Wucht fortgeführt.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.13274010615562326,
+      "time": "00:07:06"
+    },
+    {
+      "start": 433.68,
+      "end": 440.88,
+      "start_hms": "00:07:13",
+      "end_hms": "00:07:20",
+      "text": "Die tief gestapelten Abwehrstellungen des Feindes wurden in einer Breite von mehr als 500 Kilometern durchstoßen.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.13274010615562326
+    },
+    {
+      "start": 443.86,
+      "end": 448.52,
+      "start_hms": "00:07:23",
+      "end_hms": "00:07:28",
+      "text": "Die Luftwaffe unterstützt auch hier wieder in hervorragender Weise die Kämpfe des Heeres.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.07109818635163484
+    },
+    {
+      "start": 461.8,
+      "end": 465.04,
+      "start_hms": "00:07:41",
+      "end_hms": "00:07:45",
+      "text": "Stuka und Artillerie zerschlagen die feindlichen Stellungen.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.16486539840698242
+    },
+    {
+      "start": 476.32,
+      "end": 480.58,
+      "start_hms": "00:07:56",
+      "end_hms": "00:08:00",
+      "text": "Sturmgeschütze und Panzerkampfwagen bringen zusammen mit der Infanterie in eine Ortschaft ein.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.06757003289681894
+    },
+    {
+      "start": 496.65999999999997,
+      "end": 499.74,
+      "start_hms": "00:08:16",
+      "end_hms": "00:08:19",
+      "text": "Unsere Truppen haben hier 10 Widerstand zu überwinden.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.2670316696166992
+    },
+    {
+      "start": 499.74,
+      "end": 502.86,
+      "start_hms": "00:08:19",
+      "end_hms": "00:08:22",
+      "text": "Trotzdem geht der Stoß auf den Don unaufhaltsam weiter.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.11778774016942734,
+      "time": "00:08:19"
+    },
+    {
+      "start": 504.87999999999994,
+      "end": 507.66,
+      "start_hms": "00:08:24",
+      "end_hms": "00:08:27",
+      "text": "Ein Granatwerfer feuert aus einem Schützenpanzerwagen.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.11778774016942734
+    },
+    {
+      "start": 507.66,
+      "end": 508.68,
+      "start_hms": "00:08:27",
+      "end_hms": "00:08:28",
+      "text": "Schützenpanzer lagen.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.40570337122136896,
+      "from_gap": true,
+      "time": "00:08:27"
+    },
+    {
+      "start": 526.3,
+      "end": 529.9,
+      "start_hms": "00:08:46",
+      "end_hms": "00:08:49",
+      "text": "Bunker auf Bunker. Schützenloch um Schützenloch. Wird ausgeräuchert.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.16930747032165527
+    },
+    {
+      "start": 532.32,
+      "end": 555.06,
+      "start_hms": "00:08:52",
+      "end_hms": "00:09:15",
+      "text": "Bunker auf Bunker.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.5340185165405273
+    },
+    {
+      "start": 555.06,
+      "end": 559.34,
+      "start_hms": "00:09:15",
+      "end_hms": "00:09:19",
+      "text": "Immer neue Divisionen werden in Eilmärschen herangeführt.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.11942824863252186,
+      "time": "00:09:15"
+    },
+    {
+      "start": 559.34,
+      "end": 560.36,
+      "start_hms": "00:09:19",
+      "end_hms": "00:09:20",
+      "text": "Märschen herangeführt.",
+      "speaker": "Диктор",
+      "raw_speaker_id": "GAP_FILLED",
+      "confidence": -0.19439272447065872,
+      "from_gap": true,
+      "time": "00:09:19"
+    },
+    {
+      "start": 587.58,
+      "end": 588.22,
+      "start_hms": "00:09:47",
+      "end_hms": "00:09:48",
+      "text": "Bunker auf Bunker.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.11706359931706313
+    },
+    {
+      "start": 595.54,
+      "end": 598.66,
+      "start_hms": "00:09:55",
+      "end_hms": "00:09:58",
+      "text": "Überall sind unsere Pioniere sofort zur Stelle.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.10603819395366468
+    },
+    {
+      "start": 599.1,
+      "end": 600.94,
+      "start_hms": "00:09:59",
+      "end_hms": "00:10:00",
+      "text": "Nichts darf den Vormarsch aufhalten.",
+      "raw_speaker_id": "SPEAKER_00",
+      "speaker": "Диктор",
+      "confidence": -0.10603819395366468
+    }
+  ],
+  "segments_merged": [
+    {
+      "speaker": "Диктор",
+      "time": "00:00:00",
+      "start": 0.0,
+      "end": 24.1,
+      "text": "Es greifen auch starke Kampffliegerverbände des Generaloberst Stumpf den Geleitzug an. Dort die Küste von Spitzbergen. Der [нрзб] von Spitzbergen. Der Geleitzug. Die Flak der begleitenden Kriegsschiffe feuert aus allen Rohren. In kühnem Anflug wird die Sicherung durchbrochen und Schiff um Schiff versenkt.",
+      "confidence": -0.15503787021247709,
+      "auto_merged_from": 3,
+      "raw_speaker_id": "SPEAKER_00"
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:00:48",
+      "start": 48.22,
+      "end": 60.080000000000005,
+      "text": "Tagelang tobt dieser Kampf. Durch immer neue Angriffe unserer Flieger und Unterseeboote wird der Geleitzug völlig zersprengt und vernichtet. Von diesen Transportern erreicht keiner seinen Bestimmungshafen. [нрзб] Bestimmungshafen.",
+      "confidence": -0.12497589588165284,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 48.22,
+          "end": 49.74,
+          "words": 4
+        },
+        {
+          "start": 50.7,
+          "end": 55.32,
+          "words": 15
+        },
+        {
+          "start": 56.16,
+          "end": 59.06,
+          "words": 7
+        },
+        {
+          "start": 59.06,
+          "end": 60.080000000000005,
+          "words": 3
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:01:06",
+      "start": 66.88,
+      "end": 94.3,
+      "text": "Rund 260.000 Brotoregistertonnen feindlichen Schiffsraumes mit gewaltigen Mengen von Panzern, Flugzeugen und Lebensmitteln für die Sowjets sinken auf dem Meeresgrund. Unsere Kampfflugzeuge und Unterseeboote haben dem Feind damit eine neue schwere Niederlage bereitet. Moskau behauptete allerdings, der Geleitzug sei unversehrt angekommen. hat angekommen.",
+      "confidence": -0.1316248997148261,
+      "auto_merged_from": 2,
+      "raw_speaker_id": "SPEAKER_00"
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:02:00",
+      "start": 120.69999999999999,
+      "end": 127.4,
+      "text": "Deutsche Kampfflugzeuge. Kampfflugzeuge kehren nach siegreichem Einsatz in ihre Feldflughäfen an der Murman-Küste zurück.",
+      "confidence": -0.430664612696721,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 120.69999999999999,
+          "end": 123.0,
+          "words": 2
+        },
+        {
+          "start": 123.0,
+          "end": 127.4,
+          "words": 12
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:02:19",
+      "start": 139.16,
+      "end": 142.58,
+      "text": "Hier wird zugleich ein hundertster Feindflug gefeiert.",
+      "confidence": -0.20213570594787597,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 139.16,
+          "end": 142.58,
+          "words": 7
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:02:40",
+      "start": 160.82,
+      "end": 168.7,
+      "text": "Generaloberst Stumpf, der Befehlshaber der deutschen Luftstreitkräfte im hohen Norden, besichtigt einen seiner Verbände und zeichnet besonders verdiente Flieger aus.",
+      "confidence": -0.034834095409938266,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 160.82,
+          "end": 168.7,
+          "words": 20
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:03:07",
+      "start": 187.68,
+      "end": 196.9,
+      "text": "Feldwebel Müller. Er hatte am Murman-Front bisher 48 feindliche Flugzeuge abgeschossen. Generaloberst Stumpf überreicht ihm das Ritterkreuz des Eisernen Kreuzes.",
+      "confidence": -0.14598220189412434,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 187.68,
+          "end": 192.8,
+          "words": 11
+        },
+        {
+          "start": 192.8,
+          "end": 196.9,
+          "words": 9
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:03:38",
+      "start": 218.38,
+      "end": 221.64,
+      "text": "Generaloberst Stumpf trifft auf einem Feldflugplatz im hohen Norden ein.",
+      "confidence": -0.22036796569824219,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 218.38,
+          "end": 221.64,
+          "words": 10
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:03:55",
+      "start": 235.38,
+      "end": 248.58,
+      "text": "Bei einer Abteilung des Reichsarbeitsdienstes. Diese Arbeitsmänner schufen in harter, zäher Arbeit neue Straßen in der fast völlig wegelosen Tundra und ermöglichten damit einen reibungslosen Nachschub. treibungslosen Nachschub.",
+      "confidence": -0.08117734232256489,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 235.38,
+          "end": 237.64,
+          "words": 5
+        },
+        {
+          "start": 239.04,
+          "end": 247.58,
+          "words": 21
+        },
+        {
+          "start": 247.58,
+          "end": 248.58,
+          "words": 2
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:04:18",
+      "start": 258.26,
+      "end": 271.42,
+      "text": "Hier unterhält sich der Generaloberst mit besonders bewährten Frontarbeitern der Organisation Tord. Zum Abschluss der Besichtigung nimmt Generaloberst Dietl den Vorbeimarsch verschiedener Einheiten der Wehrmacht ab.",
+      "confidence": -0.20492652893066407,
+      "auto_merged_from": 2,
+      "raw_speaker_id": "SPEAKER_00"
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:04:54",
+      "start": 294.59999999999997,
+      "end": 303.44,
+      "text": "Minenräumboote im finnischen Meerbusen. Sowjetische Bomber versuchen zu stören.",
+      "confidence": -0.28004664844936794,
+      "auto_merged_from": 2,
+      "raw_speaker_id": "SPEAKER_00"
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:05:21",
+      "start": 321.38,
+      "end": 322.16,
+      "text": "Bombeneinschlag an der Küste.",
+      "confidence": -0.34357030575092024,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 321.38,
+          "end": 322.16,
+          "words": 4
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:05:28",
+      "start": 328.52,
+      "end": 330.52,
+      "text": "Auch diese Bombe verfehlte ihr Ziel.",
+      "confidence": -0.2196364262524773,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 328.52,
+          "end": 330.52,
+          "words": 6
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:05:47",
+      "start": 347.38,
+      "end": 350.7,
+      "text": "Der Bomber ist getroffen. Sinkrecht stürzt er ins Meer.",
+      "confidence": -0.2196364262524773,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 347.38,
+          "end": 350.7,
+          "words": 9
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:05:57",
+      "start": 357.52,
+      "end": 376.8,
+      "text": "Spuren der Bordwaffen des sowjetischen Bombers. Diese Bombe traf das Oberdeck. Sie richtete jedoch keinen größeren Schaden an. Die Räumboote setzen ihre Arbeit fort. Neuer Alarm. Sowjetische Schnellboote versuchen einen Durchbruch nach Westen.",
+      "confidence": -0.15705181912678043,
+      "auto_merged_from": 2,
+      "raw_speaker_id": "SPEAKER_00"
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:06:23",
+      "start": 383.84,
+      "end": 386.52,
+      "text": "Unsere Bewachungsfahrzeuge nehmen den Kampf sofort auf.",
+      "confidence": -0.21365148593217897,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 383.84,
+          "end": 386.52,
+          "words": 7
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:06:33",
+      "start": 393.66,
+      "end": 396.62,
+      "text": "Im laufenden Gefecht wird der Feind nach Osten zurückgedrängt.",
+      "confidence": -0.21365148593217897,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 393.66,
+          "end": 396.62,
+          "words": 9
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:07:03",
+      "start": 423.82000000000005,
+      "end": 448.52,
+      "text": "Die Angriffsoperationen der Bordwaffen. der deutschen Wehrmacht und ihrer Verbündeten im Raume westlich des Don werden mit unverminderter Wucht fortgeführt. Die tief gestapelten Abwehrstellungen des Feindes wurden in einer Breite von mehr als 500 Kilometern durchstoßen. Die Luftwaffe unterstützt auch hier wieder in hervorragender Weise die Kämpfe des Heeres.",
+      "confidence": -0.6710639595985413,
+      "auto_merged_from": 2,
+      "raw_speaker_id": "SPEAKER_00"
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:07:41",
+      "start": 461.8,
+      "end": 465.04,
+      "text": "Stuka und Artillerie zerschlagen die feindlichen Stellungen.",
+      "confidence": -0.16486539840698242,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 461.8,
+          "end": 465.04,
+          "words": 7
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:07:56",
+      "start": 476.32,
+      "end": 480.58,
+      "text": "Sturmgeschütze und Panzerkampfwagen bringen zusammen mit der Infanterie in eine Ortschaft ein.",
+      "confidence": -0.06757003289681894,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 476.32,
+          "end": 480.58,
+          "words": 12
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:08:16",
+      "start": 496.65999999999997,
+      "end": 508.68,
+      "text": "Unsere Truppen haben hier 10 Widerstand zu überwinden. Trotzdem geht der Stoß auf den Don unaufhaltsam weiter. Ein Granatwerfer feuert aus einem Schützenpanzerwagen. Schützenpanzer lagen.",
+      "confidence": -0.2670316696166992,
+      "auto_merged_from": 2,
+      "raw_speaker_id": "SPEAKER_00"
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:08:46",
+      "start": 526.3,
+      "end": 560.36,
+      "text": "Bunker auf Bunker. Schützenloch um Schützenloch. Wird ausgeräuchert. Bunker auf Bunker. Immer neue Divisionen werden in Eilmärschen herangeführt. Märschen herangeführt.",
+      "confidence": -0.16930747032165527,
+      "auto_merged_from": 2,
+      "raw_speaker_id": "SPEAKER_00"
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:09:47",
+      "start": 587.58,
+      "end": 588.22,
+      "text": "Bunker auf Bunker.",
+      "confidence": -0.11706359931706313,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 587.58,
+          "end": 588.22,
+          "words": 3
+        }
+      ]
+    },
+    {
+      "speaker": "Диктор",
+      "time": "00:09:55",
+      "start": 595.54,
+      "end": 600.94,
+      "text": "Überall sind unsere Pioniere sofort zur Stelle. Nichts darf den Vormarsch aufhalten.",
+      "confidence": -0.10603819395366468,
+      "raw_speaker_id": "SPEAKER_00",
+      "sub_segments": [
+        {
+          "start": 595.54,
+          "end": 598.66,
+          "words": 7
+        },
+        {
+          "start": 599.1,
+          "end": 600.94,
+          "words": 5
+        }
+      ]
+    }
+  ]
+}

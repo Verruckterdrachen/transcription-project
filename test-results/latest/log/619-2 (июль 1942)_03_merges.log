@@ -1,0 +1,427 @@
+
+  🔀 MERGE #1: 00:00:00 Диктор — начало
+    ↳ 00:00:04 ⏸️ 0.6s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C: мало значимых слов → KEEP
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Der [нрзб] von Spitzbergen.'
+    ↳ 00:00:05 ⏸️ 0.0s → ✅ merge
+    ↳ Диктор пауза 4.6s > 5.0s → ❌ STOP
+    📊 Собрано: 3 сегментов, 20 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 86 символов)
+    🔗 Вызов join_texts_deduplicated для 3 текстов...
+    🧹 Вызов clean_loops (146 символов)...
+    🧹 clean_loops: обработка текста (146 символов, 20 слов)
+    ✅ clean_loops: готово (146 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 146 символов
+  ✅ Склеено 3 сегментов → 20 слов
+
+  🔀 MERGE #2: 00:00:11 Диктор — начало
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C: мало значимых слов → KEEP
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Der Gleitzug.'
+    ↳ 00:00:12 ⏸️ 0.0s → ✅ merge
+    ↳ Диктор пауза 2.4s > 5.0s → ❌ STOP
+    📊 Собрано: 2 сегментов, 4 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 14 символов)
+    🔗 Вызов join_texts_deduplicated для 2 текстов...
+    🧹 Вызов clean_loops (28 символов)...
+    🧹 clean_loops: обработка текста (28 символов, 4 слов)
+    ✅ clean_loops: готово (28 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+  🔍 ДУБЛЬ (similarity=96.00%): "Der Geleitzug" ≈ "Der Gleitzug"
+  ✅ Очищено: 28 → 14 символов
+    ✅ Очистка завершена, финальный текст: 14 символов
+  ✅ Склеено 2 сегментов → 2 слов
+
+  🔀 MERGE #3: 00:00:16 Диктор — начало
+    ↳ 00:00:19 ⏸️ 0.5s → ✅ merge
+    ↳ Диктор пауза 24.1s > 5.0s → ❌ STOP
+    📊 Собрано: 2 сегментов, 21 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 79 символов)
+    🔗 Вызов join_texts_deduplicated для 2 текстов...
+    🧹 Вызов clean_loops (144 символов)...
+    🧹 clean_loops: обработка текста (144 символов, 21 слов)
+    ✅ clean_loops: готово (144 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 144 символов
+  ✅ Склеено 2 сегментов → 21 слов
+
+  🔀 MERGE #4: 00:00:48 Диктор — начало
+    ↳ 00:00:50 ⏸️ 1.0s → ✅ merge
+    ↳ 00:00:56 ⏸️ 0.8s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C ngram: best_sim=0.79 'нрзб seinem bestimmungshafen' ≈ 'keiner seinen bestimmungshafen'
+    ↳ ✅ GUARD C: GAP легитимен → KEEP '[нрзб] seinem Bestimmungshafen.'
+    ↳ 00:00:59 ⏸️ 0.0s → ✅ merge
+    ↳ Диктор пауза 6.8s > 5.0s → ❌ STOP
+    📊 Собрано: 4 сегментов, 29 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 112 символов)
+    🔗 Вызов join_texts_deduplicated для 4 текстов...
+    🧹 Вызов clean_loops (237 символов)...
+    🧹 clean_loops: обработка текста (237 символов, 29 слов)
+      🔁 LOOP (similarity=0.84): 'seinem Bestimmungshafen.' ≈ 'seinen bestimmungshafen. [нрзб]'
+      ⚠️ УДАЛЯЕМ: 'seinem Bestimmungshafen.'
+         Причина: совпадение с 'seinen bestimmungshafen. [нрзб]' (sim=0.84)
+         Контекст слева: '...seinen Bestimmungshafen. [нрзб]'
+         Слово перед удалением: '[нрзб]'
+    ✅ clean_loops: готово (230 символов, удалено 1 loop artifacts)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 230 символов
+  ✅ Склеено 4 сегментов → 28 слов
+
+  🔀 MERGE #5: 00:01:06 Диктор — начало
+    ↳ Диктор пауза 3.8s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 20 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (166 символов)...
+    🧹 clean_loops: обработка текста (166 символов, 20 слов)
+    ✅ clean_loops: готово (166 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 166 символов
+
+  🔀 MERGE #6: 00:01:21 Диктор — начало
+    ↳ 00:01:27 ⏸️ 0.0s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C: мало значимых слов → KEEP
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Sie hat angekommen.'
+    ↳ 00:01:33 ⏸️ 0.0s → ✅ merge
+    ↳ Диктор пауза 26.4s > 5.0s → ❌ STOP
+    📊 Собрано: 3 сегментов, 24 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 100 символов)
+    🔗 Вызов join_texts_deduplicated для 3 текстов...
+    🧹 Вызов clean_loops (191 символов)...
+    🧹 clean_loops: обработка текста (191 символов, 24 слов)
+      🔁 LOOP (similarity=0.76): 'Sie hat angekommen.' ≈ 'sei unversehrt angekommen.'
+      ⚠️ УДАЛЯЕМ: 'Sie hat angekommen.'
+         Причина: совпадение с 'sei unversehrt angekommen.' (sim=0.76)
+         Контекст слева: '...sei unversehrt angekommen.'
+         Слово перед удалением: 'angekommen.'
+    ✅ clean_loops: готово (187 символов, удалено 1 loop artifacts)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 187 символов
+  ✅ Склеено 3 сегментов → 23 слов
+
+  🔀 MERGE #7: 00:02:00 Диктор — начало
+    ↳ 00:02:03 ⏸️ 0.0s → ✅ merge
+    ↳ Диктор пауза 11.8s > 5.0s → ❌ STOP
+    📊 Собрано: 2 сегментов, 14 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 96 символов)
+    🔗 Вызов join_texts_deduplicated для 2 текстов...
+    🧹 Вызов clean_loops (121 символов)...
+    🧹 clean_loops: обработка текста (121 символов, 14 слов)
+    ✅ clean_loops: готово (121 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 121 символов
+  ✅ Склеено 2 сегментов → 14 слов
+
+  🔀 MERGE #8: 00:02:19 Диктор — начало
+    ↳ Диктор пауза 18.2s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 7 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (54 символов)...
+    🧹 clean_loops: обработка текста (54 символов, 7 слов)
+    ✅ clean_loops: готово (54 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 54 символов
+
+  🔀 MERGE #9: 00:02:40 Диктор — начало
+    ↳ Диктор пауза 19.0s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 20 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (165 символов)...
+    🧹 clean_loops: обработка текста (165 символов, 20 слов)
+    ✅ clean_loops: готово (165 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 165 символов
+
+  🔀 MERGE #10: 00:03:07 Диктор — начало
+    ↳ 00:03:12 ⏸️ 0.0s → ✅ merge
+    ↳ Диктор пауза 21.5s > 5.0s → ❌ STOP
+    📊 Собрано: 2 сегментов, 20 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 87 символов)
+    🔗 Вызов join_texts_deduplicated для 2 текстов...
+    🧹 Вызов clean_loops (161 символов)...
+    🧹 clean_loops: обработка текста (161 символов, 20 слов)
+    ✅ clean_loops: готово (161 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 161 символов
+  ✅ Склеено 2 сегментов → 20 слов
+
+  🔀 MERGE #11: 00:03:38 Диктор — начало
+    ↳ Диктор пауза 13.7s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 10 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (72 символов)...
+    🧹 clean_loops: обработка текста (72 символов, 10 слов)
+    ✅ clean_loops: готово (72 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 72 символов
+
+  🔀 MERGE #12: 00:03:55 Диктор — начало
+    ↳ 00:03:59 ⏸️ 1.4s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C: мало значимых слов → KEEP
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'treibungslosen Nachschub.'
+    ↳ 00:04:07 ⏸️ 0.0s → ✅ merge
+    ↳ Диктор пауза 9.7s > 5.0s → ❌ STOP
+    📊 Собрано: 3 сегментов, 28 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 154 символов)
+    🔗 Вызов join_texts_deduplicated для 3 текстов...
+    🧹 Вызов clean_loops (227 символов)...
+    🧹 clean_loops: обработка текста (227 символов, 28 слов)
+    ✅ clean_loops: готово (227 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 227 символов
+  ✅ Склеено 3 сегментов → 28 слов
+
+  🔀 MERGE #13: 00:04:18 Диктор — начало
+    ↳ Диктор пауза 2.2s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 12 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (99 символов)...
+    🧹 clean_loops: обработка текста (99 символов, 12 слов)
+    ✅ clean_loops: готово (99 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 99 символов
+
+  🔀 MERGE #14: 00:04:25 Диктор — начало
+    ↳ Диктор пауза 23.2s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 14 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (115 символов)...
+    🧹 clean_loops: обработка текста (115 символов, 14 слов)
+    ✅ clean_loops: готово (115 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 115 символов
+
+  🔀 MERGE #15: 00:04:54 Диктор — начало
+    ↳ Диктор пауза 4.6s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 4 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (39 символов)...
+    🧹 clean_loops: обработка текста (39 символов, 4 слов)
+    ✅ clean_loops: готово (39 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 39 символов
+
+  🔀 MERGE #16: 00:05:01 Диктор — начало
+    ↳ Диктор пауза 17.9s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 5 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (39 символов)...
+    🧹 clean_loops: обработка текста (39 символов, 5 слов)
+    ✅ clean_loops: готово (39 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 39 символов
+
+  🔀 MERGE #17: 00:05:21 Диктор — начало
+    ↳ Диктор пауза 6.4s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 4 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (29 символов)...
+    🧹 clean_loops: обработка текста (29 символов, 4 слов)
+    ✅ clean_loops: готово (29 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 29 символов
+
+  🔀 MERGE #18: 00:05:28 Диктор — начало
+    ↳ Диктор пауза 16.9s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 6 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (36 символов)...
+    🧹 clean_loops: обработка текста (36 символов, 6 слов)
+    ✅ clean_loops: готово (36 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 36 символов
+
+  🔀 MERGE #19: 00:05:47 Диктор — начало
+    ↳ Диктор пауза 6.8s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 9 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (55 символов)...
+    🧹 clean_loops: обработка текста (55 символов, 9 слов)
+    ✅ clean_loops: готово (55 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 55 символов
+
+  🔀 MERGE #20: 00:05:57 Диктор — начало
+    ↳ 00:06:00 ⏸️ 0.3s → ✅ merge
+    ↳ 00:06:05 ⏸️ 0.9s → ✅ merge
+    ↳ Диктор пауза 4.7s > 5.0s → ❌ STOP
+    📊 Собрано: 3 сегментов, 24 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 78 символов)
+    🔗 Вызов join_texts_deduplicated для 3 текстов...
+    🧹 Вызов clean_loops (165 символов)...
+    🧹 clean_loops: обработка текста (165 символов, 24 слов)
+    ✅ clean_loops: готово (165 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 165 символов
+  ✅ Склеено 3 сегментов → 24 слов
+
+  🔀 MERGE #21: 00:06:13 Диктор — начало
+    ↳ Диктор пауза 7.0s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 9 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (77 символов)...
+    🧹 clean_loops: обработка текста (77 символов, 9 слов)
+    ✅ clean_loops: готово (77 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 77 символов
+
+  🔀 MERGE #22: 00:06:23 Диктор — начало
+    ↳ Диктор пауза 7.1s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 7 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (55 символов)...
+    🧹 clean_loops: обработка текста (55 символов, 7 слов)
+    ✅ clean_loops: готово (55 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 55 символов
+
+  🔀 MERGE #23: 00:06:33 Диктор — начало
+    ↳ Диктор пауза 27.2s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 9 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (62 символов)...
+    🧹 clean_loops: обработка текста (62 символов, 9 слов)
+    ✅ clean_loops: готово (62 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 62 символов
+
+  🔀 MERGE #24: 00:07:03 Диктор — начало
+    ↳ 00:07:06 ⏸️ 0.0s → ✅ merge
+    ↳ 00:07:13 ⏸️ 0.3s → ✅ merge
+    ↳ Диктор пауза 3.0s > 5.0s → ❌ STOP
+    📊 Собрано: 3 сегментов, 36 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 116 символов)
+    🔗 Вызов join_texts_deduplicated для 3 текстов...
+    🧹 Вызов clean_loops (270 символов)...
+    🧹 clean_loops: обработка текста (270 символов, 36 слов)
+    ✅ clean_loops: готово (270 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 270 символов
+  ✅ Склеено 3 сегментов → 36 слов
+
+  🔀 MERGE #25: 00:07:23 Диктор — начало
+    ↳ Диктор пауза 13.3s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 13 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (89 символов)...
+    🧹 clean_loops: обработка текста (89 символов, 13 слов)
+    ✅ clean_loops: готово (89 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 89 символов
+
+  🔀 MERGE #26: 00:07:41 Диктор — начало
+    ↳ Диктор пауза 11.3s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 7 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (60 символов)...
+    🧹 clean_loops: обработка текста (60 символов, 7 слов)
+    ✅ clean_loops: готово (60 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 60 символов
+
+  🔀 MERGE #27: 00:07:56 Диктор — начало
+    ↳ Диктор пауза 16.1s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 12 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (94 символов)...
+    🧹 clean_loops: обработка текста (94 символов, 12 слов)
+    ✅ clean_loops: готово (94 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 94 символов
+
+  🔀 MERGE #28: 00:08:16 Диктор — начало
+    ↳ 00:08:19 ⏸️ 0.0s → ✅ merge
+    ↳ Диктор пауза 2.0s > 5.0s → ❌ STOP
+    📊 Собрано: 2 сегментов, 17 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 55 символов)
+    🔗 Вызов join_texts_deduplicated для 2 текстов...
+    🧹 Вызов clean_loops (110 символов)...
+    🧹 clean_loops: обработка текста (110 символов, 17 слов)
+    ✅ clean_loops: готово (110 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 110 символов
+  ✅ Склеено 2 сегментов → 17 слов
+
+  🔀 MERGE #29: 00:08:24 Диктор — начало
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C: мало значимых слов → KEEP
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Schützenpanzer lagen.'
+    ↳ 00:08:27 ⏸️ 0.0s → ✅ merge
+    ↳ Диктор пауза 17.6s > 5.0s → ❌ STOP
+    📊 Собрано: 2 сегментов, 8 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 54 символов)
+    🔗 Вызов join_texts_deduplicated для 2 текстов...
+    🧹 Вызов clean_loops (76 символов)...
+    🧹 clean_loops: обработка текста (76 символов, 8 слов)
+    ✅ clean_loops: готово (76 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 76 символов
+  ✅ Склеено 2 сегментов → 8 слов
+
+  🔀 MERGE #30: 00:08:46 Диктор — начало
+    ↳ Диктор пауза 2.4s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 8 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (68 символов)...
+    🧹 clean_loops: обработка текста (68 символов, 8 слов)
+    ✅ clean_loops: готово (68 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 68 символов
+
+  🔀 MERGE #31: 00:08:52 Диктор — начало
+    ↳ 00:09:15 ⏸️ 0.0s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C: мало значимых слов → KEEP
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Märschen herangeführt.'
+    ↳ 00:09:19 ⏸️ 0.0s → ✅ merge
+    ↳ Диктор пауза 27.2s > 5.0s → ❌ STOP
+    📊 Собрано: 3 сегментов, 12 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 57 символов)
+    🔗 Вызов join_texts_deduplicated для 3 текстов...
+    🧹 Вызов clean_loops (99 символов)...
+    🧹 clean_loops: обработка текста (99 символов, 12 слов)
+    ✅ clean_loops: готово (99 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 99 символов
+  ✅ Склеено 3 сегментов → 12 слов
+
+  🔀 MERGE #32: 00:09:47 Диктор — начало
+    ↳ Диктор пауза 7.3s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 3 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (18 символов)...
+    🧹 clean_loops: обработка текста (18 символов, 3 слов)
+    ✅ clean_loops: готово (18 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 18 символов
+
+  🔀 MERGE #33: 00:09:55 Диктор — начало
+     🎯 TARGET RANGE БАГ #17 DETECTED! (ищем 00:09:54)
+     📝 Сегмент #0: [00:09:55-00:09:58]
+        Текст: "Überall sind unsere Pioniere sofort zur Stelle...."
+     ➕ Сегмент #1: (пауза 0.4s) "Nichts darf den Vormarsch aufhalten."
+
+     📊 Всего собрано: 2 сегментов, 12 слов
+     📊 Финальный диапазон: [00:09:55-00:10:00]
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 47 символов)
+    🔗 Вызов join_texts_deduplicated для 2 текстов...
+
+     📝 После join_texts_deduplicated:
+        "Überall sind unsere Pioniere sofort zur Stelle. Nichts darf den Vormarsch aufhalten...."
+    🧹 Вызов clean_loops (84 символов)...
+    🧹 clean_loops: обработка текста (84 символов, 12 слов)
+    ✅ clean_loops: готово (84 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+
+     ✅ ФИНАЛЬНЫЙ текст (84 символов):
+        "Überall sind unsere Pioniere sofort zur Stelle. Nichts darf den Vormarsch aufhalten...."
+        ✅ Дубль «достаточно Достаточно» УСТРАНЁН!
+  ✅ Склеено 2 сегментов → 12 слов
+
+✅ merge_replicas завершён: 33 merged сегментов из 55 исходных
+
+🔍 CHECKPOINT [AFTER MERGE]: 33 сегментов

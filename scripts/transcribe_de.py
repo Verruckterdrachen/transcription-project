@@ -506,9 +506,6 @@ def main():
         txt_path = txt_dir / txt_filename
         print(f"\n📄 {len(json_files)} JSON → {txt_path.name}")
         jsons_to_txt(json_files, txt_path, SPEAKER_LABEL)
-				raw = txt_path.read_text(encoding="utf-8")
-				cleaned = re.sub(r'^(\d{2}:\d{2}:\d{2}) Диктор: ', r'\1 ', raw, flags=re.MULTILINE)
-				txt_path.write_text(cleaned, encoding="utf-8")
         print(f"✅ TXT: {txt_path} (v{VERSION})")
 
     print(f"\n✅ Готово! 🚀 (v{VERSION}, lang={LANGUAGE})")

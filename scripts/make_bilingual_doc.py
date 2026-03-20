@@ -1,30 +1,8 @@
 #!/usr/bin/env python3
 """
 make_bilingual_doc.py — Генератор билингвального Word-документа DE+RU
-
-Формат вывода (Вариант B — таблица):
-┌────────────┬──────────────────────────────┬──────────────────────────────┐
-│ Таймкод    │ DE                           │ RU                           │
-├────────────┼──────────────────────────────┼──────────────────────────────┤
-│ 00:02:31   │ In seiner Rede...            │ —                            │
-│ 00:03:01   │ Ankunft des...               │ Прибытие...                  │
-│ 00:03:38   │ Vom Einsatz...               │ О боевом применении...       │
-└────────────┴──────────────────────────────┴──────────────────────────────┘
-
-Входные файлы:
-  DE TXT: строки вида  "HH:MM:SS текст..."  (без метки спикера)
-          или           "HH:MM:SS Диктор: текст..."  (метка удаляется автоматически)
-  RU TXT: строки вида  "HH:MM:SS текст..."
-          (внутренние таймкоды "HH:MM:SS" внутри строки тоже распознаются)
-
-Алгоритм выравнивания:
-  1. Парсим оба TXT → список блоков (timecode, text)
-  2. Разбиваем длинные DE-блоки по внутренним таймкодам → суб-блоки
-  3. Объединяем все таймкоды → единая хронологическая шкала
-  4. Для каждого таймкода ищем ближайший DE и RU блок (tolerance=5s)
-  5. Записываем в таблицу Word
-
-Зависимости: pip install python-docx
+v2.0: поддержка мульти-частей (619-1, 619-2, 619-3) с заголовками секций
+			поддержка форматов "HH:MM:SS: текст" и "HH:MM:SS текст"
 """
 
 import re
@@ -41,206 +19,213 @@ from docx.oxml import OxmlElement
 # КОНСТАНТЫ
 # ═══════════════════════════════════════════════════════════════════════════
 
-TS_RE = re.compile(r'\b(\d{2}:\d{2}:\d{2})\b')
-SPEAKER_RE = re.compile(r'^(\d{2}:\d{2}:\d{2})\s+[^:]{1,30}:\s+', re.UNICODE)
-LINE_RE    = re.compile(r'^(\d{2}:\d{2}:\d{2})\s+(.*)', re.DOTALL)
+# Матчит "HH:MM:SS:" или "HH:MM:SS " в начале строки
+LINE_RE     = re.compile(r'^(\d{2}:\d{2}:\d{2}):?\s+(.*)', re.DOTALL)
+# Заголовок секции: "619-1 (июль 1942)" или "619-2 (июль 1942)" и т.д.
+SECTION_RE  = re.compile(r'^(\d{3,}-\d+\s*\([^)]+\))\s*$')
+SPEAKER_RE  = re.compile(r'^[^:]{1,30}:\s+')
+TS_INLINE   = re.compile(r'\b(\d{2}:\d{2}:\d{2})\b')
 
-COL_WIDTHS_CM = [2.8, 7.6, 7.6]  # Таймкод | DE | RU
+COL_WIDTHS_CM    = [2.8, 7.6, 7.6]
+MATCH_TOLERANCE  = 5  # секунд
 
-COLOR_HEADER_BG = "1F3864"   # тёмно-синий
-COLOR_HEADER_FG = "FFFFFF"   # белый
-COLOR_TS_BG     = "D9E1F2"   # светло-голубой
-COLOR_DE_BG     = "FFFFFF"
-COLOR_RU_BG     = "F2F2F2"   # чуть серый — визуальное разделение
-COLOR_EMPTY     = "BFBFBF"   # серый для "—"
+COLOR_HEADER_BG  = "1F3864"
+COLOR_HEADER_FG  = "FFFFFF"
+COLOR_SECTION_BG = "2E4057"   # чуть светлее шапки — строка-разделитель части
+COLOR_SECTION_FG = "FFFFFF"
+COLOR_TS_BG      = "D9E1F2"
+COLOR_DE_BG      = "FFFFFF"
+COLOR_RU_BG      = "F2F2F2"
+COLOR_EMPTY      = "BFBFBF"
 
-FONT_MAIN   = "Times New Roman"
-FONT_TS     = "Courier New"
-SIZE_HEADER = 11
-SIZE_BODY   = 10
-SIZE_TS     = 10
-
-MATCH_TOLERANCE_SEC = 5  # секунд — допуск для сопоставления DE↔RU блоков
+FONT_MAIN  = "Times New Roman"
+FONT_TS    = "Courier New"
+SIZE_HDR   = 11
+SIZE_BODY  = 10
+SIZE_TS    = 10
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# ПАРСИНГ TXT
+# ПАРСИНГ
 # ═══════════════════════════════════════════════════════════════════════════
 
 def ts_to_sec(ts: str) -> int:
-    """'HH:MM:SS' → секунды (int)"""
-    h, m, s = ts.split(":")
-    return int(h) * 3600 + int(m) * 60 + int(s)
+		h, m, s = ts.split(":")
+		return int(h) * 3600 + int(m) * 60 + int(s)
 
 
 def parse_txt(path: Path) -> list[dict]:
-    """
-    Парсит TXT транскрипции → список блоков.
+		"""
+		Парсит TXT с поддержкой:
+		- Заголовков секций:  "619-1 (июль 1942)"
+		- Таймкодов:          "00:00:02: текст"  или  "00:00:02 текст"
+		- Меток спикеров:     "Диктор: текст"  (удаляются)
+		- Разделителей ====   (игнорируются)
 
-    Каждый блок: {'ts': 'HH:MM:SS', 'sec': int, 'text': str}
+		Возвращает список блоков:
+			{'section': str, 'ts': str, 'sec': int, 'text': str}
+		"""
+		blocks  = []
+		current = None
+		section = ""
 
-    Поддерживает форматы строк:
-      "HH:MM:SS текст"
-      "HH:MM:SS Диктор: текст"
-      "HH:MM:SS Спикер: текст"
+		for raw in path.read_text(encoding="utf-8").splitlines():
+				line = raw.strip()
+				if not line:
+						continue
+				if set(line) <= set("=- \t"):
+						continue
 
-    Многострочные блоки (строки без таймкода в начале) присоединяются
-    к последнему блоку.
-    """
-    blocks = []
-    current = None
+				# Заголовок секции?
+				ms = SECTION_RE.match(line)
+				if ms:
+						section = ms.group(1).strip()
+						continue
 
-    for raw_line in path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line:
-            continue
+				# Строка с таймкодом?
+				m = LINE_RE.match(line)
+				if m:
+						ts   = m.group(1)
+						text = m.group(2).strip()
+						# Убираем "Диктор: " и подобные метки
+						spk = SPEAKER_RE.match(text)
+						if spk:
+								text = text[spk.end():]
+						if current:
+								blocks.append(current)
+						current = {
+								"section": section,
+								"ts":      ts,
+								"sec":     ts_to_sec(ts),
+								"text":    text
+						}
+				else:
+						if current:
+								current["text"] += " " + line
 
-        # Пропускаем разделители и footer-реестр [?]
-        if line.startswith("=") or line.startswith("[?]") or line.startswith("⚠️"):
-            continue
+		if current:
+				blocks.append(current)
 
-        m = LINE_RE.match(line)
-        if m:
-            ts   = m.group(1)
-            text = m.group(2).strip()
-
-            # Убираем метку спикера "Имя: " в начале текста
-            spk = re.match(r'^[^:]{1,30}:\s+', text)
-            if spk:
-                text = text[spk.end():]
-
-            if current:
-                blocks.append(current)
-            current = {"ts": ts, "sec": ts_to_sec(ts), "text": text}
-        else:
-            # Продолжение предыдущего блока
-            if current:
-                current["text"] += " " + line
-
-    if current:
-        blocks.append(current)
-
-    return blocks
+		return blocks
 
 
 def split_by_inner_timestamps(blocks: list[dict]) -> list[dict]:
-    """
-    Разбивает блоки с внутренними таймкодами на суб-блоки.
-
-    Пример: блок 00:02:31 с текстом "...Ankomstig. 00:03:01 Ankunft..."
-    → два блока: 00:02:31 "...Ankomstig." и 00:03:01 "Ankunft..."
-    """
-    result = []
-    for block in blocks:
-        text  = block["text"]
-        parts = TS_RE.split(text)
-
-        if len(parts) == 1:
-            # Нет внутренних таймкодов
-            result.append(block)
-            continue
-
-        # parts = [pre_text, ts1, post1, ts2, post2, ...]
-        # Первый фрагмент — до первого внутреннего таймкода
-        pre_text = parts[0].strip()
-        if pre_text:
-            result.append({
-                "ts":   block["ts"],
-                "sec":  block["sec"],
-                "text": pre_text
-            })
-
-        # Остальные — пары (таймкод, текст)
-        i = 1
-        while i < len(parts) - 1:
-            inner_ts   = parts[i]
-            inner_text = parts[i + 1].strip()
-            if inner_text:
-                result.append({
-                    "ts":   inner_ts,
-                    "sec":  ts_to_sec(inner_ts),
-                    "text": inner_text
-                })
-            i += 2
-
-    return result
+		"""Разбивает блоки с внутренними таймкодами на суб-блоки."""
+		result = []
+		for block in blocks:
+				text  = block["text"]
+				parts = TS_INLINE.split(text)
+				if len(parts) == 1:
+						result.append(block)
+						continue
+				pre = parts[0].strip()
+				if pre:
+						result.append({**block, "text": pre})
+				i = 1
+				while i < len(parts) - 1:
+						inner_ts   = parts[i]
+						inner_text = parts[i + 1].strip()
+						if inner_text:
+								result.append({
+										"section": block["section"],
+										"ts":      inner_ts,
+										"sec":     ts_to_sec(inner_ts),
+										"text":    inner_text
+								})
+						i += 2
+		return result
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# ВЫРАВНИВАНИЕ DE ↔ RU
+# ВЫРАВНИВАНИЕ DE ↔ RU  (с учётом секций)
 # ═══════════════════════════════════════════════════════════════════════════
 
 def align_blocks(de_blocks: list[dict], ru_blocks: list[dict]) -> list[dict]:
-    """
-    Выравнивает DE и RU блоки по таймкодам → список строк таблицы.
+		"""
+		Выравнивает DE и RU блоки по (section, sec).
+		Возвращает строки таблицы:
+			{'section': str, 'ts': str, 'sec': int, 'de': str, 'ru': str}
+		"""
+		# Группируем по секциям
+		de_by_section: dict[str, list] = {}
+		for b in de_blocks:
+				de_by_section.setdefault(b["section"], []).append(b)
 
-    Каждая строка: {'ts': str, 'sec': int, 'de': str, 'ru': str}
+		ru_by_section: dict[str, list] = {}
+		for b in ru_blocks:
+				ru_by_section.setdefault(b["section"], []).append(b)
 
-    Алгоритм:
-    1. Собираем все уникальные таймкоды из обоих списков
-    2. Сортируем хронологически
-    3. Для каждого таймкода находим лучшее совпадение в DE и RU
-       (точное или ближайшее в пределах MATCH_TOLERANCE_SEC)
-    4. Каждый блок используется не более одного раза
-    """
-    # Индексируем RU по секундам для быстрого поиска
-    ru_by_sec = {b["sec"]: b for b in ru_blocks}
-    ru_used   = set()
-    de_used   = set()
+		all_sections = list(dict.fromkeys(
+				[b["section"] for b in de_blocks] +
+				[b["section"] for b in ru_blocks]
+		))
 
-    # Собираем все таймкоды
-    all_secs = sorted(set(
-        [b["sec"] for b in de_blocks] +
-        [b["sec"] for b in ru_blocks]
-    ))
+		rows = []
 
-    rows = []
+		for section in all_sections:
+				de_sec = de_by_section.get(section, [])
+				ru_sec = ru_by_section.get(section, [])
 
-    de_by_sec = {b["sec"]: b for b in de_blocks}
+				# Маркер начала секции (заголовок-разделитель)
+				rows.append({
+						"section":    section,
+						"ts":         "",
+						"sec":        -1,
+						"de":         "",
+						"ru":         "",
+						"is_section": True
+				})
 
-    for sec in all_secs:
-        # Ищем DE блок
-        de_block = None
-        if sec in de_by_sec and sec not in de_used:
-            de_block = de_by_sec[sec]
-        else:
-            # Ищем ближайший неиспользованный DE
-            for b in de_blocks:
-                if b["sec"] not in de_used and abs(b["sec"] - sec) <= MATCH_TOLERANCE_SEC:
-                    de_block = b
-                    break
+				all_secs = sorted(set(
+						[b["sec"] for b in de_sec] +
+						[b["sec"] for b in ru_sec]
+				))
 
-        # Ищем RU блок
-        ru_block = None
-        if sec in ru_by_sec and sec not in ru_used:
-            ru_block = ru_by_sec[sec]
-        else:
-            for b in ru_blocks:
-                if b["sec"] not in ru_used and abs(b["sec"] - sec) <= MATCH_TOLERANCE_SEC:
-                    ru_block = b
-                    break
+				ru_used = set()
+				de_used = set()
+				ru_idx  = {b["sec"]: b for b in ru_sec}
+				de_idx  = {b["sec"]: b for b in de_sec}
 
-        # Пропускаем если оба уже использованы или оба пусты
-        if de_block is None and ru_block is None:
-            continue
+				for sec in all_secs:
+						# Найти DE
+						de_block = None
+						if sec in de_idx and id(de_idx[sec]) not in de_used:
+								de_block = de_idx[sec]
+						else:
+								for b in de_sec:
+										if id(b) not in de_used and abs(b["sec"] - sec) <= MATCH_TOLERANCE:
+												de_block = b
+												break
 
-        # Определяем таймкод строки
-        ts  = de_block["ts"] if de_block else ru_block["ts"]
-        row = {
-            "ts":  ts,
-            "sec": sec,
-            "de":  de_block["text"] if de_block else "",
-            "ru":  ru_block["text"] if ru_block else "",
-        }
+						# Найти RU
+						ru_block = None
+						if sec in ru_idx and id(ru_idx[sec]) not in ru_used:
+								ru_block = ru_idx[sec]
+						else:
+								for b in ru_sec:
+										if id(b) not in ru_used and abs(b["sec"] - sec) <= MATCH_TOLERANCE:
+												ru_block = b
+												break
 
-        if de_block:
-            de_used.add(de_block["sec"])
-        if ru_block:
-            ru_used.add(ru_block["sec"])
+						if de_block is None and ru_block is None:
+								continue
 
-        rows.append(row)
+						ts = de_block["ts"] if de_block else ru_block["ts"]
+						rows.append({
+								"section":    section,
+								"ts":         ts,
+								"sec":        sec,
+								"de":         de_block["text"] if de_block else "",
+								"ru":         ru_block["text"] if ru_block else "",
+								"is_section": False
+						})
 
-    return rows
+						if de_block:
+								de_used.add(id(de_block))
+						if ru_block:
+								ru_used.add(id(ru_block))
+
+		return rows
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -248,49 +233,51 @@ def align_blocks(de_blocks: list[dict], ru_blocks: list[dict]) -> list[dict]:
 # ═══════════════════════════════════════════════════════════════════════════
 
 def _set_cell_bg(cell, hex_color: str):
-    """Устанавливает цвет фона ячейки."""
-    tc   = cell._tc
-    tcPr = tc.get_or_add_tcPr()
-    shd  = OxmlElement("w:shd")
-    shd.set(qn("w:val"),   "clear")
-    shd.set(qn("w:color"), "auto")
-    shd.set(qn("w:fill"),  hex_color)
-    tcPr.append(shd)
+		tc   = cell._tc
+		tcPr = tc.get_or_add_tcPr()
+		shd  = OxmlElement("w:shd")
+		shd.set(qn("w:val"),   "clear")
+		shd.set(qn("w:color"), "auto")
+		shd.set(qn("w:fill"),  hex_color)
+		tcPr.append(shd)
 
 
 def _set_col_width(cell, width_cm: float):
-    """Устанавливает ширину колонки."""
-    tc   = cell._tc
-    tcPr = tc.get_or_add_tcPr()
-    tcW  = OxmlElement("w:tcW")
-    tcW.set(qn("w:w"),    str(int(width_cm * 567)))  # 567 twips/cm
-    tcW.set(qn("w:type"), "dxa")
-    tcPr.append(tcW)
+		tc   = cell._tc
+		tcPr = tc.get_or_add_tcPr()
+		tcW  = OxmlElement("w:tcW")
+		tcW.set(qn("w:w"),    str(int(width_cm * 567)))
+		tcW.set(qn("w:type"), "dxa")
+		tcPr.append(tcW)
 
 
 def _add_paragraph(cell, text: str, font_name: str, font_size: int,
-                   bold=False, color_hex: str = None,
-                   align=WD_ALIGN_PARAGRAPH.LEFT):
-    """Добавляет параграф в ячейку с нужным форматированием."""
-    para = cell.paragraphs[0]
-    para.alignment = align
-    run = para.add_run(text)
-    run.font.name      = font_name
-    run.font.size      = Pt(font_size)
-    run.font.bold      = bold
-    if color_hex:
-        r, g, b = int(color_hex[0:2], 16), int(color_hex[2:4], 16), int(color_hex[4:6], 16)
-        run.font.color.rgb = RGBColor(r, g, b)
-    return para
+									 bold=False, color_hex: str = None,
+									 align=WD_ALIGN_PARAGRAPH.LEFT):
+		para = cell.paragraphs[0]
+		para.alignment = align
+		run = para.add_run(text)
+		run.font.name = font_name
+		run.font.size = Pt(font_size)
+		run.font.bold = bold
+		if color_hex:
+				r = int(color_hex[0:2], 16)
+				g = int(color_hex[2:4], 16)
+				b = int(color_hex[4:6], 16)
+				run.font.color.rgb = RGBColor(r, g, b)
+		return para
 
 
-def _set_row_height(row, height_cm: float):
-    tr     = row._tr
-    trPr   = tr.get_or_add_trPr()
-    trH    = OxmlElement("w:trHeight")
-    trH.set(qn("w:val"),   str(int(height_cm * 567)))
-    trH.set(qn("w:hRule"), "atLeast")
-    trPr.append(trH)
+def _merge_row_cells(row, bg_color: str, text: str):
+		"""Объединяет все 3 ячейки строки в одну (для заголовка секции)."""
+		cells = row.cells
+		cells[0].merge(cells[1])
+		cells[0].merge(cells[2])
+		_set_cell_bg(cells[0], bg_color)
+		_add_paragraph(cells[0], text,
+									 font_name=FONT_MAIN, font_size=SIZE_HDR,
+									 bold=True, color_hex=COLOR_SECTION_FG,
+									 align=WD_ALIGN_PARAGRAPH.CENTER)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -298,85 +285,74 @@ def _set_row_height(row, height_cm: float):
 # ═══════════════════════════════════════════════════════════════════════════
 
 def build_doc(rows: list[dict], doc_title: str) -> Document:
-    """
-    Строит Word документ из выровненных строк.
-    """
-    doc = Document()
+		doc = Document()
 
-    # Поля страницы — уже (больше места для таблицы)
-    for section in doc.sections:
-        section.top_margin    = Cm(1.5)
-        section.bottom_margin = Cm(1.5)
-        section.left_margin   = Cm(1.5)
-        section.right_margin  = Cm(1.5)
+		for section in doc.sections:
+				section.top_margin    = Cm(1.5)
+				section.bottom_margin = Cm(1.5)
+				section.left_margin   = Cm(1.5)
+				section.right_margin  = Cm(1.5)
 
-    # Заголовок документа
-    title_para = doc.add_paragraph()
-    title_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    title_run = title_para.add_run(doc_title)
-    title_run.font.name  = FONT_MAIN
-    title_run.font.size  = Pt(14)
-    title_run.font.bold  = True
+		# Заголовок
+		tp = doc.add_paragraph()
+		tp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+		tr = tp.add_run(doc_title)
+		tr.font.name = FONT_MAIN
+		tr.font.size = Pt(14)
+		tr.font.bold = True
+		doc.add_paragraph()
 
-    doc.add_paragraph()  # отступ
+		# Таблица
+		table = doc.add_table(rows=1, cols=3)
+		table.style = "Table Grid"
 
-    # Таблица
-    table = doc.add_table(rows=1, cols=3)
-    table.style = "Table Grid"
+		# Шапка
+		hdr = table.rows[0].cells
+		for i, (cell, label) in enumerate(zip(hdr, ["Таймкод", "Немецкий", "Русский"])):
+				_set_cell_bg(cell, COLOR_HEADER_BG)
+				_add_paragraph(cell, label, FONT_MAIN, SIZE_HDR,
+											 bold=True, color_hex=COLOR_HEADER_FG,
+											 align=WD_ALIGN_PARAGRAPH.CENTER)
+				_set_col_width(cell, COL_WIDTHS_CM[i])
 
-    # Ширины колонок
-    for i, cell in enumerate(table.rows[0].cells):
-        _set_col_width(cell, COL_WIDTHS_CM[i])
+		# Строки
+		for row in rows:
+				tr_cells = table.add_row().cells
 
-    # Заголовок таблицы
-    hdr_cells = table.rows[0].cells
-    hdr_data  = ["Таймкод", "🇩🇪  DE", "🇷🇺  RU"]
+				if row.get("is_section"):
+						# Строка-разделитель секции (объединённая ячейка)
+						_merge_row_cells(table.rows[-1], COLOR_SECTION_BG,
+														 f"▶  {row['section']}")
+						continue
 
-    for i, (cell, label) in enumerate(zip(hdr_cells, hdr_data)):
-        _set_cell_bg(cell, COLOR_HEADER_BG)
-        _add_paragraph(cell, label,
-                       font_name=FONT_MAIN, font_size=SIZE_HEADER,
-                       bold=True, color_hex=COLOR_HEADER_FG,
-                       align=WD_ALIGN_PARAGRAPH.CENTER)
-        _set_col_width(cell, COL_WIDTHS_CM[i])
-    _set_row_height(table.rows[0], 0.8)
+				# Таймкод
+				_set_cell_bg(tr_cells[0], COLOR_TS_BG)
+				_add_paragraph(tr_cells[0], row["ts"],
+											 FONT_TS, SIZE_TS, bold=True,
+											 align=WD_ALIGN_PARAGRAPH.CENTER)
+				_set_col_width(tr_cells[0], COL_WIDTHS_CM[0])
 
-    # Строки данных
-    for row in rows:
-        tr_cells = table.add_row().cells
+				# DE
+				_set_cell_bg(tr_cells[1], COLOR_DE_BG)
+				if row["de"]:
+						_add_paragraph(tr_cells[1], row["de"], FONT_MAIN, SIZE_BODY)
+				else:
+						_add_paragraph(tr_cells[1], "—", FONT_MAIN, SIZE_BODY,
+													 color_hex=COLOR_EMPTY,
+													 align=WD_ALIGN_PARAGRAPH.CENTER)
+				_set_col_width(tr_cells[1], COL_WIDTHS_CM[1])
 
-        # ── Таймкод ──
-        _set_cell_bg(tr_cells[0], COLOR_TS_BG)
-        _add_paragraph(tr_cells[0], row["ts"],
-                       font_name=FONT_TS, font_size=SIZE_TS,
-                       bold=True, align=WD_ALIGN_PARAGRAPH.CENTER)
-        _set_col_width(tr_cells[0], COL_WIDTHS_CM[0])
+				# RU
+				_set_cell_bg(tr_cells[2], COLOR_RU_BG)
+				if row["ru"]:
+						_add_paragraph(tr_cells[2], row["ru"], FONT_MAIN, SIZE_BODY)
+				else:
+						_add_paragraph(tr_cells[2], "—", FONT_MAIN, SIZE_BODY,
+													 color_hex=COLOR_EMPTY,
+													 align=WD_ALIGN_PARAGRAPH.CENTER)
+				_set_col_width(tr_cells[2], COL_WIDTHS_CM[2])
 
-        # ── DE ──
-        _set_cell_bg(tr_cells[1], COLOR_DE_BG)
-        if row["de"]:
-            _add_paragraph(tr_cells[1], row["de"],
-                           font_name=FONT_MAIN, font_size=SIZE_BODY)
-        else:
-            _add_paragraph(tr_cells[1], "—",
-                           font_name=FONT_MAIN, font_size=SIZE_BODY,
-                           color_hex=COLOR_EMPTY,
-                           align=WD_ALIGN_PARAGRAPH.CENTER)
-        _set_col_width(tr_cells[1], COL_WIDTHS_CM[1])
-
-        # ── RU ──
-        _set_cell_bg(tr_cells[2], COLOR_RU_BG)
-        if row["ru"]:
-            _add_paragraph(tr_cells[2], row["ru"],
-                           font_name=FONT_MAIN, font_size=SIZE_BODY)
-        else:
-            _add_paragraph(tr_cells[2], "—",
-                           font_name=FONT_MAIN, font_size=SIZE_BODY,
-                           color_hex=COLOR_EMPTY,
-                           align=WD_ALIGN_PARAGRAPH.CENTER)
-        _set_col_width(tr_cells[2], COL_WIDTHS_CM[2])
-
-    return doc
+		return doc
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -385,69 +361,62 @@ def build_doc(rows: list[dict], doc_title: str) -> Document:
 
 def main():
     print("=" * 60)
-    print("  make_bilingual_doc.py — DE+RU билингвальная таблица")
+    print("  make_bilingual_doc.py v2.1 — DE+RU билингвальная таблица")
     print("=" * 60)
 
-    # ── Входные файлы ──
-    de_input = input("\n📂 Путь к DE TXT файлу: ").strip().replace('"', '')
-    ru_input = input("📂 Путь к RU TXT файлу (Enter — пропустить): ").strip().replace('"', '')
-    out_input = input("💾 Путь для сохранения DOCX (Enter — рядом с DE): ").strip().replace('"', '')
-
-    de_path = Path(de_input)
-    if not de_path.exists():
-        print(f"❌ Файл не найден: {de_path}")
+    folder_input = input("\n📂 Путь к папке с файлами: ").strip().replace('"', '')
+    folder = Path(folder_input)
+    if not folder.exists() or not folder.is_dir():
+        print(f"❌ Папка не найдена: {folder}")
         sys.exit(1)
 
-    ru_path = Path(ru_input) if ru_input else None
-    if ru_path and not ru_path.exists():
-        print(f"❌ Файл не найден: {ru_path}")
+    # Ищем DE и RU файлы по суффиксу
+    de_candidates = list(folder.glob("*de.txt")) + list(folder.glob("*DE.txt"))
+    ru_candidates = list(folder.glob("*ru.txt")) + list(folder.glob("*RU.txt"))
+
+    if not de_candidates:
+        print("❌ Не найден файл *de.txt в папке")
         sys.exit(1)
 
-    if out_input:
-        out_path = Path(out_input)
-    else:
-        out_path = de_path.parent / (de_path.stem + "_bilingual.docx")
+    de_path = de_candidates[0]
+    ru_path = ru_candidates[0] if ru_candidates else None
 
-    doc_title = de_path.stem.replace("_", " ")
+    print(f"   ✅ DE: {de_path.name}")
+    print(f"   {'✅' if ru_path else '⚠️ '} RU: {ru_path.name if ru_path else 'не найден — колонка будет пустой'}")
 
-    # ── Парсинг ──
+    # Заголовок документа
+    stem = de_path.stem
+    stem = re.sub(r'-?de$|-?ru$', '', stem, flags=re.IGNORECASE)
+    stem = stem.replace("-", " ")
+    doc_title = f"Перевод DDW {stem}"
+
+    # Выходной файл — в ту же папку
+    out_path = folder / (de_path.stem.replace("de", "").strip("-_ ") + ".docx")
+
     print(f"\n📖 Парсинг DE: {de_path.name}")
-    de_blocks = parse_txt(de_path)
-    de_blocks = split_by_inner_timestamps(de_blocks)
-    print(f"   → {len(de_blocks)} блоков после разбивки внутренних таймкодов")
+    de_blocks = split_by_inner_timestamps(parse_txt(de_path))
+    sections  = list(dict.fromkeys(b["section"] for b in de_blocks))
+    print(f"   → {len(de_blocks)} блоков | секции: {sections}")
 
     ru_blocks = []
     if ru_path:
         print(f"📖 Парсинг RU: {ru_path.name}")
-        ru_blocks = parse_txt(ru_path)
-        ru_blocks = split_by_inner_timestamps(ru_blocks)
+        ru_blocks = split_by_inner_timestamps(parse_txt(ru_path))
         print(f"   → {len(ru_blocks)} блоков")
     else:
-        print("ℹ️  RU файл не указан — колонка RU будет пустой (заготовка)")
+        print("ℹ️  RU не указан — колонка будет пустой")
 
-    # ── Выравнивание ──
-    print(f"\n🔗 Выравнивание DE↔RU (tolerance={MATCH_TOLERANCE_SEC}s)...")
+    print(f"\n🔗 Выравнивание...")
     rows = align_blocks(de_blocks, ru_blocks)
-    print(f"   → {len(rows)} строк в таблице")
+    data_rows = [r for r in rows if not r.get("is_section")]
+    print(f"   → {len(data_rows)} строк данных в {len(sections)} секциях")
 
-    # ── Превью ──
-    print(f"\n📋 Превью первых 5 строк:")
-    for row in rows[:5]:
-        de_preview = (row["de"][:50] + "...") if len(row["de"]) > 50 else row["de"] or "—"
-        ru_preview = (row["ru"][:50] + "...") if len(row["ru"]) > 50 else row["ru"] or "—"
-        print(f"   {row['ts']} | DE: {de_preview}")
-        print(f"           | RU: {ru_preview}")
-        print()
-
-    # ── Генерация документа ──
-    print(f"📝 Генерация DOCX...")
+    print(f"\n📝 Генерация DOCX...")
     doc = build_doc(rows, doc_title)
     doc.save(str(out_path))
 
-    print(f"\n✅ Готово! Документ сохранён:")
-    print(f"   {out_path}")
-    print(f"   Строк в таблице: {len(rows)}")
+    print(f"\n✅ Готово: {out_path}")
 
 
 if __name__ == "__main__":
-    main()
+		main()

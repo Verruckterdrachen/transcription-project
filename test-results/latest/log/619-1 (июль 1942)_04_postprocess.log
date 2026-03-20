@@ -1,0 +1,411 @@
+
+✂️ Разделение mixed-speaker сегментов...
+
+✂️ Разделение mixed-speaker сегментов (v17.6)...
+  🔗 Маппинг: "Диктор" → SPEAKER_00
+  📋 Reverse roles: {'Диктор': 'SPEAKER_00'}
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:00:41 (Диктор) — 4 предложений
+    [1] "In Prag feierte der Staatspräsident des Protektorats Böhmen ..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Emil Hacher, seinen 70..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 11 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Geburtstag, Morgenständchen der Regierungstruppe im Burggart..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 15 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [4] "im Borggarten...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 21 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:01:25 (Диктор) — 2 предложений
+    [1] "Reisminister Dr..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Lammers überbringt die Glückwünsche und ein Handschreiben de..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 2 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:01:55 (Диктор) — 4 предложений
+    [1] "In Salzburg fanden die studentischen Tage deutscher Kunst st..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Mitten im Kriege waren sie ein Bekenntnis zum Kulturwillen d..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 9 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Vertreter aus 24 Nationen nahmen an der Tagung teil..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 20 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [4] "Besichtigung der Stadt, die eine Fülle unvergänglicher Kunst..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 29 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:02:14 (Диктор) — 8 предложений
+    [1] "Reichsstudentenführer, Gauleiter und Reichsstadthalter Dr..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Scheel spricht..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 5 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "In seiner Rede führte er unter anderem aus..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 7 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [4] "Voranzugehen war, ist und bleibt die erste Pflicht des deuts..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 15 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [5] "Student sein ist keine Standesfrage, sondern eine Frage der ..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 26 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [6] "Zum Schluss verkündete er den Kriegseinsatz 1942 der deutsch..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 41 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [7] "In der Residenz wurde eine Kunstausstellung eröffnet, die mi..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 51 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [8] "Das Eiserne Kreuz kennzeichnet die Werke gefallener junger K..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 71 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:02:50 (Диктор) — 2 предложений
+    [1] "Musik Untertitelung..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "BR 2018 Viele Teilnehmer tragen hohe und höchste Kriegsausze..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 2 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:03:14 (Диктор) — 4 предложений
+    [1] "Die große deutsche Kunstausstellung 1942 in München..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Am 4..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 7 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Juli wurde diese einzigartige Schau, in der 680 Künstler ihr..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 9 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [4] "Goebbels eröffnet...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 24 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:03:37 (Диктор) — 4 предложений
+    [1] "Der Führer von Hermann Joachim Pagels..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Mussolini von Josef Thorak..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 6 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Die Woge von Fötz Klimsch..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 10 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [4] "Musik Mutter und Kind von Josef Thorak...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 15 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:04:05 (Диктор) — 4 предложений
+    [1] "Das deutsche Stadion in Nürnberg, ein Gemälde von Otto A..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Hirt..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 10 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "[нрзб] von Otto A..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 11 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [4] "Hirth...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 15 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:04:27 (Диктор) — 3 предложений
+    [1] "Am Spiegel vom gleichen Künstler..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Und die Begegnung, ebenfalls von Engelhardt..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 5 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Musik..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 11 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:05:02 (Диктор) — 3 предложений
+    [1] "Führerbild von Rudolf Gerhardt Zill..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Die Ritterkreuzträger der Leibstandarte..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 5 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Von dem 22-jährigen Kriegsberichter Ernst Krause...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 9 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:05:16 (Диктор) — 2 предложений
+    [1] "Kämpfendes Volk von Schmitz-Wiedenbrück..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "von Schmitz -Wiedenbrück...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 4 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:05:29 (Диктор) — 3 предложений
+    [1] "Durchrussische Steppe von Rudolf Lipus..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Musik Kampf von Rudolf G..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 5 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Werner...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 10 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:05:53 (Диктор) — 2 предложений
+    [1] "Gen..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Feldmarschall von Mannstein, der Sieger von Sevastopol, meld..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 1 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:06:14 (Диктор) — 4 предложений
+    [1] "Gen..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Feldmarschall Keitel und Gen..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 1 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Jodel begrüßen den Marschall von Mannstein..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 5 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [4] "in den Marschall von Manstein...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 11 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:06:30 (Диктор) — 3 предложений
+    [1] "In den Stützpunkten unserer Unterseeboote an der Atlantikküs..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Tag um Tag laufen Unterseeboote zu neuer Feinfahrt aus, ande..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 10 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Musik..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 26 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:06:57 (Диктор) — 2 предложений
+    [1] "Siegeszeichen am Boot des Ritterkreuzträgers Kapitänleutnant..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Er versenkte einen Zerstörer und 39.000 Bruttoregistertonnen..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 7 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:07:58 (Диктор) — 2 предложений
+    [1] "Schwein muss ein U-Bootmann haben..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "ein U -Boot man haben...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 5 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:08:22 (Диктор) — 5 предложений
+    [1] "Im nördlichen Eismeer..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Hier vernichteten unsere Kampfflugzeuge und Unterseeboote ei..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 3 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "In einem deutschen Stützpunkt an der nordnorwegischen Küste..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 15 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [4] "Ein Fernaufklärer wird startbereit gemacht..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 23 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [5] "Katapultstart...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 28 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:08:59 (Диктор) — 3 предложений
+    [1] "Musik Dort der große Geleitzug..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Er ist durch Schlachtschiffe, Flugzeugträger, Kreuzer, Zerst..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 5 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Die einzelnen Schiffsklassen werden festgestellt...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 15 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:09:16 (Диктор) — 2 предложений
+    [1] "Meldung an den Einsatzhafen..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Der Geleitzug darf sein Ziel nicht erreichen...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 4 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:09:33 (Диктор) — 2 предложений
+    [1] "Durch Funk erhalten die auf Feinfahrt befindlichen Einheiten..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Musik..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 10 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+✅ Mixed сегментов не найдено
+
+🔍 CHECKPOINT [AFTER SPLIT]: 40 сегментов
+
+🕒 Вставка промежуточных timestamp (interval=30.0s, mode=v17.17)...
+
+  ── Сегмент [00:02:14] Диктор ──
+     длит=32.7s | слов(post)=80 | режим=🎯 REAL (sub_segments)
+     sub_segments: 7 шт | words(pre-clean)=80 | scale=1.000
+       sub[0]: [00:02:14-00:02:17] words=7
+       sub[1]: [00:02:17-00:02:20] words=8
+       sub[2]: [00:02:20-00:02:24] words=11
+       sub[3]: [00:02:25-00:02:31] words=15
+       sub[4]: [00:02:31-00:02:36] words=10
+       sub[5]: [00:02:36-00:02:43] words=20
+       sub[6]: [00:02:44-00:02:47] words=9
+     🔧 gap_fixer_v2 [00:02:14–00:02:47] dur=33s words=80 threshold=45.0s
+       gaps > 45.0s не найдено ✅
+
+────────────────────────────────────────────────────────────
+✅ Вставлено timestamp : 0
+✅ Блоков >30s не найдено
+
+🔍 CHECKPOINT [AFTER TIMESTAMP INJECTION]: 40 сегментов
+
+🧹 Очистка hallucinations из 40 сегментов...
+  ✅ Очищено: 179 → 178 символов
+  ✅ Очищено: 88 → 87 символов
+  ✅ Очищено: 265 → 264 символов
+  ✅ Очищено: 587 → 586 символов
+  ✅ Очищено: 92 → 91 символов
+  ✅ Очищено: 177 → 176 символов
+  ✅ Очищено: 134 → 133 символов
+  ✅ Очищено: 90 → 89 символов
+  ✅ Очищено: 128 → 127 символов
+  ✅ Очищено: 67 → 66 символов
+  ✅ Очищено: 74 → 73 символов
+  ✅ Очищено: 108 → 107 символов
+  ✅ Очищено: 110 → 109 символов
+  ✅ Очищено: 183 → 182 символов
+  ✅ Очищено: 58 → 57 символов
+  ✅ Очищено: 268 → 267 символов
+  ✅ Очищено: 172 → 171 символов
+  ✅ Очищено: 75 → 74 символов
+✅ Очистка завершена: 40 сегментов (удалено 0)
+
+🔍 CHECKPOINT [AFTER HALLUCINATION REMOVAL]: 40 сегментов
+
+🔍 Validation: Adjacent same speaker...
+  ⚠️ Найдено 39 соседних реплик одного спикера!
+     🔴 [00:00:02] Диктор (пауза 38.26s)
+        Конец: '...Musik'
+        [00:00:41] Начало: 'In Prag feierte der Staatspräsident des Protektorats Böhmen und Meeren, Dr. Emil...'
+     🔴 [00:00:41] Диктор (пауза 15.46s)
+        Конец: '.... Geburtstag, Morgenständchen der Regierungstruppe im Burggarten. im Borggarten.'
+        [00:01:08] Начало: 'Mitglieder der Regierung und Abordnungen der Bevölkerung gratulieren dem Staatsp...'
+     🔴 [00:01:08] Диктор (пауза 10.9s)
+        Конец: '...der Regierung und Abordnungen der Bevölkerung gratulieren dem Staatspräsidenten.'
+        [00:01:25] Начало: 'Reisminister Dr. Lammers überbringt die Glückwünsche und ein Handschreiben des F...'
+
+🔧 Auto-merge adjacent same speaker (SAFE)...
+  🛡️ SKIP MERGE: 00:00:02-00:00:41 (разные raw_speaker_id)
+  🔧 [00:01:55] Слито 4 сегментов Диктор
+  🔧 [00:03:37] Слито 2 сегментов Диктор
+  🔧 [00:04:56] Слито 3 сегментов Диктор
+  🔧 [00:05:29] Слито 2 сегментов Диктор
+  🔧 [00:06:30] Слито 2 сегментов Диктор
+  🛡️ SKIP MERGE: 00:06:57-00:07:11 (разные raw_speaker_id)
+  🛡️ SKIP MERGE: 00:07:11-00:07:29 (разные raw_speaker_id)
+  🔧 [00:07:44] Слито 2 сегментов Диктор
+  🔧 [00:07:58] Слито 2 сегментов Диктор
+  🔧 [00:08:22] Слито 2 сегментов Диктор
+  🔧 [00:08:59] Слито 3 сегментов Диктор
+  🔧 [00:09:33] Слито 2 сегментов Диктор
+  ✅ Auto-merge: 14 сегментов объединено
+
+🔍 Validation: Adjacent same speaker...
+  ⚠️ Найдено 25 соседних реплик одного спикера!
+     🔴 [00:00:02] Диктор (пауза 38.26s)
+        Конец: '...Musik'
+        [00:00:41] Начало: 'In Prag feierte der Staatspräsident des Protektorats Böhmen und Meeren, Dr. Emil...'
+     🔴 [00:00:41] Диктор (пауза 15.46s)
+        Конец: '.... Geburtstag, Morgenständchen der Regierungstruppe im Burggarten. im Borggarten.'
+        [00:01:08] Начало: 'Mitglieder der Regierung und Abordnungen der Bevölkerung gratulieren dem Staatsp...'
+     🔴 [00:01:08] Диктор (пауза 10.9s)
+        Конец: '...der Regierung und Abordnungen der Bevölkerung gratulieren dem Staatspräsidenten.'
+        [00:01:25] Начало: 'Reisminister Dr. Lammers überbringt die Glückwünsche und ein Handschreiben des F...'
+
+🕒 Вставка промежуточных timestamp (interval=30.0s, mode=v17.17)...
+
+  ── Сегмент [00:01:55] Диктор ──
+     длит=72.5s | слов(post)=137 | режим=📐 ESTIMATED (word proportion)
+     📌 [ESTIMATED ⚠️] inject=00:02:29 | Δ=+0.0s | word#64/137 | gap=33.9s
+        ↳ 'Student sein ist keine Standesfrage, sondern eine Frage der ...'
+     🔧 gap_fixer_v2 [00:01:55–00:03:08] dur=72s words=137 threshold=45.0s
+       gaps > 45.0s не найдено ✅
+
+  ── Сегмент [00:08:22] Диктор ──
+     длит=32.6s | слов(post)=51 | режим=📐 ESTIMATED (word proportion)
+     🔧 gap_fixer_v2 [00:08:22–00:08:54] dur=33s words=51 threshold=45.0s
+       gaps > 45.0s не найдено ✅
+  ℹ️  SHORT SKIP: [00:08:59] длит=27s ≤ 30.0s
+
+────────────────────────────────────────────────────────────
+✅ Вставлено timestamp : 1
+
+🔍 CHECKPOINT [AFTER AUTO-MERGE]: 26 сегментов
+
+🔍 CHECKPOINT [BEFORE EXPORT (FINAL)]: 26 сегментов
+ ✅ 619-1 (июль 1942).json (v17.19, lang=de)
+
+🎤 619-2 (июль 1942).wav

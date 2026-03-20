@@ -1,0 +1,281 @@
+
+✂️ Разделение mixed-speaker сегментов...
+
+✂️ Разделение mixed-speaker сегментов (v17.6)...
+  🔗 Маппинг: "Диктор" → SPEAKER_00
+  📋 Reverse roles: {'Диктор': 'SPEAKER_00'}
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:00:00 (Диктор) — 3 предложений
+    [1] "Es greifen auch starke Kampffliegerverbände des Generalobers..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Dort die Küste von Spitzbergen..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 11 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Der [нрзб] von Spitzbergen...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 16 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:00:16 (Диктор) — 2 предложений
+    [1] "Die Flak der begleitenden Kriegsschiffe feuert aus allen Roh..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "In kühnem Anflug wird die Sicherung durchbrochen und Schiff ..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 9 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:00:48 (Диктор) — 4 предложений
+    [1] "Tagelang tobt dieser Kampf..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Durch immer neue Angriffe unserer Flieger und Unterseeboote ..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 4 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Von diesen Transportern erreicht keiner seinen Bestimmungsha..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 19 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [4] "[нрзб] Bestimmungshafen...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 26 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:01:21 (Диктор) — 3 предложений
+    [1] "Unsere Kampfflugzeuge und Unterseeboote haben dem Feind dami..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Moskau behauptete allerdings, der Geleitzug sei unversehrt a..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 13 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "hat angekommen...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 21 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:02:00 (Диктор) — 2 предложений
+    [1] "Deutsche Kampfflugzeuge..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Kampfflugzeuge kehren nach siegreichem Einsatz in ihre Feldf..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 2 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:03:07 (Диктор) — 3 предложений
+    [1] "Feldwebel Müller..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Er hatte am Murman-Front bisher 48 feindliche Flugzeuge abge..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 2 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Generaloberst Stumpf überreicht ihm das Ritterkreuz des Eise..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 11 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:03:55 (Диктор) — 3 предложений
+    [1] "Bei einer Abteilung des Reichsarbeitsdienstes..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Diese Arbeitsmänner schufen in harter, zäher Arbeit neue Str..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 5 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "treibungslosen Nachschub...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 26 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:05:47 (Диктор) — 2 предложений
+    [1] "Der Bomber ist getroffen..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Sinkrecht stürzt er ins Meer...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 4 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:05:57 (Диктор) — 4 предложений
+    [1] "Spuren der Bordwaffen des sowjetischen Bombers..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Diese Bombe traf das Oberdeck..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 6 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Sie richtete jedoch keinen größeren Schaden an..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 11 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [4] "Die Räumboote setzen ihre Arbeit fort...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 18 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:06:13 (Диктор) — 2 предложений
+    [1] "Neuer Alarm..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Sowjetische Schnellboote versuchen einen Durchbruch nach Wes..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 2 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:07:03 (Диктор) — 3 предложений
+    [1] "Die Angriffsoperationen der Bordwaffen..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "der deutschen Wehrmacht und ihrer Verbündeten im Raume westl..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 4 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Die tief gestapelten Abwehrstellungen des Feindes wurden in ..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 20 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:08:16 (Диктор) — 2 предложений
+    [1] "Unsere Truppen haben hier 10 Widerstand zu überwinden..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Trotzdem geht der Stoß auf den Don unaufhaltsam weiter...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 8 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:08:24 (Диктор) — 2 предложений
+    [1] "Ein Granatwerfer feuert aus einem Schützenpanzerwagen..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Schützenpanzer lagen...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 6 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:08:46 (Диктор) — 3 предложений
+    [1] "Bunker auf Bunker..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Schützenloch um Schützenloch..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 3 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Wird ausgeräuchert...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 6 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:08:52 (Диктор) — 3 предложений
+    [1] "Bunker auf Bunker..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Immer neue Divisionen werden in Eilmärschen herangeführt..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 3 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Märschen herangeführt...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 10 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:09:55 (Диктор) — 2 предложений
+    [1] "Überall sind unsere Pioniere sofort zur Stelle..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Nichts darf den Vormarsch aufhalten...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 7 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+✅ Mixed сегментов не найдено
+
+🔍 CHECKPOINT [AFTER SPLIT]: 33 сегментов
+
+🕒 Вставка промежуточных timestamp (interval=30.0s, mode=v17.17)...
+  ℹ️  SHORT SKIP: [00:08:52] длит=28s ≤ 30.0s
+
+────────────────────────────────────────────────────────────
+✅ Вставлено timestamp : 0
+✅ Блоков >30s не найдено
+
+🔍 CHECKPOINT [AFTER TIMESTAMP INJECTION]: 33 сегментов
+
+🧹 Очистка hallucinations из 33 сегментов...
+  ✅ Очищено: 147 → 146 символов
+  ✅ Очищено: 145 → 144 символов
+  ✅ Очищено: 231 → 230 символов
+  ✅ Очищено: 188 → 187 символов
+  ✅ Очищено: 122 → 121 символов
+  ✅ Очищено: 162 → 161 символов
+  ✅ Очищено: 228 → 227 символов
+  ✅ Очищено: 56 → 55 символов
+  ✅ Очищено: 166 → 165 символов
+  ✅ Очищено: 78 → 77 символов
+  ✅ Очищено: 271 → 270 символов
+  ✅ Очищено: 111 → 110 символов
+  ✅ Очищено: 77 → 76 символов
+  ✅ Очищено: 69 → 68 символов
+  ✅ Очищено: 100 → 99 символов
+  ✅ Очищено: 85 → 84 символов
+✅ Очистка завершена: 33 сегментов (удалено 0)
+
+🔍 CHECKPOINT [AFTER HALLUCINATION REMOVAL]: 33 сегментов
+
+🔍 Validation: Adjacent same speaker...
+  ⚠️ Найдено 32 соседних реплик одного спикера!
+     🔴 [00:00:00] Диктор (пауза 4.6s)
+        Конец: '...pf den Geleitzug an. Dort die Küste von Spitzbergen. Der [нрзб] von Spitzbergen.'
+        [00:00:11] Начало: 'Der Geleitzug....'
+     🔴 [00:00:11] Диктор (пауза 2.4s)
+        Конец: '...Der Geleitzug.'
+        [00:00:16] Начало: 'Die Flak der begleitenden Kriegsschiffe feuert aus allen Rohren. In kühnem Anflu...'
+     🔴 [00:00:16] Диктор (пауза 24.12s)
+        Конец: '... In kühnem Anflug wird die Sicherung durchbrochen und Schiff um Schiff versenkt.'
+        [00:00:48] Начало: 'Tagelang tobt dieser Kampf. Durch immer neue Angriffe unserer Flieger und Unters...'
+
+🔧 Auto-merge adjacent same speaker (SAFE)...
+  🔧 [00:00:00] Слито 3 сегментов Диктор
+  🔧 [00:01:06] Слито 2 сегментов Диктор
+  🔧 [00:04:18] Слито 2 сегментов Диктор
+  🔧 [00:04:54] Слито 2 сегментов Диктор
+  🔧 [00:05:57] Слито 2 сегментов Диктор
+  🔧 [00:07:03] Слито 2 сегментов Диктор
+  🔧 [00:08:16] Слито 2 сегментов Диктор
+  🔧 [00:08:46] Слито 2 сегментов Диктор
+  ✅ Auto-merge: 9 сегментов объединено
+
+🔍 Validation: Adjacent same speaker...
+  ⚠️ Найдено 23 соседних реплик одного спикера!
+     🔴 [00:00:00] Диктор (пауза 24.12s)
+        Конец: '... In kühnem Anflug wird die Sicherung durchbrochen und Schiff um Schiff versenkt.'
+        [00:00:48] Начало: 'Tagelang tobt dieser Kampf. Durch immer neue Angriffe unserer Flieger und Unters...'
+     🔴 [00:00:48] Диктор (пауза 6.8s)
+        Конец: '...n Transportern erreicht keiner seinen Bestimmungshafen. [нрзб] Bestimmungshafen.'
+        [00:01:06] Начало: 'Rund 260.000 Brotoregistertonnen feindlichen Schiffsraumes mit gewaltigen Mengen...'
+     🔴 [00:01:06] Диктор (пауза 26.4s)
+        Конец: '... behauptete allerdings, der Geleitzug sei unversehrt angekommen. hat angekommen.'
+        [00:02:00] Начало: 'Deutsche Kampfflugzeuge. Kampfflugzeuge kehren nach siegreichem Einsatz in ihre ...'
+
+🕒 Вставка промежуточных timestamp (interval=30.0s, mode=v17.17)...
+  ℹ️  SHORT SKIP: [00:01:06] длит=27s ≤ 30.0s
+
+  ── Сегмент [00:08:46] Диктор ──
+     длит=34.1s | слов(post)=20 | режим=📐 ESTIMATED (word proportion)
+     🔧 gap_fixer_v2 [00:08:46–00:09:20] dur=34s words=20 threshold=45.0s
+       gaps > 45.0s не найдено ✅
+
+────────────────────────────────────────────────────────────
+✅ Вставлено timestamp : 0
+✅ Блоков >30s не найдено
+
+🔍 CHECKPOINT [AFTER AUTO-MERGE]: 24 сегментов
+
+🔍 CHECKPOINT [BEFORE EXPORT (FINAL)]: 24 сегментов
+ ✅ 619-2 (июль 1942).json (v17.19, lang=de)
+
+🎤 619-3 (июль 1942).wav

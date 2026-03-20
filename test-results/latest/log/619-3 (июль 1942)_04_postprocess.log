@@ -1,0 +1,250 @@
+
+✂️ Разделение mixed-speaker сегментов...
+
+✂️ Разделение mixed-speaker сегментов (v17.6)...
+  🔗 Маппинг: "Диктор" → SPEAKER_00
+  📋 Reverse roles: {'Диктор': 'SPEAKER_00'}
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:00:00 (Диктор) — 2 предложений
+    [1] "Männer des Reichsarbeitsdienstes beim Straßenbau unmittelbar..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Der Nachschub muss pausenlos rollen...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 10 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:01:02 (Диктор) — 2 предложений
+    [1] "Die Geschwader unserer Luftwaffe sind pausenlos am Feind und..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "in den Bombenhagel...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 19 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:01:45 (Диктор) — 5 предложений
+    [1] "Übergang über den Ostkoll..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Pioniere entfernen im letzten Augenblick eine von den Sowjet..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 4 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "gelegte Spenkladung..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 15 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [4] "Die gewonnenen Brückenköpfe werden in erbitterten Kämpfen un..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 17 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [5] "Sprengladung..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 31 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:02:50 (Диктор) — 3 предложений
+    [1] "Auch weiter südlich ist der Oskol erreicht..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Stoßtrupps erzwingen im Morgengrauen den Übergang..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 7 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Sprengladung..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 13 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:03:47 (Диктор) — 6 предложений
+    [1] "Sprengladung Volltreffer auf eine Brücke über den Don..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Der Don ist erreicht..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 8 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Überall stoßen unsere vorrückenden Truppen auf Trümmerfelder..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 12 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [4] "An den Flussübergängen stauten sich die zurückflutenden Kolo..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 22 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [5] "Sprengladung willkommenes Ziel für unsere Stuka und Kampffli..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 37 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [6] "Hier wurde der Feind schonungslos zerschlagen...."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 45 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+
+  🔍 АНАЛИЗ СЕГМЕНТА 00:05:08 (Диктор) — 11 предложений
+    [1] "Sprengladung Flug über Wörnisch..."
+        Journalist=False | Expert=False | Continuation=False
+        → SPEAKER: Диктор (neutral (return to original))
+    [2] "Unter uns einmarschierende deutsche Verbände..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 4 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [3] "Am 7..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 9 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [4] "Juli gab das Oberkommando der Wehrmacht die Einnahme dieser ..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 11 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [5] "Dieses wichtige Industriezentrum liegt an der großen Eisenba..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 24 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [6] "Sprengladung verbindet..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 41 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [7] "Durch die Einnahme von Voronezh wurde diese Eisenbahnlinie u..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 43 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [8] "Über eine Woche lang versuchten die Sowjets diesen schwerwie..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 67 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [9] "11..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 78 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [10] "Juli gab Oberkommando der Wehrmacht durch Sondermeldung beka..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 79 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+    [11] "In rastloser Verfolgung stoßen unsere Truppen dem geschlagen..."
+        Journalist=False | Expert=False | Continuation=False
+        Context: 108 слов накоплено
+        → SPEAKER: Диктор (neutral (return to original))
+✅ Mixed сегментов не найдено
+
+🔍 CHECKPOINT [AFTER SPLIT]: 16 сегментов
+
+🕒 Вставка промежуточных timestamp (interval=30.0s, mode=v17.17)...
+
+  ── Сегмент [00:05:08] Диктор ──
+     длит=55.8s | слов(post)=118 | режим=🎯 REAL (sub_segments)
+     sub_segments: 15 шт | words(pre-clean)=120 | scale=1.017
+       sub[0]: [00:05:08-00:05:10] words=1
+       sub[1]: [00:05:10-00:05:14] words=8
+       sub[2]: [00:05:14-00:05:17] words=12
+       sub[3]: [00:05:17-00:05:19] words=1
+       sub[4]: [00:05:19-00:05:28] words=12
+       sub[5]: [00:05:28-00:05:30] words=7
+       sub[6]: [00:05:30-00:05:31] words=1
+       sub[7]: [00:05:31-00:05:37] words=12
+       sub[8]: [00:05:37-00:05:41] words=11
+       sub[9]: [00:05:41-00:05:46] words=12
+       sub[10]: [00:05:46-00:05:50] words=13
+       sub[11]: [00:05:50-00:05:51] words=1
+       sub[12]: [00:05:51-00:05:56] words=10
+       sub[13]: [00:05:56-00:06:01] words=11
+       sub[14]: [00:06:01-00:06:04] words=8
+     📌 [REAL ✅    ] inject=00:05:42 | Δ=+1.8s | word#67/118 | gap=31.7s
+        ↳ 'Über eine Woche lang versuchten die Sowjets diesen schwerwie...'
+     🔧 gap_fixer_v2 [00:05:08–00:06:04] dur=56s words=118 threshold=45.0s
+       gaps > 45.0s не найдено ✅
+
+────────────────────────────────────────────────────────────
+✅ Вставлено timestamp : 1
+📊 Средний |Δ| (REAL) : 1.8s по 1 инжекциям
+
+🔍 CHECKPOINT [AFTER TIMESTAMP INJECTION]: 16 сегментов
+
+🧹 Очистка hallucinations из 16 сегментов...
+  ✅ Очищено: 128 → 127 символов
+  ✅ Очищено: 167 → 166 символов
+  ✅ Очищено: 392 → 391 символов
+  ✅ Очищено: 925 → 924 символов
+✅ Очистка завершена: 16 сегментов (удалено 0)
+
+🔍 CHECKPOINT [AFTER HALLUCINATION REMOVAL]: 16 сегментов
+
+🔍 Validation: Adjacent same speaker...
+  ⚠️ Найдено 15 соседних реплик одного спикера!
+     🔴 [00:00:00] Диктор (пауза 20.3s)
+        Конец: '...u unmittelbar hinter der kämpfenden Truppe. Der Nachschub muss pausenlos rollen.'
+        [00:00:28] Начало: 'Rumänische Verbände rücken vor....'
+     🔴 [00:00:28] Диктор (пауза 21.06s)
+        Конец: '...Rumänische Verbände rücken vor.'
+        [00:00:51] Начало: 'Sturmgeschütze übernehmen neue Munition....'
+     🔴 [00:00:51] Диктор (пауза 8.06s)
+        Конец: '...Sturmgeschütze übernehmen neue Munition.'
+        [00:01:02] Начало: 'Die Geschwader unserer Luftwaffe sind pausenlos am Feind und treffen die zurückf...'
+
+🔧 Auto-merge adjacent same speaker (SAFE)...
+  🛡️ SKIP MERGE: 00:02:50-00:03:18 (разные raw_speaker_id)
+  🛡️ SKIP MERGE: 00:03:29-00:03:47 (разные raw_speaker_id)
+  🛡️ SKIP MERGE: 00:04:41-00:04:53 (разные raw_speaker_id)
+  🛡️ SKIP MERGE: 00:04:53-00:05:08 (разные raw_speaker_id)
+  ✅ Auto-merge: 0 сегментов объединено
+
+🔍 Validation: Adjacent same speaker...
+  ⚠️ Найдено 15 соседних реплик одного спикера!
+     🔴 [00:00:00] Диктор (пауза 20.3s)
+        Конец: '...u unmittelbar hinter der kämpfenden Truppe. Der Nachschub muss pausenlos rollen.'
+        [00:00:28] Начало: 'Rumänische Verbände rücken vor....'
+     🔴 [00:00:28] Диктор (пауза 21.06s)
+        Конец: '...Rumänische Verbände rücken vor.'
+        [00:00:51] Начало: 'Sturmgeschütze übernehmen neue Munition....'
+     🔴 [00:00:51] Диктор (пауза 8.06s)
+        Конец: '...Sturmgeschütze übernehmen neue Munition.'
+        [00:01:02] Начало: 'Die Geschwader unserer Luftwaffe sind pausenlos am Feind und treffen die zurückf...'
+
+🕒 Вставка промежуточных timestamp (interval=30.0s, mode=v17.17)...
+
+  ── Сегмент [00:05:08] Диктор ──
+     длит=55.8s | слов(post)=118 | режим=🎯 REAL (sub_segments)
+     sub_segments: 15 шт | words(pre-clean)=120 | scale=1.017
+       sub[0]: [00:05:08-00:05:10] words=1
+       sub[1]: [00:05:10-00:05:14] words=8
+       sub[2]: [00:05:14-00:05:17] words=12
+       sub[3]: [00:05:17-00:05:19] words=1
+       sub[4]: [00:05:19-00:05:28] words=12
+       sub[5]: [00:05:28-00:05:30] words=7
+       sub[6]: [00:05:30-00:05:31] words=1
+       sub[7]: [00:05:31-00:05:37] words=12
+       sub[8]: [00:05:37-00:05:41] words=11
+       sub[9]: [00:05:41-00:05:46] words=12
+       sub[10]: [00:05:46-00:05:50] words=13
+       sub[11]: [00:05:50-00:05:51] words=1
+       sub[12]: [00:05:51-00:05:56] words=10
+       sub[13]: [00:05:56-00:06:01] words=11
+       sub[14]: [00:06:01-00:06:04] words=8
+     📌 [REAL ✅    ] inject=00:05:42 | Δ=+1.8s | word#67/118 | gap=31.7s
+        ↳ 'Über eine Woche lang versuchten die Sowjets diesen schwerwie...'
+     🔧 gap_fixer_v2 [00:05:08–00:06:04] dur=56s words=118 threshold=45.0s
+       gaps > 45.0s не найдено ✅
+
+────────────────────────────────────────────────────────────
+✅ Вставлено timestamp : 1
+📊 Средний |Δ| (REAL) : 1.8s по 1 инжекциям
+
+🔍 CHECKPOINT [AFTER AUTO-MERGE]: 16 сегментов
+
+🔍 CHECKPOINT [BEFORE EXPORT (FINAL)]: 16 сегментов
+ ✅ 619-3 (июль 1942).json (v17.19, lang=de)
+
+✅ JSON: 3/3
+
+📄 3 JSON → 619 (июль 1942).txt
+
+📄 3 JSON → 619 (июль 1942).txt
+ ✅ TXT: 619 (июль 1942).txt (v17.20 — [?]-метки: 19)
+✅ TXT: ..\interview\DDW\1942\619 (июль 1942)\txt\619 (июль 1942).txt (v17.19)
+
+✅ Готово! 🚀 (v17.19, lang=de)
+
+📂 Результаты:
+   JSON: ..\interview\DDW\1942\619 (июль 1942)\json
+   TXT:  ..\interview\DDW\1942\619 (июль 1942)\txt

@@ -1,0 +1,143 @@
+
+🔄 Cross-speaker deduplication...
+✅ После cross-speaker dedup: 171 сегментов
+
+🔍 CHECKPOINT [AFTER CROSS-SPEAKER DEDUP]: 171 сегментов
+
+🔄 Дедупликация сегментов...
+✅ После дедупликации: 23 сегментов
+
+🔍 CHECKPOINT [AFTER DEDUPLICATION]: 23 сегментов
+
+🔍 ГАПЫ WHISPER:
+   🚨 GAP 00:00:08–00:00:28 (20.3s)
+   🚨 GAP 00:00:30–00:00:51 (21.1s)
+   🚨 GAP 00:00:53–00:01:02 (9.1s)
+   🚨 GAP 00:01:10–00:01:45 (35.6s)
+   🚨 GAP 00:01:52–00:01:55 (3.0s)
+   🚨 GAP 00:02:02–00:02:27 (25.2s)
+   🚨 GAP 00:02:28–00:02:58 (29.4s)
+   🚨 GAP 00:02:59–00:03:29 (30.6s)
+   🚨 GAP 00:03:29–00:03:47 (17.6s)
+   🚨 GAP 00:03:49–00:04:04 (15.1s)
+   🚨 GAP 00:04:05–00:04:18 (12.2s)
+   🚨 GAP 00:04:18–00:04:41 (23.1s)
+   🚨 GAP 00:04:42–00:05:08 (26.3s)
+   🚨 GAP 00:05:10–00:05:17 (6.7s)
+   🚨 GAP 00:05:19–00:05:30 (10.9s)
+   🚨 GAP 00:05:31–00:05:50 (19.8s)
+   🚨 GAP 00:05:51–00:06:27 (35.8s)
+   🚨 GAP 00:06:27–00:06:52 (25.0s)
+   🚨 GAP 00:06:53–00:07:15 (21.7s)
+
+🔄 Force-transcribe gaps...
+  🚨 GAP 00:00:08–00:00:28 (20.3s)
+     🔧 [v17.12] Removed 2 leading overlap words vs prev (exact): Pausenlos rollen.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:00:30–00:00:51 (21.1s)
+     🔧 Removed fragment from GAP end: 'vor.' (likely cut-off or hallucination)
+     🔧 [v17.12] Removed 2 leading overlap words vs prev (substring match at pos 1): Verbände rücken
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:00:53–00:01:02 (9.1s)
+     ✅ [00:00:53] Wir nehmen neue Munition....
+  🚨 GAP 00:01:10–00:01:45 (35.6s)
+     ✅ [00:01:10] in den Bombenhagel....
+     ⚠️ GAP overlap с next existing, adjusted end: 105.70s
+     ⚠️ GAP too short after adjustment (0.86s), skipping
+  🚨 GAP 00:01:52–00:01:55 (3.0s)
+     ✅ [00:01:52] gelegte Spenkladung....
+  🚨 GAP 00:02:02–00:02:27 (25.2s)
+     ⚠️ GAP полностью неразборчив → skipping
+  🚨 GAP 00:02:28–00:02:58 (29.4s)
+     🎙️ Pyannote overlap: Диктор (4.5s)
+     ✅ [00:02:50] Auch weiter südlich ist der Oskol erreicht. Stoßtr...
+     ⚠️ GAP полностью неразборчив → skipping
+  🚨 GAP 00:02:59–00:03:29 (30.6s)
+     🎙️ Pyannote overlap: Диктор (1.7s)
+     ✅ [00:03:18] Jetzt wird der Fluss in breiter Front überschritte...
+     ⚠️ GAP overlap с next existing, adjusted end: 209.66s
+     ⚠️ GAP too short after adjustment (-0.42s), skipping
+  🚨 GAP 00:03:29–00:03:47 (17.6s)
+     🔧 Removed fragment from GAP end: 'an.' (likely cut-off or hallucination)
+     🎙️ Pyannote overlap: Диктор (3.7s)
+     ✅ [00:03:29] Stuka greifen die Fluchtstraßen der Sowjets in unu...
+  🚨 GAP 00:03:49–00:04:04 (15.1s)
+     🎙️ Pyannote overlap: Диктор (7.4s)
+     ✅ [00:03:49] Volltreffer auf eine Brücke über den Don. Der Don ...
+     ⚠️ GAP overlap с предыдущим GAP, adjusted start: 240.38s
+     ⚠️ GAP overlap с next existing, adjusted end: 244.70s
+     🔧 Adjusted: 240.80-246.68 → 240.38-244.70
+     🎙️ Pyannote overlap: Диктор (4.3s)
+     ✅ [00:04:00] An den Flussübergängen stauten sich die zurückflut...
+  🚨 GAP 00:04:05–00:04:18 (12.2s)
+     🎙️ Pyannote overlap: Диктор (5.2s)
+     ✅ [00:04:05] willkommenes Ziel für unsere Stuka und Kampffliege...
+  🚨 GAP 00:04:18–00:04:41 (23.1s)
+     ⚠️ GAP overlap с next existing, adjusted end: 281.28s
+     ⚠️ GAP too short after adjustment (-0.58s), skipping
+  🚨 GAP 00:04:42–00:05:08 (26.3s)
+     🎙️ Pyannote overlap: Диктор (2.2s)
+     ✅ [00:04:53] Volltreffer in Fabriken und Bahnanlagen....
+  🚨 GAP 00:05:10–00:05:17 (6.7s)
+     🎙️ Pyannote overlap: Диктор (4.5s)
+     ✅ [00:05:10] Flug über Wörnisch. Unter uns einmarschierende deu...
+     ⚠️ GAP overlap с предыдущим GAP, adjusted start: 314.86s
+     ⚠️ GAP overlap с next existing, adjusted end: 317.08s
+     🔧 Adjusted: 315.18-319.06 → 314.86-317.08
+     🎙️ Pyannote overlap: Диктор (2.2s)
+     ✅ [00:05:14] Am 7. Juli gab das Oberkommando der Wehrmacht die ...
+  🚨 GAP 00:05:19–00:05:30 (10.9s)
+     🎙️ Pyannote overlap: Диктор (5.6s)
+     ✅ [00:05:19] [нрзб] bekannt. Dieses wichtige Industriezentrum l...
+     ⚠️ GAP overlap с предыдущим GAP, adjusted start: 328.84s
+     ⚠️ GAP overlap с next existing, adjusted end: 330.44s
+     🔧 Adjusted: 328.84-331.54 → 328.84-330.44
+     🎙️ Pyannote overlap: Диктор (1.6s)
+     ✅ [00:05:28] mit seinen wichtigen Rohstoffgebieten im Süden ver...
+  🚨 GAP 00:05:31–00:05:50 (19.8s)
+     🔧 Removed fragment from GAP end: 'die' (likely cut-off or hallucination)
+     🎙️ Pyannote overlap: Диктор (5.9s)
+     ✅ [00:05:31] verbindet. Durch die Einnahme von Voronezh wurde d...
+     ⚠️ GAP overlap с предыдущим GAP, adjusted start: 337.06s
+     🔧 Removed fragment from GAP end: 'des' (likely cut-off or hallucination)
+     🎙️ Pyannote overlap: Диктор (4.1s)
+     ✅ [00:05:37] Truppen - und Materialverschiebung zwischen den bo...
+     ⚠️ GAP overlap с предыдущим GAP, adjusted start: 341.18s
+     🎙️ Pyannote overlap: Диктор (4.6s)
+     ✅ [00:05:41] Südens unterbunden. Über eine Woche lang versuchte...
+     ⚠️ GAP overlap с предыдущим GAP, adjusted start: 346.14s
+     ⚠️ GAP overlap с next existing, adjusted end: 350.94s
+     🔧 Adjusted: 346.14-352.72 → 346.14-350.94
+     🔧 Removed fragment from GAP end: 'der' (likely cut-off or hallucination)
+     🎙️ Pyannote overlap: Диктор (3.6s)
+     ✅ [00:05:46] abzustreifen. Am 11. Juli gab das Oberkommando der...
+  🚨 GAP 00:05:51–00:06:27 (35.8s)
+     ⚠️ GAP overlap с предыдущим GAP, adjusted start: 350.94s
+     🔧 Adjusted: 351.30-356.00 → 350.94-356.00
+     🔧 Removed fragment from GAP end: 'von' (likely cut-off or hallucination)
+     🎙️ Pyannote overlap: Диктор (5.1s)
+     ✅ [00:05:50] bekannt, dass der Feind vernichtend geschlagen und...
+     ⚠️ GAP overlap с предыдущим GAP, adjusted start: 356.00s
+     🎙️ Pyannote overlap: Диктор (5.2s)
+     ✅ [00:05:56] Voronezh in einer Breite von 350 Kilometern erreic...
+     ⚠️ GAP overlap с предыдущим GAP, adjusted start: 361.40s
+     🎙️ Pyannote overlap: Диктор (2.4s)
+     ✅ [00:06:01] Verfolgung stoßen unsere Truppen dem geschlagenen ...
+     ⚠️ GAP overlap с next existing, adjusted end: 387.06s
+     🔧 Adjusted: 383.96-389.04 → 383.96-387.06
+     ✅ [00:06:23] Untertitelung des ZDF, 2020...
+  🚨 GAP 00:06:27–00:06:52 (25.0s)
+     ✅ [00:06:45] Untertitelung des ZDF, 2020...
+  🚨 GAP 00:06:53–00:07:15 (21.7s)
+     ⚠️ GAP too short after adjustment (0.10s), skipping
+  ✅ Добавлено из gaps: 23 сегментов
+  ✅ Добавлено из gaps: 23 сегментов
+
+🔍 CHECKPOINT [AFTER GAP FILLING]: 46 сегментов
+
+🔧 Исправление сдвига timestamp после gap filling...
+  ⏭️ ПРОПУСКАЕМ: 00:00:05 → 00:00:05 (сдвиг назад -0.3s)
+✅ Исправлено timestamp: 23
+⏭️ Пропущено (назад): 1
+
+🔍 CHECKPOINT [AFTER TIMESTAMP CORRECTION]: 46 сегментов

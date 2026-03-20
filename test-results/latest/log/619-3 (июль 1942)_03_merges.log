@@ -1,0 +1,311 @@
+
+  🔀 MERGE #1: 00:00:00 Диктор — начало
+    ↳ 00:00:05 ⏸️ 0.3s → ✅ merge
+    ↳ Диктор пауза 20.3s > 5.0s → ❌ STOP
+    📊 Собрано: 2 сегментов, 15 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 90 символов)
+    🔗 Вызов join_texts_deduplicated для 2 текстов...
+    🧹 Вызов clean_loops (127 символов)...
+    🧹 clean_loops: обработка текста (127 символов, 15 слов)
+    ✅ clean_loops: готово (127 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 127 символов
+  ✅ Склеено 2 сегментов → 15 слов
+
+  🔀 MERGE #2: 00:00:28 Диктор — начало
+    ↳ Диктор пауза 21.1s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 4 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (31 символов)...
+    🧹 clean_loops: обработка текста (31 символов, 4 слов)
+    ✅ clean_loops: готово (31 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 31 символов
+
+  🔀 MERGE #3: 00:00:51 Диктор — начало
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C ngram: best_sim=0.91 'nehmen neue munition' ≈ 'übernehmen neue munition'
+    ↳ ⛔ GUARD C: GAP corrupted → DROP 'Wir nehmen neue Munition.'
+    ↳ Диктор пауза 8.1s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 4 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (40 символов)...
+    🧹 clean_loops: обработка текста (40 символов, 4 слов)
+    ✅ clean_loops: готово (40 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 40 символов
+
+  🔀 MERGE #4: 00:01:02 Диктор — начало
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C: мало значимых слов → KEEP
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'in den Bombenhagel.'
+    ↳ 00:01:10 ⏸️ 0.0s → ✅ merge
+    ↳ Диктор пауза 34.6s > 5.0s → ❌ STOP
+    📊 Собрано: 2 сегментов, 22 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 146 символов)
+    🔗 Вызов join_texts_deduplicated для 2 текстов...
+    🧹 Вызов clean_loops (166 символов)...
+    🧹 clean_loops: обработка текста (166 символов, 22 слов)
+    ✅ clean_loops: готово (166 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 166 символов
+  ✅ Склеено 2 сегментов → 22 слов
+
+  🔀 MERGE #5: 00:01:45 Диктор — начало
+    ↳ 00:01:47 ⏸️ 0.6s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C: мало значимых слов → KEEP
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'gelegte Spenkladung.'
+    ↳ 00:01:52 ⏸️ 0.0s → ✅ merge
+    ↳ 00:01:55 ⏸️ 1.9s → ✅ merge
+    ↳ 00:02:02 ⏸️ 2.0s → ✅ merge
+    ↳ Диктор пауза 25.2s > 5.0s → ❌ STOP
+    📊 Собрано: 5 сегментов, 32 слов
+    🎯 Доминирующий: Диктор / SPEAKER_00 (длина: 107 символов)
+    🔗 Вызов join_texts_deduplicated для 5 текстов...
+    🧹 Вызов clean_loops (252 символов)...
+    🧹 clean_loops: обработка текста (252 символов, 32 слов)
+    ✅ clean_loops: готово (252 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 252 символов
+  ✅ Склеено 5 сегментов → 32 слов
+
+  🔀 MERGE #6: 00:02:27 Диктор — начало
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C: мало значимых слов → KEEP
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Auch weiter südlich ist der Oskol erreicht. Stoßtr'
+    ↳ Диктор пауза 21.8s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 1 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (12 символов)...
+    🧹 clean_loops: обработка текста (12 символов, 1 слов)
+    ✅ clean_loops: готово (12 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 12 символов
+
+  🔀 MERGE #7: 00:02:50 Диктор — начало
+    ↳ ⚠️ raw_speaker_id разные (GAP_FILLED vs SPEAKER_00), но speaker=Диктор → ✅ merge anyway
+    ↳ 00:02:58 ⏸️ 1.6s → ✅ merge
+    🔎 GUARD C ngram: best_sim=0.43 'breiter front überschritten' ≈ 'morgengrauen übergang sprengladung'
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Jetzt wird der Fluss in breiter Front überschritte'
+    ↳ Диктор пауза 19.9s > 5.0s → ❌ STOP
+    📊 Собрано: 2 сегментов, 14 слов
+    🎯 Доминирующий: Диктор / GAP_FILLED (длина: 94 символов)
+    🔗 Вызов join_texts_deduplicated для 2 текстов...
+    🧹 Вызов clean_loops (107 символов)...
+    🧹 clean_loops: обработка текста (107 символов, 14 слов)
+    ✅ clean_loops: готово (107 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 107 символов
+  ✅ Склеено 2 сегментов → 14 слов
+
+  🔀 MERGE #8: 00:03:18 Диктор — начало
+    ↳ ⚠️ raw_speaker_id разные (GAP_FILLED vs SPEAKER_00), но speaker=Диктор → ✅ merge anyway
+    ↳ Диктор пауза 8.3s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 8 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (52 символов)...
+    🧹 clean_loops: обработка текста (52 символов, 8 слов)
+    ✅ clean_loops: готово (52 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 52 символов
+
+  🔀 MERGE #9: 00:03:29 Диктор — начало
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C: мало значимых слов → KEEP
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Stuka greifen die Fluchtstraßen der Sowjets in unu'
+    ↳ 00:03:29 ⏸️ 0.0s → ✅ merge
+    ↳ Диктор пауза 12.9s > 5.0s → ❌ STOP
+    📊 Собрано: 2 сегментов, 10 слов
+    🎯 Доминирующий: Диктор / GAP_FILLED (длина: 71 символов)
+    🔗 Вызов join_texts_deduplicated для 2 текстов...
+    🧹 Вызов clean_loops (84 символов)...
+    🧹 clean_loops: обработка текста (84 символов, 10 слов)
+    ✅ clean_loops: готово (84 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 84 символов
+  ✅ Склеено 2 сегментов → 10 слов
+
+  🔀 MERGE #10: 00:03:47 Диктор — начало
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C: мало значимых слов → KEEP
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Volltreffer auf eine Brücke über den Don. Der Don '
+    ↳ 00:03:49 ⏸️ 0.0s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C ngram: best_sim=0.59 'stauten sich zurückflutenden' ≈ 'stoßen unsere vorrückenden'
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'An den Flussübergängen stauten sich die zurückflut'
+    ↳ 00:04:00 ⏸️ 0.0s → ✅ merge
+    ↳ 00:04:04 ⏸️ 0.0s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C ngram: best_sim=0.74 'willkommenes ziel unsere' ≈ 'willkommenes ziel sprengladung'
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'willkommenes Ziel für unsere Stuka und Kampffliege'
+    ↳ 00:04:05 ⏸️ 0.0s → ✅ merge
+    ↳ Диктор пауза 6.2s > 5.0s → ❌ STOP
+    📊 Собрано: 5 сегментов, 51 слов
+    🎯 Доминирующий: Диктор / GAP_FILLED (длина: 147 символов)
+    🔗 Вызов join_texts_deduplicated для 5 текстов...
+    🧹 Вызов clean_loops (391 символов)...
+    🧹 clean_loops: обработка текста (391 символов, 51 слов)
+    ✅ clean_loops: готово (391 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 391 символов
+  ✅ Склеено 5 сегментов → 51 слов
+
+  🔀 MERGE #11: 00:04:18 Диктор — начало
+    ↳ Диктор пауза 23.1s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 1 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (12 символов)...
+    🧹 clean_loops: обработка текста (12 символов, 1 слов)
+    ✅ clean_loops: готово (12 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 12 символов
+
+  🔀 MERGE #12: 00:04:41 Диктор — начало
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C: мало значимых слов → KEEP
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Volltreffer in Fabriken und Bahnanlagen.'
+    ↳ Диктор пауза 10.4s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 1 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (12 символов)...
+    🧹 clean_loops: обработка текста (12 символов, 1 слов)
+    ✅ clean_loops: готово (12 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 12 символов
+
+  🔀 MERGE #13: 00:04:53 Диктор — начало
+    ↳ ⚠️ raw_speaker_id разные (GAP_FILLED vs SPEAKER_00), но speaker=Диктор → ✅ merge anyway
+    ↳ Диктор пауза 12.9s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 5 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (40 символов)...
+    🧹 clean_loops: обработка текста (40 символов, 5 слов)
+    ✅ clean_loops: готово (40 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 40 символов
+
+  🔀 MERGE #14: 00:05:08 Диктор — начало
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C: мало значимых слов → KEEP
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Flug über Wörnisch. Unter uns einmarschierende deu'
+    ↳ 00:05:10 ⏸️ 0.0s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C ngram: best_sim=0.50 'wehrmacht einnahme dieser' ≈ 'wörnisch unter einmarschierende'
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Am 7. Juli gab das Oberkommando der Wehrmacht die '
+    ↳ 00:05:14 ⏸️ 0.0s → ✅ merge
+    ↳ 00:05:17 ⏸️ 0.0s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C ngram: best_sim=0.48 'wichtige industriezentrum liegt' ≈ 'wörnisch unter einmarschierende'
+    ↳ ✅ GUARD C: GAP легитимен → KEEP '[нрзб] bekannt. Dieses wichtige Industriezentrum l'
+    ↳ 00:05:19 ⏸️ 0.0s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C ngram: best_sim=0.55 'seinen wichtigen rohstoffgebieten' ≈ 'dieses wichtige industriezentrum'
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'mit seinen wichtigen Rohstoffgebieten im Süden ver'
+    ↳ 00:05:28 ⏸️ 0.0s → ✅ merge
+    ↳ 00:05:30 ⏸️ 0.0s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C ngram: best_sim=0.68 'wurde diese eisenbahnlinie' ≈ 'liegt großen eisenbahnlinie'
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'verbindet. Durch die Einnahme von Voronezh wurde d'
+    ↳ 00:05:31 ⏸️ 0.0s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C ngram: best_sim=0.50 'zwischen bolschewistischen heeresgruppen' ≈ 'wichtigen rohstoffgebieten süden'
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Truppen - und Materialverschiebung zwischen den bo'
+    ↳ 00:05:37 ⏸️ 0.0s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C ngram: best_sim=0.58 'unterbunden über eine' ≈ 'verbindet durch einnahme'
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Südens unterbunden. Über eine Woche lang versuchte'
+    ↳ 00:05:41 ⏸️ 0.0s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C ngram: best_sim=0.51 'durch sondermeldung bekannt' ≈ 'verbindet sprengladung verbindet'
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'abzustreifen. Am 11. Juli gab das Oberkommando der'
+    ↳ 00:05:46 ⏸️ 0.0s → ✅ merge
+    ↳ 00:05:50 ⏸️ 0.0s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C ngram: best_sim=0.74 'bekannt dass feind' ≈ 'bekannt dass sprengladung'
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'bekannt, dass der Feind vernichtend geschlagen und'
+    ↳ 00:05:50 ⏸️ 0.0s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C ngram: best_sim=0.47 'einer breite kilometern' ≈ 'eine woche lang'
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Voronezh in einer Breite von 350 Kilometern erreic'
+    ↳ 00:05:56 ⏸️ 0.0s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C ngram: best_sim=0.62 'unsere truppen geschlagenen' ≈ 'feind vernichtend geschlagen'
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Verfolgung stoßen unsere Truppen dem geschlagenen '
+    ↳ 00:06:01 ⏸️ 0.0s → ✅ merge
+    ↳ ⚠️ raw_speaker_id разные (SPEAKER_00 vs GAP_FILLED), но speaker=Диктор → ✅ merge anyway
+    🔎 GUARD C: мало значимых слов → KEEP
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Untertitelung des ZDF, 2020'
+    ↳ Диктор пауза 19.2s > 5.0s → ❌ STOP
+    📊 Собрано: 15 сегментов, 120 слов
+    🎯 Доминирующий: Диктор / GAP_FILLED (длина: 95 символов)
+    🔗 Вызов join_texts_deduplicated для 15 текстов...
+    🧹 Вызов clean_loops (922 символов)...
+    🧹 clean_loops: обработка текста (922 символов, 120 слов)
+      🔁 LOOP (similarity=0.86): 'Am 11. Juli' ≈ 'am 7. juli'
+      ⚠️ УДАЛЯЕМ: 'Am 11. Juli'
+         Причина: совпадение с 'am 7. juli' (sim=0.86)
+         Контекст слева: '...schwerwiegenden Verlust abzustreifen.'
+         Слово перед удалением: 'abzustreifen.'
+      🔁 LOOP (similarity=0.80): 'das Oberkommando der' ≈ 'gab das oberkommando'
+      ⚠️ УДАЛЯЕМ: 'das Oberkommando der'
+         Причина: совпадение с 'gab das oberkommando' (sim=0.80)
+         Контекст слева: '...11. Juli gab'
+         Слово перед удалением: 'gab'
+    ✅ clean_loops: готово (915 символов, удалено 2 loop artifacts)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 915 символов
+  ✅ Склеено 15 сегментов → 118 слов
+
+  🔀 MERGE #15: 00:06:23 Диктор — начало
+    ↳ ⚠️ raw_speaker_id разные (GAP_FILLED vs SPEAKER_00), но speaker=Диктор → ✅ merge anyway
+    ↳ 00:06:27 ⏸️ 0.0s → ✅ merge
+    🔎 GUARD C: мало значимых слов → KEEP
+    ↳ ✅ GUARD C: GAP легитимен → KEEP 'Untertitelung des ZDF, 2020'
+    ↳ Диктор пауза 18.2s > 5.0s → ❌ STOP
+    📊 Собрано: 2 сегментов, 5 слов
+    🎯 Доминирующий: Диктор / GAP_FILLED (длина: 27 символов)
+    🔗 Вызов join_texts_deduplicated для 2 текстов...
+    🧹 Вызов clean_loops (40 символов)...
+    🧹 clean_loops: обработка текста (40 символов, 5 слов)
+    ✅ clean_loops: готово (40 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+  🗑️ HALLUCINATION (leading): удалена фраза "Untertitelung des ZDF, 2020 Sprengladung"
+  ✅ Очищено: 40 → 0 символов
+    ✅ Очистка завершена, финальный текст: 0 символов
+
+  🔀 MERGE #16: 00:06:45 Диктор — начало
+    ↳ ⚠️ raw_speaker_id разные (GAP_FILLED vs SPEAKER_00), но speaker=Диктор → ✅ merge anyway
+    ↳ Диктор пауза 4.0s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 4 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (27 символов)...
+    🧹 clean_loops: обработка текста (27 символов, 4 слов)
+    ✅ clean_loops: готово (27 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+  🗑️ HALLUCINATION (leading): удалена фраза "Untertitelung des ZDF, 2020"
+  ✅ Очищено: 27 → 0 символов
+    ✅ Очистка завершена, финальный текст: 0 символов
+
+  🔀 MERGE #17: 00:06:52 Диктор — начало
+    ↳ Диктор пауза 21.7s > 5.0s → ❌ STOP
+    📊 Собрано: 1 сегментов, 1 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (12 символов)...
+    🧹 clean_loops: обработка текста (12 символов, 1 слов)
+    ✅ clean_loops: готово (12 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 12 символов
+
+  🔀 MERGE #18: 00:07:15 Диктор — начало
+    📊 Собрано: 1 сегментов, 1 слов
+    🔗 Вызов join_texts_deduplicated для 1 текстов...
+    🧹 Вызов clean_loops (12 символов)...
+    🧹 clean_loops: обработка текста (12 символов, 1 слов)
+    ✅ clean_loops: готово (12 символов, loops не найдены)
+    🧹 Вызов clean_hallucinations_from_text...
+    ✅ Очистка завершена, финальный текст: 12 символов
+
+✅ merge_replicas завершён: 16 merged сегментов из 46 исходных
+
+🔍 CHECKPOINT [AFTER MERGE]: 16 сегментов

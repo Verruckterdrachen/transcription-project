@@ -1,0 +1,146 @@
+
+🔄 Cross-speaker deduplication...
+✅ После cross-speaker dedup: 65 сегментов
+
+🔍 CHECKPOINT [AFTER CROSS-SPEAKER DEDUP]: 65 сегментов
+
+🔄 Дедупликация сегментов...
+✅ После дедупликации: 48 сегментов
+
+🔍 CHECKPOINT [AFTER DEDUPLICATION]: 48 сегментов
+
+🔍 ГАПЫ WHISPER:
+   🚨 GAP 00:00:05–00:00:11 (5.6s)
+   🚨 GAP 00:00:12–00:00:16 (3.4s)
+   🚨 GAP 00:00:24–00:00:48 (24.1s)
+   🚨 GAP 00:00:59–00:01:06 (7.8s)
+   🚨 GAP 00:01:18–00:01:21 (3.8s)
+   🚨 GAP 00:01:33–00:02:00 (27.4s)
+   🚨 GAP 00:02:07–00:02:19 (11.8s)
+   🚨 GAP 00:02:22–00:02:40 (18.2s)
+   🚨 GAP 00:02:48–00:03:07 (19.0s)
+   🚨 GAP 00:03:16–00:03:38 (21.5s)
+   🚨 GAP 00:03:41–00:03:55 (13.7s)
+   🚨 GAP 00:04:07–00:04:18 (10.7s)
+   🚨 GAP 00:04:31–00:04:54 (23.2s)
+   🚨 GAP 00:04:56–00:05:01 (4.6s)
+   🚨 GAP 00:05:03–00:05:21 (17.9s)
+   🚨 GAP 00:05:22–00:05:28 (6.4s)
+   🚨 GAP 00:05:30–00:05:47 (16.9s)
+   🚨 GAP 00:05:50–00:05:57 (6.8s)
+   🚨 GAP 00:06:08–00:06:13 (4.7s)
+   🚨 GAP 00:06:16–00:06:23 (7.0s)
+   🚨 GAP 00:06:26–00:06:33 (7.1s)
+   🚨 GAP 00:06:36–00:07:03 (27.2s)
+   🚨 GAP 00:07:28–00:07:41 (13.3s)
+   🚨 GAP 00:07:45–00:07:56 (11.3s)
+   🚨 GAP 00:08:00–00:08:16 (16.1s)
+   🚨 GAP 00:08:27–00:08:46 (18.6s)
+   🚨 GAP 00:09:19–00:09:47 (28.2s)
+   🚨 GAP 00:09:48–00:09:55 (7.3s)
+
+🔄 Force-transcribe gaps...
+  🚨 GAP 00:00:05–00:00:11 (5.6s)
+     ✅ [00:00:05] Der [нрзб] von Spitzbergen....
+  🚨 GAP 00:00:12–00:00:16 (3.4s)
+     ✅ [00:00:12] Der Gleitzug....
+  🚨 GAP 00:00:24–00:00:48 (24.1s)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (1 ASR mismatch): und Schiff versenkt.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+     ⚠️ GAP too short after adjustment (0.46s), skipping
+  🚨 GAP 00:00:59–00:01:06 (7.8s)
+     ✅ [00:00:59] [нрзб] seinem Bestimmungshafen....
+     ⚠️ GAP too short after adjustment (0.44s), skipping
+  🚨 GAP 00:01:18–00:01:21 (3.8s)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (1 ASR mismatch): auf den Meeresgrund.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:01:33–00:02:00 (27.4s)
+     ✅ [00:01:33] Sie hat angekommen....
+  🚨 GAP 00:02:07–00:02:19 (11.8s)
+     ⚠️ GAP too short after adjustment (0.98s), skipping
+  🚨 GAP 00:02:22–00:02:40 (18.2s)
+     🔧 [v17.12] Removed 2 leading overlap words vs prev (exact): Feindflug gefeiert.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+     ⚠️ GAP too short after adjustment (0.74s), skipping
+  🚨 GAP 00:02:48–00:03:07 (19.0s)
+     🔧 Removed fragment from GAP end: 'aus.' (likely cut-off or hallucination)
+     🔧 [v17.12] Removed 2 leading overlap words vs prev (substring match at pos 17): verdiente Flieger
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+     ⚠️ GAP too short after adjustment (0.68s), skipping
+  🚨 GAP 00:03:16–00:03:38 (21.5s)
+     ⚠️ GAP too short after adjustment (0.90s), skipping
+     ⚠️ GAP overlap с next existing, adjusted end: 218.38s
+     ⚠️ GAP too short after adjustment (-0.34s), skipping
+  🚨 GAP 00:03:41–00:03:55 (13.7s)
+     🔧 Removed fragment from GAP end: 'ein.' (likely cut-off or hallucination)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (substring match at pos 6): im hohen Norden
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:04:07–00:04:18 (10.7s)
+     ✅ [00:04:07] treibungslosen Nachschub....
+  🚨 GAP 00:04:31–00:04:54 (23.2s)
+     🔧 Removed fragment from GAP end: 'ab.' (likely cut-off or hallucination)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (substring match at pos 10): Einheiten der Wehrmacht
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+     ⚠️ GAP too short after adjustment (0.54s), skipping
+  🚨 GAP 00:04:56–00:05:01 (4.6s)
+     ⚠️ GAP too short after adjustment (0.88s), skipping
+  🚨 GAP 00:05:03–00:05:21 (17.9s)
+     ⚠️ GAP too short after adjustment (0.98s), skipping
+     ⚠️ GAP overlap с next existing, adjusted end: 321.38s
+     ⚠️ GAP too short after adjustment (-0.88s), skipping
+  🚨 GAP 00:05:22–00:05:28 (6.4s)
+     🔧 [v17.12] Removed 4 leading overlap words vs prev (1 ASR mismatch): Einschlag an der Küste.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:05:30–00:05:47 (16.9s)
+     🔧 [v17.12] Removed 5 leading overlap words vs prev (1 ASR mismatch): Der Bombe verfehlte ihr Ziel.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+     ⚠️ GAP too short after adjustment (0.40s), skipping
+  🚨 GAP 00:05:50–00:05:57 (6.8s)
+     🔧 [v17.12] Removed 5 leading overlap words vs prev (1 ASR mismatch): Vielleicht stürzt er ins Meer.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:06:08–00:06:13 (4.7s)
+     🔧 [v17.12] Removed 5 leading overlap words vs prev (1 ASR mismatch): Wir setzen ihre Arbeit fort.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:06:16–00:06:23 (7.0s)
+     🔧 [v17.12] Removed 4 leading overlap words vs prev (1 ASR mismatch): [нрзб] Durchbruch nach Westen.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:06:26–00:06:33 (7.1s)
+     🔧 Removed fragment from GAP end: 'auf' (likely cut-off or hallucination)
+     🔧 [v17.12] Removed 2 leading overlap words vs prev (substring match at pos 4): kampf sofort
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:06:36–00:07:03 (27.2s)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (exact): nach Osten zurückgedrängt.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:07:28–00:07:41 (13.3s)
+     🔧 [v17.12] Removed 4 leading overlap words vs prev (exact): die Kämpfe des Heeres.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:07:45–00:07:56 (11.3s)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (exact): die feindlichen Stellungen.
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:08:00–00:08:16 (16.1s)
+     🔧 Removed fragment from GAP end: 'ein.' (likely cut-off or hallucination)
+     🔧 [v17.12] Removed 3 leading overlap words vs prev (substring match at pos 8): in eine Ortschaft
+     ⚠️ GAP полностью дублирует хвост prev → skipping
+  🚨 GAP 00:08:27–00:08:46 (18.6s)
+     ✅ [00:08:27] Schützenpanzer lagen....
+  🚨 GAP 00:09:19–00:09:47 (28.2s)
+     ✅ [00:09:19] Märschen herangeführt....
+     ⚠️ GAP overlap с next existing, adjusted end: 587.58s
+     ⚠️ GAP too short after adjustment (-1.76s), skipping
+  🚨 GAP 00:09:48–00:09:55 (7.3s)
+     ⚠️ GAP overlap с next existing, adjusted end: 595.54s
+     ⚠️ GAP too short after adjustment (-0.50s), skipping
+  ✅ Добавлено из gaps: 7 сегментов
+  ✅ Добавлено из gaps: 7 сегментов
+
+🔍 CHECKPOINT [AFTER GAP FILLING]: 55 сегментов
+
+🔧 Исправление сдвига timestamp после gap filling...
+  ⏭️ ПРОПУСКАЕМ: 00:00:19 → 00:00:19 (сдвиг назад -0.5s)
+  ⏭️ ПРОПУСКАЕМ: 00:06:00 → 00:06:00 (сдвиг назад -0.3s)
+  ⏭️ ПРОПУСКАЕМ: 00:07:13 → 00:07:13 (сдвиг назад -0.3s)
+  ⏭️ ПРОПУСКАЕМ: 00:09:59 → 00:09:58 (сдвиг назад -0.4s)
+✅ Исправлено timestamp: 13
+⏭️ Пропущено (назад): 4
+
+🔍 CHECKPOINT [AFTER TIMESTAMP CORRECTION]: 55 сегментов
